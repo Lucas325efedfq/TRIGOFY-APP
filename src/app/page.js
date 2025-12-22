@@ -25,7 +25,7 @@ export default function TrigofyApp() {
   const usuariosAutorizados = [
     { usuario: 'admin', senha: 'admin' },
     { usuario: 'lucas.vieira', senha: '123' },
-    { usuario: 'joao.pato', senha: '456' } // Exemplo: João adicionado
+    { usuario: 'lucas.lopes', senha: '456' } // Exemplo: João adicionado
   ];
 
   // --- FUNÇÕES DO BANCO DE DADOS (AIRTABLE) ---
