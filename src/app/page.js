@@ -13,10 +13,28 @@ export default function TrigofyApp() {
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
 
-  // --- BANCO DE DADOS DE PESSOAS ---
-  const [pessoasCadastradas, setPessoasCadastradas] = useState([
-    { cpf: '12345678900', nome: 'LUCAS VIEIRA' }
-  ]);
+  // --- BANCO DE DADOS DE PESSOAS COM SALVAMENTO PERMANENTE ---
+  const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
+
+  // 1. Carrega os dados do dispositivo assim que o app abre
+  useEffect(() => {
+    const dadosSalvos = localStorage.getItem('trigofy_clientes');
+    if (dadosSalvos) {
+      setPessoasCadastradas(JSON.parse(dadosSalvos));
+    } else {
+      // Lista inicial padrão caso o banco esteja vazio
+      const listaInicial = [{ cpf: '12345678900', nome: 'LUCAS VIEIRA' }];
+      setPessoasCadastradas(listaInicial);
+      localStorage.setItem('trigofy_clientes', JSON.stringify(listaInicial));
+    }
+  }, []);
+
+  // 2. Salva no dispositivo automaticamente toda vez que você cadastrar ou excluir alguém
+  useEffect(() => {
+    if (pessoasCadastradas.length > 0) {
+      localStorage.setItem('trigofy_clientes', JSON.stringify(pessoasCadastradas));
+    }
+  }, [pessoasCadastradas]);
 
   // --- ESTADOS DO FORMULÁRIO DE NOVO PEDIDO ---
   const [cpfDigitado, setCpfDigitado] = useState('');
@@ -27,7 +45,7 @@ export default function TrigofyApp() {
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
 
-  // Lógica para buscar nome pelo CPF automaticamente
+  // Busca automática de nome por CPF
   useEffect(() => {
     const pessoa = pessoasCadastradas.find(p => p.cpf === cpfDigitado.replace(/\D/g, ''));
     if (pessoa) {
@@ -64,21 +82,25 @@ export default function TrigofyApp() {
 
   const cadastrarPessoa = () => {
     if (novoCpf && novoNome) {
-      setPessoasCadastradas([...pessoasCadastradas, { cpf: novoCpf.replace(/\D/g, ''), nome: novoNome.toUpperCase() }]);
+      const novaLista = [...pessoasCadastradas, { cpf: novoCpf.replace(/\D/g, ''), nome: novoNome.toUpperCase() }];
+      setPessoasCadastradas(novaLista);
       setNovoCpf('');
       setNovoNome('');
-      alert('Cadastro realizado com sucesso!');
+      alert('Cadastrado com sucesso! Agora os dados estão salvos permanentemente.');
     }
   };
 
   const removerPessoa = (cpf) => {
-    setPessoasCadastradas(pessoasCadastradas.filter(p => p.cpf !== cpf));
+    if (confirm("Tem certeza que deseja excluir?")) {
+      const novaLista = pessoasCadastradas.filter(p => p.cpf !== cpf);
+      setPessoasCadastradas(novaLista);
+    }
   };
 
   if (!estaLogado) {
     return (
       <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans text-zinc-900">
-        <div className="w-full max-w-[390px] bg-white h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 p-8 justify-center">
+        <div className="w-full max-w-[390px] bg-white h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 p-8 justify-center text-zinc-900">
           <div className="text-center mb-10">
             <h1 className="text-4xl font-black italic text-yellow-500 tracking-tighter mb-2 text-center uppercase">TRIGOFY</h1>
           </div>
@@ -92,7 +114,7 @@ export default function TrigofyApp() {
               <input type="password" placeholder="Sua senha" className="w-full p-4 pl-12 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 text-zinc-800" value={senha} onChange={(e) => setSenha(e.target.value)} required />
             </div>
             {erro && <p className="text-red-500 text-xs font-bold text-center">{erro}</p>}
-            <button type="submit" className="w-full bg-zinc-900 text-yellow-400 py-4 rounded-2xl font-black shadow-lg uppercase tracking-widest">ENTRAR</button>
+            <button type="submit" className="w-full bg-zinc-900 text-yellow-400 py-4 rounded-2xl font-black shadow-lg uppercase tracking-widest active:scale-95 transition-all">ENTRAR</button>
           </form>
         </div>
       </div>
@@ -103,13 +125,13 @@ export default function TrigofyApp() {
     switch (activeTab) {
       case 'home':
         return (
-          <div className="space-y-4 animate-in fade-in duration-500 pb-10 text-zinc-900 text-zinc-900">
+          <div className="space-y-4 animate-in fade-in duration-500 pb-10 text-zinc-900">
             <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 p-6 rounded-3xl text-zinc-900 shadow-lg flex items-center gap-4 border border-yellow-300">
-              <div className="bg-white p-2 rounded-2xl shadow-inner w-16 h-16 flex items-center justify-center overflow-hidden text-zinc-900">
-                <img src="/favicon.ico" alt="Logo" className="w-full h-full object-contain scale-125 text-zinc-900" />
+              <div className="bg-white p-2 rounded-2xl shadow-inner w-16 h-16 flex items-center justify-center overflow-hidden">
+                <img src="/favicon.ico" alt="Logo" className="w-full h-full object-contain scale-125" />
               </div>
               <div>
-                <h2 className="text-xl font-black tracking-tight">Grupo Trigo</h2>
+                <h2 className="text-xl font-black tracking-tight text-zinc-900">Grupo Trigo</h2>
                 <p className="text-yellow-900/80 text-sm font-medium italic">Olá, {usuarioInput}!</p>
               </div>
             </div>
@@ -117,7 +139,6 @@ export default function TrigofyApp() {
             <h3 className="text-zinc-800 font-extrabold text-lg px-2 mt-6 uppercase italic tracking-tighter">Ações Rápidas</h3>
             
             <div className="space-y-3">
-              {/* Card 1: Pedidos */}
               <div onClick={() => setActiveTab('pedidos')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><ShoppingBag size={20} /></div>
                 <div className="flex-1">
@@ -127,53 +148,48 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 2: Doações */}
-              <div onClick={() => setActiveTab('catalogo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group text-zinc-900">
+              <div onClick={() => setActiveTab('catalogo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-2 rounded-full text-zinc-900 shadow-sm flex items-center justify-center w-11 h-11 overflow-hidden">
                   <img src="/doacao.png" alt="Doações" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex-1">
                   <p className="font-bold text-zinc-800 uppercase text-sm">Solicitações de doações</p>
-                  <p className="text-[10px] text-zinc-400 font-bold uppercase">Gestão de Doações</p>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tight">Gestão de Doações</p>
                 </div>
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 3: Rio/SP */}
-              <div onClick={() => setActiveTab('rio-sp')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group text-zinc-900">
-                <div className="bg-yellow-400 p-2 rounded-full text-zinc-900 shadow-sm flex items-center justify-center w-11 h-11 overflow-hidden">
+              <div onClick={() => setActiveTab('rio-sp')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
+                <div className="bg-yellow-400 p-2 rounded-full flex items-center justify-center w-11 h-11 overflow-hidden">
                   <img src="/cesta.png" alt="Compras RIO/SP" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex-1">
                   <p className="font-bold text-zinc-800 uppercase text-sm leading-tight">solicitações de compras produtos fabrica RIO/SP</p>
-                  <p className="text-[10px] text-zinc-400 font-bold uppercase">Compras Regionais</p>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tight">Compras Regionais</p>
                 </div>
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 4: Novo Pedido */}
-              <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group text-zinc-900">
-                <div className="bg-yellow-400 p-2 rounded-full text-zinc-900 shadow-sm flex items-center justify-center w-11 h-11 overflow-hidden text-zinc-900">
-                  <img src="/pizza.png" alt="Novo Pedido" className="w-full h-full object-contain text-zinc-900" />
+              <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
+                <div className="bg-yellow-400 p-2 rounded-full flex items-center justify-center w-11 h-11 overflow-hidden">
+                  <img src="/pizza.png" alt="Novo Pedido" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex-1">
                   <p className="font-bold text-zinc-800 uppercase text-sm">Novo Pedido</p>
-                  <p className="text-[10px] text-zinc-400 font-bold uppercase">Solicitar Compra</p>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tight">Solicitar Compra</p>
                 </div>
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 5: Suporte */}
-              <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group text-zinc-900">
+              <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><Megaphone size={20} /></div>
                 <div className="flex-1 text-zinc-900">
                   <p className="font-bold text-zinc-800 uppercase text-sm">Suporte</p>
-                  <p className="text-[10px] text-zinc-400 font-bold uppercase">Falar com a Fábrica</p>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tight">Falar com a Fábrica</p>
                 </div>
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* ABA DE CADASTRO (APENAS ADMIN) */}
               {usuarioInput.toLowerCase() === 'admin' && (
                 <div onClick={() => setActiveTab('admin-painel')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-zinc-800 transition-all group">
                   <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><Plus size={20} /></div>
@@ -190,13 +206,13 @@ export default function TrigofyApp() {
 
       case 'novo':
         return (
-          <div className="animate-in slide-in-from-right duration-300 text-zinc-900 text-zinc-900">
+          <div className="animate-in slide-in-from-right duration-300 text-zinc-900">
             <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2 flex items-center gap-1">← Voltar</button>
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-zinc-100 space-y-5 text-zinc-900">
               <h2 className="text-lg font-bold text-zinc-800 uppercase italic tracking-tighter border-b pb-2">Novo Pedido</h2>
               <div>
                 <label className="text-[10px] font-black uppercase text-zinc-400 ml-1">CPF do Solicitante</label>
-                <input type="text" placeholder="Ex: 12345678900" maxLength={11} className="w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400" value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
+                <input type="text" placeholder="Apenas números" maxLength={11} className="w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400" value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
               </div>
               <div>
                 <label className="text-[10px] font-black uppercase text-zinc-400 ml-1">Nome do Solicitante</label>
@@ -206,7 +222,7 @@ export default function TrigofyApp() {
                 <label className="text-[10px] font-black uppercase text-zinc-400 ml-1">Descrição</label>
                 <textarea placeholder="O que você precisa?" rows="3" className="w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400" value={descricaoPedido} onChange={(e) => setDescricaoPedido(e.target.value)}></textarea>
               </div>
-              <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black flex items-center justify-center gap-2 uppercase tracking-widest shadow-lg ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400 cursor-not-allowed'}`}>
+              <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black flex items-center justify-center gap-2 uppercase tracking-widest shadow-lg ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400 cursor-not-allowed'} transition-all`}>
                 <Send size={18} /> ENVIAR PEDIDO
               </button>
             </div>
@@ -219,17 +235,17 @@ export default function TrigofyApp() {
             <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2 flex items-center gap-1">← Voltar</button>
             <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm space-y-4 text-zinc-900">
               <h2 className="text-lg font-bold uppercase italic tracking-tighter border-b pb-2">Cadastrar Colaborador</h2>
-              <input type="text" placeholder="CPF (Apenas números)" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
+              <input type="text" placeholder="CPF (apenas números)" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
               <input type="text" placeholder="Nome Completo" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
-              <button onClick={cadastrarPessoa} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm">Salvar Cadastro</button>
+              <button onClick={cadastrarPessoa} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm active:scale-95 transition-all">Salvar Cadastro</button>
               
               <div className="pt-4">
-                <h3 className="text-xs font-black text-zinc-400 uppercase mb-3">Pessoas no Sistema</h3>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
+                <h3 className="text-xs font-black text-zinc-400 uppercase mb-3">Pessoas no Sistema ({pessoasCadastradas.length})</h3>
+                <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
                   {pessoasCadastradas.map(p => (
-                    <div key={p.cpf} className="flex justify-between items-center p-3 bg-zinc-50 rounded-xl border">
+                    <div key={p.cpf} className="flex justify-between items-center p-3 bg-zinc-50 rounded-xl border border-zinc-100">
                       <div><p className="font-bold text-[11px] text-zinc-800">{p.nome}</p><p className="text-[10px] text-zinc-400">{p.cpf}</p></div>
-                      <button onClick={() => removerPessoa(p.cpf)} className="text-red-400 p-2"><Trash2 size={16}/></button>
+                      <button onClick={() => removerPessoa(p.cpf)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition-all"><Trash2 size={16}/></button>
                     </div>
                   ))}
                 </div>
@@ -278,9 +294,6 @@ export default function TrigofyApp() {
           <button onClick={() => setActiveTab('catalogo')} className={`flex flex-col items-center gap-1 flex-1 transition-all ${activeTab === 'catalogo' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}`}><BookOpen size={22} /></button>
           <button onClick={() => setActiveTab('novo')} className={`flex flex-col items-center gap-1 flex-1 transition-all ${activeTab === 'novo' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}`}><ClipboardList size={22} /></button>
         </nav>
-        <div className="absolute bottom-2 w-full flex justify-center text-zinc-900">
-          <div className="w-28 h-1 bg-zinc-200 rounded-full"></div>
-        </div>
       </div>
     </div>
   );
