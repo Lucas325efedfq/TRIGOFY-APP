@@ -18,14 +18,14 @@ export default function TrigofyApp() {
     if (activeTab === 'home') {
       return (
         <div className="space-y-4 animate-in fade-in duration-500">
-          {/* Banner Principal com a Logo do Grupo Trigo */}
+          {/* Banner Principal com a sua Logo do Trigo */}
           <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 p-6 rounded-3xl text-zinc-900 shadow-lg flex items-center gap-4 border border-yellow-300">
-            <div className="bg-white p-1 rounded-2xl shadow-inner w-16 h-16 flex items-center justify-center overflow-hidden">
-              {/* Logo do Grupo Trigo inserida no lugar do ícone anterior */}
+            {/* Quadrado da Logo Ajustado */}
+            <div className="bg-white p-2 rounded-2xl shadow-inner w-16 h-16 flex items-center justify-center overflow-hidden">
               <img 
-                src="https://www.grupotrigo.com.br/wp-content/uploads/2021/11/logo-grupo-trigo.png" 
+                src="/favicon.ico" 
                 alt="Logo Grupo Trigo" 
-                className="w-full h-auto object-contain"
+                className="w-full h-full object-contain scale-125"
               />
             </div>
             <div>
@@ -109,7 +109,6 @@ export default function TrigofyApp() {
           <div className="w-32 h-5 bg-zinc-900 rounded-b-2xl"></div>
         </div>
 
-        {/* Header com TRIGOFY em Amarelo */}
         <header className="p-6 flex justify-between items-center bg-white border-b border-zinc-50">
           <div>
             <h1 className="text-2xl font-black italic text-yellow-500 tracking-tighter leading-none uppercase">TRIGOFY</h1>
