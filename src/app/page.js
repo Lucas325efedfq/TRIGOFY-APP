@@ -22,7 +22,7 @@ export default function TrigofyClone() {
               <h2 className="text-xl font-bold font-sans">Olá, Bem-vindo!</h2>
               <p className="text-blue-100 text-sm">O que vamos fazer hoje no Trigofy?</p>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div onClick={() => setActiveTab('form')} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center cursor-pointer hover:bg-gray-50 transition active:scale-95">
                 <div className="bg-blue-100 p-3 rounded-full mb-2 text-blue-600"><ClipboardList size={24} /></div>
@@ -48,38 +48,38 @@ export default function TrigofyClone() {
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Seu Nome</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   className="w-full mt-1 p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
                   placeholder="Ex: João Silva"
-                  onChange={(e) => setFormData({...formData, nome: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                 />
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">E-mail para Contato</label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   className="w-full mt-1 p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
                   placeholder="exemplo@email.com"
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Observações</label>
-                <textarea 
+                <textarea
                   className="w-full mt-1 p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
                   placeholder="Digite aqui..."
                   rows="3"
-                  onChange={(e) => setFormData({...formData, mensagem: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, mensagem: e.target.value })}
                 />
               </div>
-              <button 
+              <button
                 className="w-full bg-green-600 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition active:scale-95 shadow-md"
                 onClick={enviarWhatsApp}
               >
                 <Send size={18} /> ENVIAR DADOS
               </button>
-              <button 
+              <button
                 onClick={() => setActiveTab('home')}
                 className="w-full text-gray-400 text-sm py-2 hover:text-gray-600"
               >
@@ -106,7 +106,7 @@ export default function TrigofyClone() {
     <div className="flex justify-center bg-zinc-900 min-h-screen sm:py-6">
       {/* Moldura do Celular */}
       <div className="w-full max-w-[390px] bg-gray-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[50px] border-[12px] border-zinc-800">
-        
+
         {/* Notch do iPhone */}
         <div className="h-8 w-full bg-white flex justify-center items-start">
           <div className="w-32 h-6 bg-zinc-800 rounded-b-3xl"></div>
