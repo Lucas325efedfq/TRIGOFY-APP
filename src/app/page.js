@@ -2,56 +2,59 @@
 import React, { useState } from 'react';
 import { 
   LayoutGrid, ClipboardList, Settings, User, Send, 
-  ChevronRight, ShoppingBag, Package, Megaphone, Lock, Mail 
+  ChevronRight, ShoppingBag, Package, Megaphone, Lock, UserCircle 
 } from 'lucide-react';
 
 export default function TrigofyApp() {
   const [estaLogado, setEstaLogado] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
-  const [email, setEmail] = useState('');
+  const [usuarioInput, setUsuarioInput] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
 
   // --- ÁREA DO ADMINISTRADOR (VOCÊ) ---
-  // Adicione aqui os e-mails de quem você quer permitir o acesso
+  // Aqui você cadastra quem pode entrar. 
+  // Basta colocar o nome de usuário (sem @) e a senha.
   const usuariosAutorizados = [
-    { email: 'admin.trigo', senha: '123' },
-    { email: 'usuario@teste.com', senha: '456' }
+    { usuario: 'lucas.vieira', senha: '123' },
+    { usuario: 'admin', senha: 'admin' },
+    { usuario: 'trigo.fabrica', senha: '789' }
   ];
 
   const lidarComLogin = (e) => {
     e.preventDefault();
+    // Procura na sua lista se o nome e senha batem
     const usuarioEncontrado = usuariosAutorizados.find(
-      (u) => u.email === email && u.senha === senha
+      (u) => u.usuario === usuarioInput.toLowerCase() && u.senha === senha
     );
 
     if (usuarioEncontrado) {
       setEstaLogado(true);
       setErro('');
     } else {
-      setErro('Acesso negado. E-mail ou senha incorretos.');
+      setErro('Usuário ou senha incorretos.');
     }
   };
 
-  // TELA DE LOGIN
+  // TELA DE LOGIN (SEM NECESSIDADE DE EMAIL/@)
   if (!estaLogado) {
     return (
       <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans">
         <div className="w-full max-w-[390px] bg-white h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 p-8 justify-center">
           <div className="text-center mb-10">
             <h1 className="text-4xl font-black italic text-yellow-500 tracking-tighter mb-2">TRIGOFY</h1>
-            <p className="text-zinc-400 font-bold text-sm">ÁREA RESTRITA</p>
+            <p className="text-zinc-400 font-bold text-sm uppercase tracking-widest">Acesso Restrito</p>
           </div>
 
           <form onSubmit={lidarComLogin} className="space-y-4">
             <div className="relative">
-              <Mail className="absolute left-4 top-4 text-zinc-400" size={20} />
+              <UserCircle className="absolute left-4 top-4 text-zinc-400" size={20} />
               <input 
-                type="email" 
-                placeholder="Seu e-mail" 
+                type="text" 
+                placeholder="Nome de Usuário" 
                 className="w-full p-4 pl-12 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 text-zinc-800"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={usuarioInput}
+                onChange={(e) => setUsuarioInput(e.target.value)}
                 required
               />
             </div>
@@ -76,14 +79,14 @@ export default function TrigofyApp() {
           </form>
 
           <p className="text-center text-zinc-400 text-xs mt-10">
-            Esqueceu o acesso? <br/> Entre em contato com o administrador.
+            Dúvidas no acesso? <br/> Fale com o suporte técnico.
           </p>
         </div>
       </div>
     );
   }
 
-  // TELA PRINCIPAL (APÓS LOGIN)
+  // TELA PRINCIPAL (EXIBIDA APÓS O LOGIN)
   const renderContent = () => {
     if (activeTab === 'home') {
       return (
@@ -94,7 +97,7 @@ export default function TrigofyApp() {
             </div>
             <div>
               <h2 className="text-xl font-black tracking-tight">Grupo Trigo</h2>
-              <p className="text-yellow-900/80 text-sm font-medium">Bem-vindo ao Trigofy!</p>
+              <p className="text-yellow-900/80 text-sm font-medium italic">Olá, {usuarioInput}!</p>
             </div>
           </div>
 
@@ -105,7 +108,7 @@ export default function TrigofyApp() {
               <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><Megaphone size={20} /></div>
               <div className="flex-1">
                 <p className="font-bold text-zinc-800">Produtos Disponíveis</p>
-                <p className="text-xs text-zinc-400 font-medium">E-mail para contato</p>
+                <p className="text-xs text-zinc-400 font-medium italic">Catálogo atualizado</p>
               </div>
               <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
             </div>
@@ -114,7 +117,7 @@ export default function TrigofyApp() {
               <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm font-black flex items-center justify-center w-11 h-11">24</div>
               <div className="flex-1">
                 <p className="font-bold text-zinc-800">Produto Desejado</p>
-                <p className="text-xs text-zinc-400 font-medium">Solicite aqui o seu pedido!</p>
+                <p className="text-xs text-zinc-400 font-medium italic">Solicite seu pedido aqui</p>
               </div>
               <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
             </div>
@@ -151,7 +154,11 @@ export default function TrigofyApp() {
           <div>
             <h1 className="text-2xl font-black italic text-yellow-500 tracking-tighter leading-none uppercase">TRIGOFY</h1>
           </div>
-          <button onClick={() => setEstaLogado(false)} className="w-10 h-10 bg-zinc-50 rounded-full flex items-center justify-center text-yellow-500 border border-zinc-100">
+          {/* Botão para Sair (Logout) */}
+          <button 
+            onClick={() => { setEstaLogado(false); setUsuarioInput(''); setSenha(''); }} 
+            className="w-10 h-10 bg-zinc-50 rounded-full flex items-center justify-center text-yellow-500 border border-zinc-100 shadow-sm"
+          >
             <User size={20} />
           </button>
         </header>
