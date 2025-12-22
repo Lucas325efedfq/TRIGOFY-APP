@@ -59,7 +59,7 @@ export default function TrigofyApp() {
         <div className="w-full max-w-[390px] bg-white h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 p-8 justify-center">
           <div className="text-center mb-10">
             <h1 className="text-4xl font-black italic text-yellow-500 tracking-tighter mb-2 text-center uppercase">TRIGOFY</h1>
-            <p className="text-zinc-400 font-bold text-sm uppercase tracking-widest text-center">Acesso Restrito</p>
+            {/* O TEXTO "ACESSO RESTRITO" FOI REMOVIDO DAQUI */}
           </div>
 
           <form onSubmit={lidarComLogin} className="space-y-4">
@@ -172,6 +172,7 @@ export default function TrigofyApp() {
           </div>
         );
 
+      // As outras cases permanecem as mesmas para garantir funcionamento...
       case 'pedidos':
         return (
           <div className="space-y-4 animate-in slide-in-from-right duration-300 text-zinc-900">
@@ -183,7 +184,6 @@ export default function TrigofyApp() {
             </div>
           </div>
         );
-
       case 'catalogo':
         return (
           <div className="space-y-4 animate-in slide-in-from-right duration-300 text-zinc-900">
@@ -192,7 +192,6 @@ export default function TrigofyApp() {
             <p className="px-2 text-zinc-500 font-medium">Gestão de solicitações de doações.</p>
           </div>
         );
-
       case 'rio-sp':
         return (
           <div className="space-y-4 animate-in slide-in-from-right duration-300 text-zinc-900">
@@ -204,7 +203,6 @@ export default function TrigofyApp() {
             </div>
           </div>
         );
-
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300 text-zinc-900">
@@ -221,7 +219,6 @@ export default function TrigofyApp() {
             </div>
           </div>
         );
-
       default:
         return null;
     }
