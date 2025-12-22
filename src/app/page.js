@@ -15,7 +15,7 @@ import {
   LogOut,
   BookOpen,
   History,
-  Factory // Importei um ícone de fábrica para o novo botão
+  Factory 
 } from 'lucide-react';
 
 export default function TrigofyApp() {
@@ -137,9 +137,15 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* NOVO CARD: Solicitações de compras produtos fabrica RIO/SP */}
+              {/* CARD: Compras produtos fabrica RIO/SP - AGORA COM A IMAGEM cesta.png */}
               <div onClick={() => setActiveTab('rio-sp')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
-                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><Factory size={20} /></div>
+                <div className="bg-yellow-400 p-2 rounded-full text-zinc-900 shadow-sm flex items-center justify-center w-11 h-11 overflow-hidden">
+                  <img 
+                    src="/cesta.png" 
+                    alt="Compras RIO/SP" 
+                    className="w-full h-full object-contain" 
+                  />
+                </div>
                 <div className="flex-1">
                   <p className="font-bold text-zinc-800 uppercase text-sm leading-tight">solicitações de compras produtos fabrica RIO/SP</p>
                   <p className="text-[10px] text-zinc-400 font-bold">COMPRAS REGIONAIS</p>
@@ -147,14 +153,10 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 4: Novo Pedido (Com a imagem pizza.png) */}
+              {/* Card 4: Novo Pedido (Imagem pizza.png) */}
               <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-2 rounded-full text-zinc-900 shadow-sm flex items-center justify-center w-11 h-11 overflow-hidden">
-                  <img 
-                    src="/pizza.png" 
-                    alt="Novo Pedido" 
-                    className="w-full h-full object-contain" 
-                  />
+                  <img src="/pizza.png" alt="Novo Pedido" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex-1">
                   <p className="font-bold text-zinc-800 uppercase text-sm">Novo Pedido</p>
