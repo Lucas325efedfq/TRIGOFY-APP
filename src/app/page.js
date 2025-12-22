@@ -25,7 +25,7 @@ export default function TrigofyApp() {
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
 
-  // --- ÁREA DO ADMINISTRADOR ---
+  // --- ÁREA DO ADMINISTRADOR (CADASTRO DE USUÁRIOS) ---
   const usuariosAutorizados = [
     { usuario: 'lucas.vieira', senha: '123' },
     { usuario: 'admin', senha: 'admin' }
@@ -52,13 +52,15 @@ export default function TrigofyApp() {
     setActiveTab('home');
   };
 
+  // TELA DE LOGIN
   if (!estaLogado) {
     return (
       <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans text-zinc-900">
         <div className="w-full max-w-[390px] bg-white h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 p-8 justify-center">
           <div className="text-center mb-10">
             <h1 className="text-4xl font-black italic text-yellow-500 tracking-tighter mb-2 text-center uppercase">TRIGOFY</h1>
-            </div>
+            <p className="text-zinc-400 font-bold text-sm uppercase tracking-widest text-center">Acesso Restrito</p>
+          </div>
 
           <form onSubmit={lidarComLogin} className="space-y-4">
             <div className="relative">
@@ -87,8 +89,9 @@ export default function TrigofyApp() {
 
             {erro && <p className="text-red-500 text-xs font-bold text-center">{erro}</p>}
 
-            <button type="submit" className="w-full bg-zinc-900 text-yellow-400 py-4 rounded-2xl font-black shadow-lg active:scale-95 transition-all uppercase">
-              ENTRAR NO APP
+            {/* BOTÃO ALTERADO PARA APENAS "ENTRAR" */}
+            <button type="submit" className="w-full bg-zinc-900 text-yellow-400 py-4 rounded-2xl font-black shadow-lg active:scale-95 transition-all uppercase tracking-widest">
+              ENTRAR
             </button>
           </form>
         </div>
@@ -96,6 +99,7 @@ export default function TrigofyApp() {
     );
   }
 
+  // CONTEÚDO DA TELA INICIAL
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
@@ -114,7 +118,6 @@ export default function TrigofyApp() {
             <h3 className="text-zinc-800 font-extrabold text-lg px-2 mt-6 uppercase italic tracking-tighter">Ações Rápidas</h3>
             
             <div className="space-y-3">
-              {/* Card 1: Pedidos */}
               <div onClick={() => setActiveTab('pedidos')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><ShoppingBag size={20} /></div>
                 <div className="flex-1">
@@ -124,7 +127,6 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 2: Solicitações de doações - AGORA COM A IMAGEM doacao.png */}
               <div onClick={() => setActiveTab('catalogo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-2 rounded-full text-zinc-900 shadow-sm flex items-center justify-center w-11 h-11 overflow-hidden">
                   <img src="/doacao.png" alt="Doações" className="w-full h-full object-contain" />
@@ -136,7 +138,6 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 3: Compras produtos fabrica RIO/SP - Imagem cesta.png */}
               <div onClick={() => setActiveTab('rio-sp')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-2 rounded-full text-zinc-900 shadow-sm flex items-center justify-center w-11 h-11 overflow-hidden">
                   <img src="/cesta.png" alt="Compras RIO/SP" className="w-full h-full object-contain" />
@@ -148,7 +149,6 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 4: Novo Pedido - Imagem pizza.png */}
               <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-2 rounded-full text-zinc-900 shadow-sm flex items-center justify-center w-11 h-11 overflow-hidden">
                   <img src="/pizza.png" alt="Novo Pedido" className="w-full h-full object-contain" />
@@ -160,7 +160,6 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 5: Suporte */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><Megaphone size={20} /></div>
                 <div className="flex-1">
@@ -199,7 +198,7 @@ export default function TrigofyApp() {
           <div className="space-y-4 animate-in slide-in-from-right duration-300 text-zinc-900">
             <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2 flex items-center gap-1">← Voltar</button>
             <h2 className="text-xl font-black text-zinc-800 uppercase italic tracking-tighter">RIO / SP</h2>
-            <div className="bg-white p-6 rounded-3xl border border-zinc-100">
+            <div className="bg-white p-6 rounded-3xl border border-zinc-100 text-zinc-800">
                 <p className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest mb-4">Solicitações Fábrica RIO e SP</p>
                 <p className="text-sm text-zinc-400 italic">Área destinada a compras regionais da fábrica.</p>
             </div>
