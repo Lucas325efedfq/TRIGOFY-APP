@@ -1,30 +1,32 @@
 "use client";
 import React, { useState } from 'react';
-import {
-  LayoutGrid,
-  ClipboardList,
-  Settings,
-  User,
-  Send,
-  ChevronRight,
-  ShoppingBag,
-  Package,
-  Megaphone
+import { 
+  LayoutGrid, 
+  ClipboardList, 
+  Settings, 
+  User, 
+  Send, 
+  ChevronRight, 
+  ShoppingBag, 
+  Megaphone 
 } from 'lucide-react';
 
 export default function TrigofyApp() {
-  // Estado para controlar qual tela está ativa (home ou form)
   const [activeTab, setActiveTab] = useState('home');
 
-  // Função que decide o que desenhar na tela central
   const renderContent = () => {
     if (activeTab === 'home') {
       return (
         <div className="space-y-4 animate-in fade-in duration-500">
-          {/* Banner Principal com Degradê Amarelo */}
+          {/* Banner Principal com a Logo do Grupo Trigo */}
           <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 p-6 rounded-3xl text-zinc-900 shadow-lg flex items-center gap-4 border border-yellow-300">
-            <div className="bg-white p-3 rounded-2xl shadow-inner">
-              <Package className="text-yellow-600" size={32} />
+            <div className="bg-white p-1 rounded-2xl shadow-inner w-16 h-16 flex items-center justify-center overflow-hidden">
+              {/* Logo do Grupo Trigo inserida no lugar do ícone anterior */}
+              <img 
+                src="https://www.grupotrigo.com.br/wp-content/uploads/2021/11/logo-grupo-trigo.png" 
+                alt="Logo Grupo Trigo" 
+                className="w-full h-auto object-contain"
+              />
             </div>
             <div>
               <h2 className="text-xl font-black tracking-tight">Grupo Trigo</h2>
@@ -33,10 +35,8 @@ export default function TrigofyApp() {
           </div>
 
           <h3 className="text-zinc-800 font-extrabold text-lg px-2 mt-6 tracking-tight">Formulário de Compra (Fábrica)</h3>
-
-          {/* Cartões de Opções */}
+          
           <div className="space-y-3">
-            {/* Opção 1: Produtos Disponíveis */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-colors group">
               <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm">
                 <Megaphone size={20} />
@@ -48,7 +48,6 @@ export default function TrigofyApp() {
               <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
             </div>
 
-            {/* Opção 2: Produto Desejado (Clica para abrir o formulário) */}
             <div onClick={() => setActiveTab('form')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-colors group">
               <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm font-black flex items-center justify-center w-11 h-11">
                 24
@@ -60,7 +59,6 @@ export default function TrigofyApp() {
               <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
             </div>
 
-            {/* Opção 3: Status do Pedido */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-colors group">
               <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm">
                 <ShoppingBag size={20} />
@@ -83,17 +81,16 @@ export default function TrigofyApp() {
           <div className="space-y-4">
             <div>
               <label className="text-xs font-bold text-zinc-400 uppercase ml-1">Nome Completo</label>
-              <input type="text" placeholder="Ex: João Silva" className="w-full mt-1 p-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 transition-all" />
+              <input type="text" placeholder="Ex: João Silva" className="w-full mt-1 p-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 transition-all text-zinc-800" />
             </div>
             <div>
               <label className="text-xs font-bold text-zinc-400 uppercase ml-1">E-mail de Contato</label>
-              <input type="email" placeholder="contato@exemplo.com" className="w-full mt-1 p-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 transition-all" />
+              <input type="email" placeholder="contato@exemplo.com" className="w-full mt-1 p-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 transition-all text-zinc-800" />
             </div>
             <div>
               <label className="text-xs font-bold text-zinc-400 uppercase ml-1">Descrição do Pedido</label>
-              <textarea placeholder="Liste os produtos ou deixe uma mensagem..." rows="4" className="w-full mt-1 p-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 transition-all"></textarea>
+              <textarea placeholder="Liste os produtos ou deixe uma mensagem..." rows="4" className="w-full mt-1 p-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 transition-all text-zinc-800"></textarea>
             </div>
-            {/* Botão de Enviar (Cor sólida preta com texto amarelo) */}
             <button className="w-full bg-zinc-900 text-yellow-400 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-zinc-800 shadow-lg active:scale-95 transition-all">
               <Send size={18} /> ENVIAR PEDIDO
             </button>
@@ -106,32 +103,27 @@ export default function TrigofyApp() {
 
   return (
     <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans">
-      {/* Moldura de Smartphone (iPhone style) */}
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900">
-
-        {/* Notch Superior do Aparelho */}
+        
         <div className="h-7 w-full bg-white flex justify-center items-start">
           <div className="w-32 h-5 bg-zinc-900 rounded-b-2xl"></div>
         </div>
 
-        {/* Header - Onde mudamos para Amarelo */}
+        {/* Header com TRIGOFY em Amarelo */}
         <header className="p-6 flex justify-between items-center bg-white border-b border-zinc-50">
           <div>
-            {/* Título TRIGOFY em Amarelo (text-yellow-500) */}
-            <h1 className="text-2xl font-black italic text-yellow-500 tracking-tighter leading-none">TRIGOFY</h1>
+            <h1 className="text-2xl font-black italic text-yellow-500 tracking-tighter leading-none uppercase">TRIGOFY</h1>
             <span className="text-[10px] font-bold text-zinc-400 tracking-[0.2em] uppercase">Brasil</span>
           </div>
-          <div className="w-10 h-10 bg-zinc-50 rounded-full flex items-center justify-center text-yellow-500 border border-zinc-100 shadow-sm">
+          <div className="w-10 h-10 bg-zinc-50 rounded-full flex items-center justify-center text-yellow-500 border border-zinc-100 shadow-sm cursor-pointer">
             <User size={20} />
           </div>
         </header>
 
-        {/* Área Principal de Conteúdo (Scrollable) */}
         <main className="flex-1 overflow-y-auto p-5 pb-28">
           {renderContent()}
         </main>
 
-        {/* Barra de Navegação Flutuante Inferior */}
         <nav className="absolute bottom-8 left-6 right-6 bg-white/90 backdrop-blur-md border border-zinc-100 px-8 py-3 flex justify-between items-center rounded-full shadow-2xl">
           <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center transition-all ${activeTab === 'home' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}`}>
             <LayoutGrid size={24} />
@@ -147,7 +139,6 @@ export default function TrigofyApp() {
           </button>
         </nav>
 
-        {/* Indicador de Home (Barrinha do iPhone) */}
         <div className="absolute bottom-2 w-full flex justify-center">
           <div className="w-28 h-1 bg-zinc-200 rounded-full"></div>
         </div>
