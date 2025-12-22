@@ -6,7 +6,6 @@ import {
 } from 'lucide-react';
 
 // --- CONFIGURAÇÃO DO AIRTABLE (NUVEM) ---
-// Estes dados permitem que o que você cadastra no PC apareça no celular
 const AIRTABLE_TOKEN = 'patSTombPP4bmw0AK.43e89e93f885283e025cc1c7636c3af9053c953ca812746652c883757c25cd9a';
 const BASE_ID = 'appj9MPXg5rVQf3zK';
 const TABLE_ID = 'tblcgAQwSPe8NcvRN';
@@ -21,11 +20,10 @@ export default function TrigofyApp() {
   const [carregando, setCarregando] = useState(true);
 
   // --- CONTROLE DE LOGINS (CADASTRO DE USUÁRIOS DO APP) ---
-  // Para criar novos logins que funcionem em qualquer aparelho, adicione na lista abaixo:
   const usuariosAutorizados = [
     { usuario: 'admin', senha: 'T!$&gur001' },
     { usuario: 'lucas.vieira', senha: '123' },
-    { usuario: 'lucas.lopes', senha: '456'  },
+    { usuario: 'lucas.lopes', senha: '456'  }, // Alterado de joao.pato para lucas.lopes
   ];
 
   // --- FUNÇÕES DO BANCO DE DADOS (AIRTABLE) ---
@@ -162,7 +160,7 @@ export default function TrigofyApp() {
                 <img src="/favicon.ico" alt="Logo" className="w-full h-full object-contain scale-125" />
               </div>
               <div>
-                <h2 className="text-xl font-black tracking-tight">Grupo Trigo</h2>
+                <h2 className="text-xl font-black tracking-tight text-zinc-900">Grupo Trigo</h2>
                 <p className="text-yellow-900/80 text-sm font-medium italic">Olá, {usuarioInput}!</p>
               </div>
             </div>
@@ -273,11 +271,11 @@ export default function TrigofyApp() {
     <div className="flex justify-center bg-zinc-200 min-h-screen font-sans">
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 text-zinc-900">
         <header className="p-6 flex justify-between items-center bg-white border-b">
-          <h1 className="text-2xl font-black italic text-yellow-500 uppercase">TRIGOFY</h1>
+          <h1 className="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           <button onClick={fazerLogoff} className="text-zinc-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
         </header>
         <main className="flex-1 overflow-y-auto p-5 pb-32">{renderContent()}</main>
-        <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between rounded-full shadow-2xl border">
+        <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between rounded-full shadow-2xl border text-zinc-900">
           <button onClick={() => setActiveTab('home')} className={activeTab === 'home' ? 'text-yellow-500' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
           <button onClick={() => setActiveTab('pedidos')} className={activeTab === 'pedidos' ? 'text-yellow-500' : 'text-zinc-300'}><ShoppingBag size={22} /></button>
           <button onClick={() => setActiveTab('catalogo')} className={activeTab === 'catalogo' ? 'text-yellow-500' : 'text-zinc-300'}><BookOpen size={22} /></button>
