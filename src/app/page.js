@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { 
   LayoutGrid, ClipboardList, Settings, User, Send, 
-  ChevronRight, ShoppingBag, Package, Megaphone, Lock, UserCircle 
+  ChevronRight, ShoppingBag, Package, Megaphone, Lock, UserCircle, LogOut 
 } from 'lucide-react';
 
 export default function TrigofyApp() {
@@ -13,8 +13,6 @@ export default function TrigofyApp() {
   const [erro, setErro] = useState('');
 
   // --- ÁREA DO ADMINISTRADOR (VOCÊ) ---
-  // Aqui você cadastra quem pode entrar. 
-  // Basta colocar o nome de usuário (sem @) e a senha.
   const usuariosAutorizados = [
     { usuario: 'lucas.vieira', senha: '123' },
     { usuario: 'admin', senha: 'admin' },
@@ -23,7 +21,6 @@ export default function TrigofyApp() {
 
   const lidarComLogin = (e) => {
     e.preventDefault();
-    // Procura na sua lista se o nome e senha batem
     const usuarioEncontrado = usuariosAutorizados.find(
       (u) => u.usuario === usuarioInput.toLowerCase() && u.senha === senha
     );
@@ -36,7 +33,15 @@ export default function TrigofyApp() {
     }
   };
 
-  // TELA DE LOGIN (SEM NECESSIDADE DE EMAIL/@)
+  // FUNÇÃO DE LOGOFF (SAIR)
+  const fazerLogoff = () => {
+    setEstaLogado(false);
+    setUsuarioInput(''); // Limpa o nome para o próximo login
+    setSenha('');        // Limpa a senha
+    setActiveTab('home'); // Reseta a aba para o início
+  };
+
+  // TELA DE LOGIN
   if (!estaLogado) {
     return (
       <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans">
@@ -77,16 +82,12 @@ export default function TrigofyApp() {
               ENTRAR NO APP
             </button>
           </form>
-
-          <p className="text-center text-zinc-400 text-xs mt-10">
-            Dúvidas no acesso? <br/> Fale com o suporte técnico.
-          </p>
         </div>
       </div>
     );
   }
 
-  // TELA PRINCIPAL (EXIBIDA APÓS O LOGIN)
+  // TELA PRINCIPAL (PÓS-LOGIN)
   const renderContent = () => {
     if (activeTab === 'home') {
       return (
@@ -101,23 +102,14 @@ export default function TrigofyApp() {
             </div>
           </div>
 
-          <h3 className="text-zinc-800 font-extrabold text-lg px-2 mt-6 tracking-tight">Formulário de Compra (Fábrica)</h3>
+          <h3 className="text-zinc-800 font-extrabold text-lg px-2 mt-6 tracking-tight">Formulário de Compra</h3>
           
           <div className="space-y-3">
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-colors group">
-              <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><Megaphone size={20} /></div>
-              <div className="flex-1">
-                <p className="font-bold text-zinc-800">Produtos Disponíveis</p>
-                <p className="text-xs text-zinc-400 font-medium italic">Catálogo atualizado</p>
-              </div>
-              <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
-            </div>
-
             <div onClick={() => setActiveTab('form')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-colors group">
               <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm font-black flex items-center justify-center w-11 h-11">24</div>
               <div className="flex-1">
-                <p className="font-bold text-zinc-800">Produto Desejado</p>
-                <p className="text-xs text-zinc-400 font-medium italic">Solicite seu pedido aqui</p>
+                <p className="font-bold text-zinc-800">Novo Pedido</p>
+                <p className="text-xs text-zinc-400 font-medium italic">Toque para solicitar produtos</p>
               </div>
               <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
             </div>
@@ -146,6 +138,7 @@ export default function TrigofyApp() {
   return (
     <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans">
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900">
+        
         <div className="h-7 w-full bg-white flex justify-center items-start">
           <div className="w-32 h-5 bg-zinc-900 rounded-b-2xl"></div>
         </div>
@@ -154,12 +147,15 @@ export default function TrigofyApp() {
           <div>
             <h1 className="text-2xl font-black italic text-yellow-500 tracking-tighter leading-none uppercase">TRIGOFY</h1>
           </div>
-          {/* Botão para Sair (Logout) */}
+          
+          {/* BOTÃO DE LOGOFF (Ícone de Sair) */}
           <button 
-            onClick={() => { setEstaLogado(false); setUsuarioInput(''); setSenha(''); }} 
-            className="w-10 h-10 bg-zinc-50 rounded-full flex items-center justify-center text-yellow-500 border border-zinc-100 shadow-sm"
+            onClick={fazerLogoff} 
+            className="flex items-center gap-2 bg-zinc-100 px-3 py-2 rounded-xl text-zinc-500 hover:text-red-500 hover:bg-red-50 transition-all border border-zinc-100"
+            title="Sair do App"
           >
-            <User size={20} />
+            <span className="text-[10px] font-black uppercase">Sair</span>
+            <LogOut size={18} />
           </button>
         </header>
 
