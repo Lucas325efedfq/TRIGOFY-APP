@@ -22,7 +22,7 @@ export default function TrigofyApp() {
             </div>
 
             <h3 className="text-zinc-800 font-extrabold text-lg px-2 mt-6 tracking-tight">Formulário de Compra (Fábrica)</h3>
-            
+
             {/* Lista de Opções Estilo Card - Baseado na sua imagem */}
             <div className="space-y-3">
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-colors group">
@@ -95,7 +95,7 @@ export default function TrigofyApp() {
     <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans">
       {/* Moldura do Celular */}
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900">
-        
+
         {/* Notch Superior */}
         <div className="h-7 w-full bg-white flex justify-center items-start">
           <div className="w-32 h-5 bg-zinc-900 rounded-b-2xl"></div>
