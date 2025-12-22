@@ -126,17 +126,17 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 2: Catálogo */}
+              {/* Card 2: Solicitações de doações (ALTERADO AQUI) */}
               <div onClick={() => setActiveTab('catalogo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><BookOpen size={20} /></div>
                 <div className="flex-1">
-                  <p className="font-bold text-zinc-800 uppercase text-sm">Catálogo</p>
-                  <p className="text-[10px] text-zinc-400 font-bold">PRODUTOS DISPONÍVEIS</p>
+                  <p className="font-bold text-zinc-800 uppercase text-sm">Solicitações de doações</p>
+                  <p className="text-[10px] text-zinc-400 font-bold">GESTÃO DE DOAÇÕES</p>
                 </div>
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 3: Novo Pedido - AGORA USANDO A IMAGEM pizza.png */}
+              {/* Card 3: Novo Pedido (Com a imagem pizza.png) */}
               <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-2 rounded-full text-zinc-900 shadow-sm flex items-center justify-center w-11 h-11 overflow-hidden">
                   <img 
@@ -181,15 +181,8 @@ export default function TrigofyApp() {
         return (
           <div className="space-y-4 animate-in slide-in-from-right duration-300 text-zinc-900">
             <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2 flex items-center gap-1">← Voltar</button>
-            <h2 className="text-xl font-black text-zinc-800 uppercase italic tracking-tighter">Catálogo</h2>
-            <div className="grid grid-cols-2 gap-4 pb-10">
-              {[1, 2, 3, 4].map((item) => (
-                <div key={item} className="bg-white p-3 rounded-3xl border border-zinc-100 shadow-sm">
-                  <div className="bg-zinc-100 h-24 rounded-2xl mb-2 flex items-center justify-center"><Package className="text-zinc-300" size={32} /></div>
-                  <p className="font-bold text-zinc-800 text-xs uppercase text-center">Produto {item}</p>
-                </div>
-              ))}
-            </div>
+            <h2 className="text-xl font-black text-zinc-800 uppercase italic tracking-tighter">Doações</h2>
+            <p className="px-2 text-zinc-500 font-medium">Aqui você poderá gerenciar as solicitações de doações.</p>
           </div>
         );
 
@@ -242,7 +235,7 @@ export default function TrigofyApp() {
           </button>
           <button onClick={() => setActiveTab('catalogo')} className={`flex flex-col items-center gap-1 flex-1 transition-all ${activeTab === 'catalogo' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}`}>
             <BookOpen size={22} />
-            <span className="text-[8px] font-black uppercase tracking-tighter">Catálogo</span>
+            <span className="text-[8px] font-black uppercase tracking-tighter">Doações</span>
           </button>
           <button onClick={() => setActiveTab('novo')} className={`flex flex-col items-center gap-1 flex-1 transition-all ${activeTab === 'novo' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}`}>
             <ClipboardList size={22} />
