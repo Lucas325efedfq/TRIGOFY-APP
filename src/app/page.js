@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+// 1. Para trocar o ícone, você deve importar o novo ícone aqui embaixo
 import { 
   LayoutGrid, 
   ClipboardList, 
@@ -14,7 +15,8 @@ import {
   UserCircle, 
   LogOut,
   BookOpen,
-  History
+  History,
+  // Exemplo: se quiser um ícone de estrela, adicione: Star
 } from 'lucide-react';
 
 export default function TrigofyApp() {
@@ -24,7 +26,6 @@ export default function TrigofyApp() {
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
 
-  // --- ÁREA DO ADMINISTRADOR (CADASTRO DE USUÁRIOS) ---
   const usuariosAutorizados = [
     { usuario: 'lucas.vieira', senha: '123' },
     { usuario: 'admin', senha: 'admin' }
@@ -35,7 +36,6 @@ export default function TrigofyApp() {
     const usuarioEncontrado = usuariosAutorizados.find(
       (u) => u.usuario === usuarioInput.toLowerCase() && u.senha === senha
     );
-
     if (usuarioEncontrado) {
       setEstaLogado(true);
       setErro('');
@@ -51,7 +51,6 @@ export default function TrigofyApp() {
     setActiveTab('home');
   };
 
-  // TELA DE LOGIN
   if (!estaLogado) {
     return (
       <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans">
@@ -60,7 +59,6 @@ export default function TrigofyApp() {
             <h1 className="text-4xl font-black italic text-yellow-500 tracking-tighter mb-2 text-center uppercase">TRIGOFY</h1>
             <p className="text-zinc-400 font-bold text-sm uppercase tracking-widest text-center">Acesso Restrito</p>
           </div>
-
           <form onSubmit={lidarComLogin} className="space-y-4">
             <div className="relative">
               <UserCircle className="absolute left-4 top-4 text-zinc-400" size={20} />
@@ -73,7 +71,6 @@ export default function TrigofyApp() {
                 required
               />
             </div>
-
             <div className="relative">
               <Lock className="absolute left-4 top-4 text-zinc-400" size={20} />
               <input 
@@ -85,9 +82,7 @@ export default function TrigofyApp() {
                 required
               />
             </div>
-
             {erro && <p className="text-red-500 text-xs font-bold text-center">{erro}</p>}
-
             <button type="submit" className="w-full bg-zinc-900 text-yellow-400 py-4 rounded-2xl font-black shadow-lg active:scale-95 transition-all uppercase">
               ENTRAR NO APP
             </button>
@@ -97,13 +92,11 @@ export default function TrigofyApp() {
     );
   }
 
-  // CONTEÚDO DA TELA INICIAL COM OS CARDS VISÍVEIS
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
         return (
           <div className="space-y-4 animate-in fade-in duration-500">
-            {/* Banner do Grupo Trigo */}
             <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 p-6 rounded-3xl text-zinc-900 shadow-lg flex items-center gap-4 border border-yellow-300">
               <div className="bg-white p-2 rounded-2xl shadow-inner w-16 h-16 flex items-center justify-center overflow-hidden">
                 <img src="/favicon.ico" alt="Logo" className="w-full h-full object-contain scale-125" />
@@ -116,11 +109,13 @@ export default function TrigofyApp() {
 
             <h3 className="text-zinc-800 font-extrabold text-lg px-2 mt-6 uppercase italic tracking-tighter">Ações Rápidas</h3>
             
-            {/* LISTA DE ABAS VISÍVEIS NA TELA INICIAL */}
             <div className="space-y-3">
-              {/* Card 1: Pedidos */}
+              {/* CARD 1: MEUS PEDIDOS */}
               <div onClick={() => setActiveTab('pedidos')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
-                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><ShoppingBag size={20} /></div>
+                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm">
+                  {/* ALTERE O ÍCONE ABAIXO */}
+                  <ShoppingBag size={20} />
+                </div>
                 <div className="flex-1">
                   <p className="font-bold text-zinc-800 uppercase text-sm">Meus Pedidos</p>
                   <p className="text-[10px] text-zinc-400 font-bold">HISTÓRICO E STATUS</p>
@@ -128,9 +123,12 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 2: Catálogo */}
+              {/* CARD 2: CATÁLOGO */}
               <div onClick={() => setActiveTab('catalogo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
-                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><BookOpen size={20} /></div>
+                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm">
+                  {/* ALTERE O ÍCONE ABAIXO */}
+                  <BookOpen size={20} />
+                </div>
                 <div className="flex-1">
                   <p className="font-bold text-zinc-800 uppercase text-sm">Catálogo</p>
                   <p className="text-[10px] text-zinc-400 font-bold">PRODUTOS DISPONÍVEIS</p>
@@ -138,9 +136,12 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 3: Novo Pedido */}
+              {/* CARD 3: NOVO PEDIDO */}
               <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
-                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm font-black flex items-center justify-center w-11 h-11 text-lg italic">24</div>
+                {/* Aqui está o "24" em texto. Se quiser imagem, troque o conteúdo da div abaixo */}
+                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm font-black flex items-center justify-center w-11 h-11 text-lg italic">
+                  24 
+                </div>
                 <div className="flex-1">
                   <p className="font-bold text-zinc-800 uppercase text-sm">Novo Pedido</p>
                   <p className="text-[10px] text-zinc-400 font-bold">SOLICITAR COMPRA</p>
@@ -148,9 +149,12 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 4: Suporte/Mensagens */}
+              {/* CARD 4: SUPORTE */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
-                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><Megaphone size={20} /></div>
+                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm">
+                  {/* ALTERE O ÍCONE ABAIXO */}
+                  <Megaphone size={20} />
+                </div>
                 <div className="flex-1">
                   <p className="font-bold text-zinc-800 uppercase text-sm">Suporte</p>
                   <p className="text-[10px] text-zinc-400 font-bold">FALAR COM A FÁBRICA</p>
@@ -160,7 +164,8 @@ export default function TrigofyApp() {
             </div>
           </div>
         );
-
+      
+      // As outras cases (pedidos, catalogo, novo) continuam iguais...
       case 'pedidos':
         return (
           <div className="space-y-4 animate-in slide-in-from-right duration-300">
@@ -172,7 +177,6 @@ export default function TrigofyApp() {
             </div>
           </div>
         );
-
       case 'catalogo':
         return (
           <div className="space-y-4 animate-in slide-in-from-right duration-300">
@@ -188,7 +192,6 @@ export default function TrigofyApp() {
             </div>
           </div>
         );
-
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300">
@@ -205,7 +208,6 @@ export default function TrigofyApp() {
             </div>
           </div>
         );
-
       default:
         return null;
     }
@@ -214,11 +216,9 @@ export default function TrigofyApp() {
   return (
     <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans text-zinc-900">
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900">
-        
         <div className="h-7 w-full bg-white flex justify-center items-start">
           <div className="w-32 h-5 bg-zinc-900 rounded-b-2xl"></div>
         </div>
-
         <header className="p-6 flex justify-between items-center bg-white border-b border-zinc-50">
           <h1 className="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           <button onClick={fazerLogoff} className="flex items-center gap-2 bg-zinc-100 px-3 py-2 rounded-xl text-zinc-500 border border-zinc-100 active:bg-red-50 active:text-red-500 transition-all">
@@ -226,34 +226,27 @@ export default function TrigofyApp() {
             <LogOut size={16} />
           </button>
         </header>
-
         <main className="flex-1 overflow-y-auto p-5 pb-32">
           {renderContent()}
         </main>
-
-        {/* Menu Inferior - Mantive para navegação rápida além dos cards da Home */}
         <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md border border-zinc-100 px-4 py-3 flex justify-between items-center rounded-full shadow-2xl">
           <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1 flex-1 transition-all ${activeTab === 'home' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}`}>
             <LayoutGrid size={22} />
             <span className="text-[8px] font-black uppercase tracking-tighter">Início</span>
           </button>
-          
           <button onClick={() => setActiveTab('pedidos')} className={`flex flex-col items-center gap-1 flex-1 transition-all ${activeTab === 'pedidos' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}`}>
             <ShoppingBag size={22} />
             <span className="text-[8px] font-black uppercase tracking-tighter">Pedidos</span>
           </button>
-
           <button onClick={() => setActiveTab('catalogo')} className={`flex flex-col items-center gap-1 flex-1 transition-all ${activeTab === 'catalogo' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}`}>
             <BookOpen size={22} />
             <span className="text-[8px] font-black uppercase tracking-tighter">Catálogo</span>
           </button>
-
           <button onClick={() => setActiveTab('novo')} className={`flex flex-col items-center gap-1 flex-1 transition-all ${activeTab === 'novo' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}`}>
             <ClipboardList size={22} />
             <span className="text-[8px] font-black uppercase tracking-tighter">Novo</span>
           </button>
         </nav>
-
         <div className="absolute bottom-2 w-full flex justify-center">
           <div className="w-28 h-1 bg-zinc-200 rounded-full"></div>
         </div>
