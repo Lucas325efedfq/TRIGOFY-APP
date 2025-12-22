@@ -109,10 +109,10 @@ export default function TrigofyApp() {
           <div className="w-32 h-5 bg-zinc-900 rounded-b-2xl"></div>
         </div>
 
+        {/* Header - Brasil Removido */}
         <header className="p-6 flex justify-between items-center bg-white border-b border-zinc-50">
           <div>
             <h1 className="text-2xl font-black italic text-yellow-500 tracking-tighter leading-none uppercase">TRIGOFY</h1>
-            <span className="text-[10px] font-bold text-zinc-400 tracking-[0.2em] uppercase">Brasil</span>
           </div>
           <div className="w-10 h-10 bg-zinc-50 rounded-full flex items-center justify-center text-yellow-500 border border-zinc-100 shadow-sm cursor-pointer">
             <User size={20} />
