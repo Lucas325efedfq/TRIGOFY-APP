@@ -25,7 +25,7 @@ export default function TrigofyApp() {
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
 
-  // --- ÁREA DO ADMINISTRADOR (CADASTRO DE USUÁRIOS) ---
+  // --- ÁREA DO ADMINISTRADOR ---
   const usuariosAutorizados = [
     { usuario: 'lucas.vieira', senha: '123' },
     { usuario: 'admin', senha: 'admin' }
@@ -52,7 +52,6 @@ export default function TrigofyApp() {
     setActiveTab('home');
   };
 
-  // TELA DE LOGIN
   if (!estaLogado) {
     return (
       <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans text-zinc-900">
@@ -98,12 +97,11 @@ export default function TrigofyApp() {
     );
   }
 
-  // CONTEÚDO DA TELA INICIAL
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
         return (
-          <div className="space-y-4 animate-in fade-in duration-500 pb-10">
+          <div className="space-y-4 animate-in fade-in duration-500 pb-10 text-zinc-900">
             <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 p-6 rounded-3xl text-zinc-900 shadow-lg flex items-center gap-4 border border-yellow-300">
               <div className="bg-white p-2 rounded-2xl shadow-inner w-16 h-16 flex items-center justify-center overflow-hidden">
                 <img src="/favicon.ico" alt="Logo" className="w-full h-full object-contain scale-125" />
@@ -127,9 +125,11 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 2: Solicitações de doações */}
+              {/* Card 2: Solicitações de doações - AGORA COM A IMAGEM doacao.png */}
               <div onClick={() => setActiveTab('catalogo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
-                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><BookOpen size={20} /></div>
+                <div className="bg-yellow-400 p-2 rounded-full text-zinc-900 shadow-sm flex items-center justify-center w-11 h-11 overflow-hidden">
+                  <img src="/doacao.png" alt="Doações" className="w-full h-full object-contain" />
+                </div>
                 <div className="flex-1">
                   <p className="font-bold text-zinc-800 uppercase text-sm">Solicitações de doações</p>
                   <p className="text-[10px] text-zinc-400 font-bold">GESTÃO DE DOAÇÕES</p>
@@ -137,14 +137,10 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* CARD: Compras produtos fabrica RIO/SP - AGORA COM A IMAGEM cesta.png */}
+              {/* Card 3: Compras produtos fabrica RIO/SP - Imagem cesta.png */}
               <div onClick={() => setActiveTab('rio-sp')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-2 rounded-full text-zinc-900 shadow-sm flex items-center justify-center w-11 h-11 overflow-hidden">
-                  <img 
-                    src="/cesta.png" 
-                    alt="Compras RIO/SP" 
-                    className="w-full h-full object-contain" 
-                  />
+                  <img src="/cesta.png" alt="Compras RIO/SP" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex-1">
                   <p className="font-bold text-zinc-800 uppercase text-sm leading-tight">solicitações de compras produtos fabrica RIO/SP</p>
@@ -153,7 +149,7 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 4: Novo Pedido (Imagem pizza.png) */}
+              {/* Card 4: Novo Pedido - Imagem pizza.png */}
               <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-2 rounded-full text-zinc-900 shadow-sm flex items-center justify-center w-11 h-11 overflow-hidden">
                   <img src="/pizza.png" alt="Novo Pedido" className="w-full h-full object-contain" />
@@ -235,7 +231,7 @@ export default function TrigofyApp() {
 
   return (
     <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans">
-      <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900">
+      <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 text-zinc-900">
         <div className="h-7 w-full bg-white flex justify-center items-start">
           <div className="w-32 h-5 bg-zinc-900 rounded-b-2xl"></div>
         </div>
@@ -252,19 +248,19 @@ export default function TrigofyApp() {
         <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md border border-zinc-100 px-4 py-3 flex justify-between items-center rounded-full shadow-2xl">
           <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1 flex-1 transition-all ${activeTab === 'home' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}`}>
             <LayoutGrid size={22} />
-            <span className="text-[8px] font-black uppercase tracking-tighter">Início</span>
+            <span className="text-[8px] font-black uppercase tracking-tighter text-center">Início</span>
           </button>
           <button onClick={() => setActiveTab('pedidos')} className={`flex flex-col items-center gap-1 flex-1 transition-all ${activeTab === 'pedidos' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}`}>
             <ShoppingBag size={22} />
-            <span className="text-[8px] font-black uppercase tracking-tighter">Pedidos</span>
+            <span className="text-[8px] font-black uppercase tracking-tighter text-center">Pedidos</span>
           </button>
           <button onClick={() => setActiveTab('catalogo')} className={`flex flex-col items-center gap-1 flex-1 transition-all ${activeTab === 'catalogo' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}`}>
             <BookOpen size={22} />
-            <span className="text-[8px] font-black uppercase tracking-tighter">Doações</span>
+            <span className="text-[8px] font-black uppercase tracking-tighter text-center">Doações</span>
           </button>
           <button onClick={() => setActiveTab('novo')} className={`flex flex-col items-center gap-1 flex-1 transition-all ${activeTab === 'novo' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}`}>
             <ClipboardList size={22} />
-            <span className="text-[8px] font-black uppercase tracking-tighter">Novo</span>
+            <span className="text-[8px] font-black uppercase tracking-tighter text-center">Novo</span>
           </button>
         </nav>
         <div className="absolute bottom-2 w-full flex justify-center">
