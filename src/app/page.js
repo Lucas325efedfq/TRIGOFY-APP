@@ -23,7 +23,7 @@ export default function TrigofyApp() {
   // --- CONTROLE DE LOGINS (CADASTRO DE USUÁRIOS DO APP) ---
   // Para criar novos logins que funcionem em qualquer aparelho, adicione na lista abaixo:
   const usuariosAutorizados = [
-    { usuario: 'admin', senha: 'admin' },
+    { usuario: 'admin', senha: 'T!$&gur001' },
     { usuario: 'lucas.vieira', senha: '123' },
     { usuario: 'lucas.lopes', senha: '456' } // Exemplo: João adicionado
   ];
