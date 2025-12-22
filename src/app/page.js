@@ -58,8 +58,7 @@ export default function TrigofyApp() {
         <div className="w-full max-w-[390px] bg-white h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 p-8 justify-center">
           <div className="text-center mb-10">
             <h1 className="text-4xl font-black italic text-yellow-500 tracking-tighter mb-2 text-center uppercase">TRIGOFY</h1>
-            <p className="text-zinc-400 font-bold text-sm uppercase tracking-widest text-center">Acesso Restrito</p>
-          </div>
+            </div>
 
           <form onSubmit={lidarComLogin} className="space-y-4">
             <div className="relative">
