@@ -97,12 +97,13 @@ export default function TrigofyApp() {
     );
   }
 
-  // CONTEÚDO DAS NOVAS ABAS
+  // CONTEÚDO DA TELA INICIAL COM OS CARDS VISÍVEIS
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
         return (
           <div className="space-y-4 animate-in fade-in duration-500">
+            {/* Banner do Grupo Trigo */}
             <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 p-6 rounded-3xl text-zinc-900 shadow-lg flex items-center gap-4 border border-yellow-300">
               <div className="bg-white p-2 rounded-2xl shadow-inner w-16 h-16 flex items-center justify-center overflow-hidden">
                 <img src="/favicon.ico" alt="Logo" className="w-full h-full object-contain scale-125" />
@@ -113,42 +114,75 @@ export default function TrigofyApp() {
               </div>
             </div>
 
-            <h3 className="text-zinc-800 font-extrabold text-lg px-2 mt-6">Ações Rápidas</h3>
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50" onClick={() => setActiveTab('novo')}>
-              <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><Megaphone size={20} /></div>
-              <div className="flex-1">
-                <p className="font-bold text-zinc-800">Produtos Disponíveis</p>
-                <p className="text-xs text-zinc-400">Ver catálogo completo</p>
+            <h3 className="text-zinc-800 font-extrabold text-lg px-2 mt-6 uppercase italic tracking-tighter">Ações Rápidas</h3>
+            
+            {/* LISTA DE ABAS VISÍVEIS NA TELA INICIAL */}
+            <div className="space-y-3">
+              {/* Card 1: Pedidos */}
+              <div onClick={() => setActiveTab('pedidos')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
+                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><ShoppingBag size={20} /></div>
+                <div className="flex-1">
+                  <p className="font-bold text-zinc-800 uppercase text-sm">Meus Pedidos</p>
+                  <p className="text-[10px] text-zinc-400 font-bold">HISTÓRICO E STATUS</p>
+                </div>
+                <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
-              <ChevronRight className="text-zinc-300" size={20} />
+
+              {/* Card 2: Catálogo */}
+              <div onClick={() => setActiveTab('catalogo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
+                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><BookOpen size={20} /></div>
+                <div className="flex-1">
+                  <p className="font-bold text-zinc-800 uppercase text-sm">Catálogo</p>
+                  <p className="text-[10px] text-zinc-400 font-bold">PRODUTOS DISPONÍVEIS</p>
+                </div>
+                <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
+              </div>
+
+              {/* Card 3: Novo Pedido */}
+              <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
+                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm font-black flex items-center justify-center w-11 h-11 text-lg italic">24</div>
+                <div className="flex-1">
+                  <p className="font-bold text-zinc-800 uppercase text-sm">Novo Pedido</p>
+                  <p className="text-[10px] text-zinc-400 font-bold">SOLICITAR COMPRA</p>
+                </div>
+                <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
+              </div>
+
+              {/* Card 4: Suporte/Mensagens */}
+              <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
+                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><Megaphone size={20} /></div>
+                <div className="flex-1">
+                  <p className="font-bold text-zinc-800 uppercase text-sm">Suporte</p>
+                  <p className="text-[10px] text-zinc-400 font-bold">FALAR COM A FÁBRICA</p>
+                </div>
+                <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
+              </div>
             </div>
           </div>
         );
 
       case 'pedidos':
         return (
-          <div className="space-y-4 animate-in slide-in-from-bottom duration-300">
-            <h2 className="text-xl font-black text-zinc-800 px-2 uppercase italic tracking-tighter">Meus Pedidos</h2>
+          <div className="space-y-4 animate-in slide-in-from-right duration-300">
+             <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2 flex items-center gap-1">← Voltar</button>
+            <h2 className="text-xl font-black text-zinc-800 uppercase italic tracking-tighter">Meus Pedidos</h2>
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-zinc-100 text-center flex flex-col items-center">
               <History className="text-zinc-200 mb-4" size={48} />
-              <p className="text-zinc-500 font-bold uppercase text-xs tracking-widest">Nenhum pedido encontrado</p>
-              <button onClick={() => setActiveTab('novo')} className="mt-6 bg-yellow-400 text-zinc-900 px-6 py-3 rounded-full font-black text-xs uppercase shadow-sm active:scale-95">Criar Primeiro Pedido</button>
+              <p className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Nenhum pedido encontrado</p>
             </div>
           </div>
         );
 
       case 'catalogo':
         return (
-          <div className="space-y-4 animate-in slide-in-from-bottom duration-300 pb-10">
-            <h2 className="text-xl font-black text-zinc-800 px-2 uppercase italic tracking-tighter">Catálogo</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {[1, 2, 3, 4, 5, 6].map((item) => (
-                <div key={item} className="bg-white p-3 rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
-                  <div className="bg-zinc-100 h-24 rounded-2xl mb-2 flex items-center justify-center">
-                    <Package className="text-zinc-300" size={32} />
-                  </div>
-                  <p className="font-bold text-zinc-800 text-xs uppercase">Produto Ref. {item}</p>
-                  <p className="text-[10px] text-zinc-400 font-bold mt-1 uppercase">Grupo Trigo</p>
+          <div className="space-y-4 animate-in slide-in-from-right duration-300">
+            <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2 flex items-center gap-1">← Voltar</button>
+            <h2 className="text-xl font-black text-zinc-800 uppercase italic tracking-tighter">Catálogo</h2>
+            <div className="grid grid-cols-2 gap-4 pb-10">
+              {[1, 2, 3, 4].map((item) => (
+                <div key={item} className="bg-white p-3 rounded-3xl border border-zinc-100 shadow-sm">
+                  <div className="bg-zinc-100 h-24 rounded-2xl mb-2 flex items-center justify-center"><Package className="text-zinc-300" size={32} /></div>
+                  <p className="font-bold text-zinc-800 text-xs uppercase text-center">Produto {item}</p>
                 </div>
               ))}
             </div>
@@ -157,14 +191,17 @@ export default function TrigofyApp() {
 
       case 'novo':
         return (
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-zinc-100 animate-in slide-in-from-bottom duration-300">
-            <h2 className="text-lg font-bold mb-4 text-zinc-800 uppercase italic tracking-tighter">Formulário de Compra</h2>
-            <div className="space-y-4">
-              <input type="text" placeholder="Nome Completo" className="w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 text-zinc-800" />
-              <textarea placeholder="Descrição do que você precisa..." rows="4" className="w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 text-zinc-800"></textarea>
-              <button className="w-full bg-zinc-900 text-yellow-400 py-4 rounded-2xl font-black flex items-center justify-center gap-2 uppercase tracking-widest shadow-lg">
-                <Send size={18} /> ENVIAR PEDIDO
-              </button>
+          <div className="animate-in slide-in-from-right duration-300">
+            <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2 flex items-center gap-1">← Voltar</button>
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-zinc-100">
+              <h2 className="text-lg font-bold mb-4 text-zinc-800 uppercase italic tracking-tighter">Formulário de Compra</h2>
+              <div className="space-y-4">
+                <input type="text" placeholder="Nome Completo" className="w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 text-zinc-800" />
+                <textarea placeholder="Descrição do que você precisa..." rows="4" className="w-full p-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 text-zinc-800"></textarea>
+                <button className="w-full bg-zinc-900 text-yellow-400 py-4 rounded-2xl font-black flex items-center justify-center gap-2 uppercase tracking-widest shadow-lg">
+                  <Send size={18} /> ENVIAR PEDIDO
+                </button>
+              </div>
             </div>
           </div>
         );
@@ -175,7 +212,7 @@ export default function TrigofyApp() {
   };
 
   return (
-    <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans">
+    <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans text-zinc-900">
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900">
         
         <div className="h-7 w-full bg-white flex justify-center items-start">
@@ -185,7 +222,7 @@ export default function TrigofyApp() {
         <header className="p-6 flex justify-between items-center bg-white border-b border-zinc-50">
           <h1 className="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           <button onClick={fazerLogoff} className="flex items-center gap-2 bg-zinc-100 px-3 py-2 rounded-xl text-zinc-500 border border-zinc-100 active:bg-red-50 active:text-red-500 transition-all">
-            <span className="text-[10px] font-black uppercase">Sair</span>
+            <span className="text-[10px] font-black uppercase tracking-tighter">Sair</span>
             <LogOut size={16} />
           </button>
         </header>
@@ -194,7 +231,7 @@ export default function TrigofyApp() {
           {renderContent()}
         </main>
 
-        {/* MENU INFERIOR COM AS 4 ABAS PEDIDAS */}
+        {/* Menu Inferior - Mantive para navegação rápida além dos cards da Home */}
         <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md border border-zinc-100 px-4 py-3 flex justify-between items-center rounded-full shadow-2xl">
           <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1 flex-1 transition-all ${activeTab === 'home' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}`}>
             <LayoutGrid size={22} />
