@@ -14,7 +14,8 @@ import {
   UserCircle, 
   LogOut,
   BookOpen,
-  History
+  History,
+  Factory // Importei um ícone de fábrica para o novo botão
 } from 'lucide-react';
 
 export default function TrigofyApp() {
@@ -102,7 +103,7 @@ export default function TrigofyApp() {
     switch (activeTab) {
       case 'home':
         return (
-          <div className="space-y-4 animate-in fade-in duration-500">
+          <div className="space-y-4 animate-in fade-in duration-500 pb-10">
             <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 p-6 rounded-3xl text-zinc-900 shadow-lg flex items-center gap-4 border border-yellow-300">
               <div className="bg-white p-2 rounded-2xl shadow-inner w-16 h-16 flex items-center justify-center overflow-hidden">
                 <img src="/favicon.ico" alt="Logo" className="w-full h-full object-contain scale-125" />
@@ -126,7 +127,7 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 2: Solicitações de doações (ALTERADO AQUI) */}
+              {/* Card 2: Solicitações de doações */}
               <div onClick={() => setActiveTab('catalogo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><BookOpen size={20} /></div>
                 <div className="flex-1">
@@ -136,7 +137,17 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 3: Novo Pedido (Com a imagem pizza.png) */}
+              {/* NOVO CARD: Solicitações de compras produtos fabrica RIO/SP */}
+              <div onClick={() => setActiveTab('rio-sp')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
+                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><Factory size={20} /></div>
+                <div className="flex-1">
+                  <p className="font-bold text-zinc-800 uppercase text-sm leading-tight">solicitações de compras produtos fabrica RIO/SP</p>
+                  <p className="text-[10px] text-zinc-400 font-bold">COMPRAS REGIONAIS</p>
+                </div>
+                <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
+              </div>
+
+              {/* Card 4: Novo Pedido (Com a imagem pizza.png) */}
               <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-2 rounded-full text-zinc-900 shadow-sm flex items-center justify-center w-11 h-11 overflow-hidden">
                   <img 
@@ -152,7 +163,7 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* Card 4: Suporte */}
+              {/* Card 5: Suporte */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-3 rounded-full text-zinc-900 shadow-sm"><Megaphone size={20} /></div>
                 <div className="flex-1">
@@ -182,7 +193,19 @@ export default function TrigofyApp() {
           <div className="space-y-4 animate-in slide-in-from-right duration-300 text-zinc-900">
             <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2 flex items-center gap-1">← Voltar</button>
             <h2 className="text-xl font-black text-zinc-800 uppercase italic tracking-tighter">Doações</h2>
-            <p className="px-2 text-zinc-500 font-medium">Aqui você poderá gerenciar as solicitações de doações.</p>
+            <p className="px-2 text-zinc-500 font-medium">Gestão de solicitações de doações.</p>
+          </div>
+        );
+
+      case 'rio-sp':
+        return (
+          <div className="space-y-4 animate-in slide-in-from-right duration-300 text-zinc-900">
+            <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2 flex items-center gap-1">← Voltar</button>
+            <h2 className="text-xl font-black text-zinc-800 uppercase italic tracking-tighter">RIO / SP</h2>
+            <div className="bg-white p-6 rounded-3xl border border-zinc-100">
+                <p className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest mb-4">Solicitações Fábrica RIO e SP</p>
+                <p className="text-sm text-zinc-400 italic">Área destinada a compras regionais da fábrica.</p>
+            </div>
           </div>
         );
 
