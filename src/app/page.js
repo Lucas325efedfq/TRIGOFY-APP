@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 
 // --- CONFIGURAÇÃO DO AIRTABLE (NUVEM) ---
+// Estes dados permitem que o que você cadastra no PC apareça no celular
 const AIRTABLE_TOKEN = 'patSTombPP4bmw0AK.43e89e93f885283e025cc1c7636c3af9053c953ca812746652c883757c25cd9a';
 const BASE_ID = 'appj9MPXg5rVQf3zK';
 const TABLE_ID = 'tblcgAQwSPe8NcvRN';
@@ -18,6 +19,14 @@ export default function TrigofyApp() {
   const [erro, setErro] = useState('');
   const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
   const [carregando, setCarregando] = useState(true);
+
+  // --- CONTROLE DE LOGINS (CADASTRO DE USUÁRIOS DO APP) ---
+  // Para criar novos logins que funcionem em qualquer aparelho, adicione na lista abaixo:
+  const usuariosAutorizados = [
+    { usuario: 'admin', senha: 'admin' },
+    { usuario: 'lucas.vieira', senha: '123' },
+    { usuario: 'joao.pato', senha: '456' } // Exemplo: João adicionado
+  ];
 
   // --- FUNÇÕES DO BANCO DE DADOS (AIRTABLE) ---
   const buscarDadosAirtable = async () => {
@@ -59,8 +68,7 @@ export default function TrigofyApp() {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${AIRTABLE_TOKEN}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           fields: {
@@ -73,12 +81,10 @@ export default function TrigofyApp() {
         setNovoCpf('');
         setNovoNome('');
         await buscarDadosAirtable();
-        alert("✅ Cadastrado com sucesso!");
-      } else {
-        alert("Erro ao salvar. Verifique as colunas no Airtable.");
+        alert("✅ Cadastrado com sucesso na Nuvem!");
       }
     } catch (e) {
-      alert("Erro de conexão.");
+      alert("Erro ao salvar.");
     }
     setCarregando(false);
   };
@@ -109,8 +115,11 @@ export default function TrigofyApp() {
 
   const lidarComLogin = (e) => {
     e.preventDefault();
-    if ((usuarioInput.toLowerCase() === 'admin' && senha === 'admin') || 
-        (usuarioInput.toLowerCase() === 'lucas.vieira' && senha === '123')) {
+    const encontrou = usuariosAutorizados.find(
+      (u) => u.usuario === usuarioInput.toLowerCase() && u.senha === senha
+    );
+
+    if (encontrou) {
       setEstaLogado(true);
       setErro('');
     } else {
@@ -190,16 +199,16 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300" size={20} />
               </div>
 
-              {/* BOTÃO DE SUPORTE - APARECE PARA TODOS MENOS ADMIN */}
+              {/* SUPORTE (ESCONDIDO PARA ADMIN) */}
               {usuarioInput.toLowerCase() !== 'admin' && (
-                <div className="bg-yellow-400 p-4 rounded-2xl shadow-md flex items-center gap-4 cursor-pointer active:scale-95 transition-all group">
+                <div className="bg-yellow-400 p-4 rounded-2xl shadow-md flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
                   <div className="bg-zinc-900 p-3 rounded-full text-yellow-400"><Megaphone size={20} /></div>
                   <div className="flex-1 font-bold text-zinc-900 uppercase text-sm">Suporte</div>
                   <ChevronRight className="text-zinc-800" size={20} />
                 </div>
               )}
 
-              {/* PAINEL ADMIN - SÓ APARECE PARA ADMIN */}
+              {/* PAINEL ADMIN */}
               {usuarioInput.toLowerCase() === 'admin' && (
                 <div onClick={() => setActiveTab('admin-painel')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-zinc-800">
                   <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><Plus size={20} /></div>
@@ -219,7 +228,7 @@ export default function TrigofyApp() {
               <h2 className="text-lg font-bold text-zinc-800 uppercase italic border-b pb-2">Novo Pedido</h2>
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Digite o CPF</label>
-                <input type="text" placeholder="Apenas números" maxLength={11} className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400" value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
+                <input type="text" placeholder="Apenas números" maxLength={11} className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
               </div>
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Nome do Solicitante</label>
@@ -241,6 +250,7 @@ export default function TrigofyApp() {
               <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm">
                 {carregando ? "Salvando..." : "Salvar no Airtable"}
               </button>
+              
               <div className="pt-4 space-y-2">
                 <h3 className="text-xs font-black text-zinc-400 uppercase">Lista Sincronizada</h3>
                 {pessoasCadastradas.map(p => (
@@ -255,12 +265,7 @@ export default function TrigofyApp() {
         );
 
       default:
-        return (
-          <div className="text-center p-10">
-            <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2">← Voltar</button>
-            <p className="text-zinc-400 font-bold uppercase text-[10px]">Em desenvolvimento</p>
-          </div>
-        );
+        return null;
     }
   };
 
