@@ -5,7 +5,7 @@ import {
   Lock, UserCircle, LogOut, BookOpen, Plus, Trash2, Megaphone, History
 } from 'lucide-react';
 
-// --- CONFIGURAÇÃO DO AIRTABLE (NUVEM) ---
+// --- CONFIGURAÇÃO DO AIRTABLE ---
 const AIRTABLE_TOKEN = 'patSTombPP4bmw0AK.43e89e93f885283e025cc1c7636c3af9053c953ca812746652c883757c25cd9a';
 const BASE_ID = 'appj9MPXg5rVQf3zK';
 const TABLE_ID = 'tblcgAQwSPe8NcvRN';
@@ -19,13 +19,16 @@ export default function TrigofyApp() {
   const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
-  // --- FUNÇÕES DO BANCO DE DADOS (AIRTABLE) ---
+  // --- FUNÇÕES DO BANCO DE DADOS ---
 
   const buscarDadosAirtable = async () => {
     setCarregando(true);
     try {
       const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
-        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
+        headers: { 
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+          "Content-Type": "application/json"
+        }
       });
       const data = await response.json();
       if (data.records) {
@@ -37,7 +40,7 @@ export default function TrigofyApp() {
         setPessoasCadastradas(formatado);
       }
     } catch (e) {
-      console.error("Erro ao buscar dados no Airtable:", e);
+      console.error("Erro ao buscar dados:", e);
     }
     setCarregando(false);
   };
@@ -47,37 +50,48 @@ export default function TrigofyApp() {
   }, []);
 
   const salvarNoAirtable = async () => {
+    // Verifica se os campos estão vazios antes de tentar enviar
     if (!novoCpf || !novoNome) {
-      alert("Preencha CPF e Nome");
+      alert("Por favor, preencha o CPF e o Nome Completo.");
       return;
     }
+
+    setCarregando(true);
     try {
       const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${AIRTABLE_TOKEN}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           fields: {
-            cpf: novoCpf.replace(/\D/g, ''),
-            nome: novoNome.toUpperCase()
+            cpf: novoCpf.replace(/\D/g, ''), // Remove pontos e traços
+            nome: novoNome.toUpperCase().trim()
           }
         })
       });
+
+      const resultado = await response.json();
+
       if (response.ok) {
         setNovoCpf('');
         setNovoNome('');
-        buscarDadosAirtable();
-        alert("Cadastrado na Nuvem com sucesso!");
+        await buscarDadosAirtable();
+        alert("✅ Cadastrado com sucesso!");
+      } else {
+        console.error("Erro Airtable:", resultado);
+        alert(`Erro: ${resultado.error.message || "Verifique se as colunas no Airtable se chamam 'cpf' e 'nome'"}`);
       }
     } catch (e) {
-      alert("Erro ao salvar dados.");
+      alert("Erro de conexão. Verifique sua internet.");
     }
+    setCarregando(false);
   };
 
   const excluirDoAirtable = async (id) => {
-    if (!confirm("Deseja excluir este cadastro permanentemente da nuvem?")) return;
+    if (!confirm("Deseja excluir permanentemente?")) return;
     try {
       const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}/${id}`, {
         method: 'DELETE',
@@ -123,7 +137,7 @@ export default function TrigofyApp() {
   if (!estaLogado) {
     return (
       <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans text-zinc-900">
-        <div className="w-full max-w-[390px] bg-white h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 p-8 justify-center">
+        <div className="w-full max-w-[390px] bg-white h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 p-8 justify-center text-zinc-900">
           <div className="text-center mb-10">
             <h1 className="text-4xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           </div>
@@ -148,7 +162,7 @@ export default function TrigofyApp() {
                 <img src="/favicon.ico" alt="Logo" className="w-full h-full object-contain scale-125" />
               </div>
               <div>
-                <h2 className="text-xl font-black tracking-tight">Grupo Trigo</h2>
+                <h2 className="text-xl font-black tracking-tight text-zinc-900">Grupo Trigo</h2>
                 <p className="text-yellow-900/80 text-sm font-medium italic">Olá, {usuarioInput}!</p>
               </div>
             </div>
@@ -221,20 +235,21 @@ export default function TrigofyApp() {
             <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2">← Voltar</button>
             <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
               <h2 className="text-lg font-bold uppercase italic border-b pb-2">Cadastrar na Nuvem</h2>
-              <input type="text" placeholder="CPF" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
+              <input type="text" placeholder="CPF (apenas números)" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
               <input type="text" placeholder="Nome Completo" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
-              <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm">Salvar no Airtable</button>
+              <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm">
+                {carregando ? "Salvando..." : "Salvar no Airtable"}
+              </button>
               
               <div className="pt-4 space-y-2">
                 <h3 className="text-xs font-black text-zinc-400 uppercase">Lista Sincronizada</h3>
-                {carregando ? <p className="text-xs animate-pulse">Sincronizando com a nuvem...</p> : 
-                  pessoasCadastradas.map(p => (
-                    <div key={p.id} className="flex justify-between items-center p-3 bg-zinc-50 rounded-xl border">
-                      <div><p className="font-bold text-xs text-zinc-800">{p.nome}</p><p className="text-[10px] text-zinc-400">{p.cpf}</p></div>
-                      <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2"><Trash2 size={16}/></button>
-                    </div>
-                  ))
-                }
+                {pessoasCadastradas.length === 0 && !carregando ? <p className="text-xs text-zinc-400 italic">Nenhum registro encontrado.</p> : null}
+                {pessoasCadastradas.map(p => (
+                  <div key={p.id} className="flex justify-between items-center p-3 bg-zinc-50 rounded-xl border">
+                    <div><p className="font-bold text-xs text-zinc-800">{p.nome}</p><p className="text-[10px] text-zinc-400">{p.cpf}</p></div>
+                    <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2"><Trash2 size={16}/></button>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -254,7 +269,7 @@ export default function TrigofyApp() {
     <div className="flex justify-center bg-zinc-200 min-h-screen font-sans">
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 text-zinc-900">
         <header className="p-6 flex justify-between items-center bg-white border-b">
-          <h1 className="text-2xl font-black italic text-yellow-500 uppercase">TRIGOFY</h1>
+          <h1 className="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           <button onClick={fazerLogoff} className="text-zinc-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
         </header>
         <main className="flex-1 overflow-y-auto p-5 pb-32">{renderContent()}</main>
