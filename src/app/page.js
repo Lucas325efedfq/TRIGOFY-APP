@@ -21,6 +21,12 @@ export default function TrigofyApp() {
   const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
+  // Estados para o Chat do Triger
+  const [mensagens, setMensagens] = useState([
+    { id: 1, texto: "Olá! Eu sou o Triger, seu suporte inteligente. Como posso te ajudar hoje?", bot: true }
+  ]);
+  const [inputChat, setInputChat] = useState('');
+
   // ==========================================================
   // 2. CADASTRO DE USUÁRIOS (LOGINS DO APP)
   // ==========================================================
@@ -107,7 +113,7 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
-  // 4. LÓGICA DE FORMULÁRIOS E LOGIN
+  // 4. LÓGICA DE FORMULÁRIOS, LOGIN E CHAT
   // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
@@ -131,6 +137,24 @@ export default function TrigofyApp() {
     } else {
       setErro('Usuário ou senha incorretos.');
     }
+  };
+
+  const enviarMensagemChat = (e) => {
+    e.preventDefault();
+    if (!inputChat.trim()) return;
+
+    const novaMensagemUsuario = { id: Date.now(), texto: inputChat, bot: false };
+    setMensagens(prev => [...prev, novaMensagemUsuario]);
+    setInputChat('');
+
+    setTimeout(() => {
+      const respostaBot = { 
+        id: Date.now() + 1, 
+        texto: "Entendi sua dúvida. Como sou um assistente em treinamento, ainda estou aprendendo sobre os processos da Trigofy. Você pode tentar verificar sua aba de pedidos!", 
+        bot: true 
+      };
+      setMensagens(prev => [...prev, respostaBot]);
+    }, 1000);
   };
 
   const fazerLogoff = () => {
@@ -162,7 +186,7 @@ export default function TrigofyApp() {
   }
 
   // ==========================================================
-  // 6. CONTEÚDO PRINCIPAL (ABAS DO APP)
+  // 6. CONTEÚDO PRINCIPAL (RENDERIZAÇÃO DE ABAS)
   // ==========================================================
   const renderContent = () => {
     switch (activeTab) {
@@ -171,7 +195,6 @@ export default function TrigofyApp() {
       case 'home':
         return (
           <div className="space-y-4 animate-in fade-in duration-500 pb-10">
-            {/* Boas-vindas ao Usuário */}
             <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 p-6 rounded-3xl text-zinc-900 shadow-lg flex items-center gap-4 border border-yellow-300">
               <div className="bg-white p-2 rounded-2xl shadow-inner w-16 h-16 flex items-center justify-center overflow-hidden">
                 <img src="/favicon.ico" alt="Logo" className="w-full h-full object-contain scale-125" />
@@ -219,16 +242,16 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300" size={20} />
               </div>
 
-              {/* BOTÃO: SUPORTE (ESCONDIDO PARA ADMIN) */}
+              {/* BOTÃO: SUPORTE AMARELO */}
               {usuarioInput.toLowerCase() !== 'admin' && (
-                <div className="bg-yellow-400 p-4 rounded-2xl shadow-md flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
+                <div onClick={() => setActiveTab('suporte')} className="bg-yellow-400 p-4 rounded-2xl shadow-md flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
                   <div className="bg-zinc-900 p-3 rounded-full text-yellow-400"><Megaphone size={20} /></div>
                   <div className="flex-1 font-bold text-zinc-900 uppercase text-sm">Suporte</div>
                   <ChevronRight className="text-zinc-800" size={20} />
                 </div>
               )}
 
-              {/* BOTÃO: PAINEL ADMIN (APARECE SÓ PARA O ADMIN) */}
+              {/* BOTÃO: PAINEL ADMIN */}
               {usuarioInput.toLowerCase() === 'admin' && (
                 <div onClick={() => setActiveTab('admin-painel')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-zinc-800">
                   <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><Plus size={20} /></div>
@@ -240,7 +263,44 @@ export default function TrigofyApp() {
           </div>
         );
 
-      // --- ABA: TELA DE NOVO PEDIDO ---
+      // ==========================================================
+      // 8. AGENTE DE I.A (SUPORTE TRIGER)
+      // ==========================================================
+      case 'suporte':
+        return (
+          <div className="animate-in slide-in-from-right duration-300 flex flex-col h-full max-h-[600px]">
+            <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2">← Voltar</button>
+            <div className="bg-white rounded-3xl shadow-sm border flex flex-col h-full overflow-hidden">
+              <div className="bg-zinc-900 p-4 flex items-center gap-3">
+                <div className="bg-yellow-400 p-2 rounded-full"><UserCircle className="text-zinc-900" size={20} /></div>
+                <span className="text-yellow-400 font-black uppercase text-xs italic">Agente Triger</span>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-zinc-50">
+                {mensagens.map(msg => (
+                  <div key={msg.id} className={`flex ${msg.bot ? 'justify-start' : 'justify-end'}`}>
+                    <div className={`max-w-[80%] p-3 rounded-2xl text-xs font-bold ${msg.bot ? 'bg-white text-zinc-800 border' : 'bg-yellow-400 text-zinc-900 shadow-sm'}`}>
+                      {msg.texto}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <form onSubmit={enviarMensagemChat} className="p-4 border-t bg-white flex gap-2">
+                <input 
+                  type="text" 
+                  placeholder="Sua dúvida..." 
+                  className="flex-1 bg-zinc-100 p-3 rounded-xl text-xs outline-none focus:ring-2 focus:ring-yellow-400"
+                  value={inputChat}
+                  onChange={(e) => setInputChat(e.target.value)}
+                />
+                <button type="submit" className="bg-zinc-900 text-yellow-400 p-3 rounded-xl"><Send size={18} /></button>
+              </form>
+            </div>
+          </div>
+        );
+
+      // --- ABA: TELA DE NOVO PEDIDO (FORMULÁRIO) ---
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300">
@@ -260,7 +320,7 @@ export default function TrigofyApp() {
           </div>
         );
 
-      // --- ABA: PAINEL DO ADMINISTRADOR ---
+      // --- ABA: PAINEL ADMINISTRATIVO ---
       case 'admin-painel':
         return (
           <div className="animate-in slide-in-from-right duration-300">
@@ -292,22 +352,19 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
-  // 7. ESTRUTURA VISUAL FIXA (HEADER E MENU DE BAIXO)
+  // 9. ESTRUTURA VISUAL FIXA (HEADER E MENU DE BAIXO)
   // ==========================================================
   return (
     <div className="flex justify-center bg-zinc-200 min-h-screen font-sans">
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 text-zinc-900">
         
-        {/* CABEÇALHO COM O NOME TRIGOFY */}
         <header className="p-6 flex justify-between items-center bg-white border-b">
           <h1 className="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           <button onClick={fazerLogoff} className="text-zinc-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
         </header>
 
-        {/* ÁREA ONDE O CONTEÚDO DAS ABAS É EXIBIDO */}
         <main className="flex-1 overflow-y-auto p-5 pb-32">{renderContent()}</main>
 
-        {/* BARRA DE NAVEGAÇÃO INFERIOR (ÍCONES) */}
         <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between rounded-full shadow-2xl border text-zinc-900">
           <button onClick={() => setActiveTab('home')} className={activeTab === 'home' ? 'text-yellow-500' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
           <button onClick={() => setActiveTab('pedidos')} className={activeTab === 'pedidos' ? 'text-yellow-500' : 'text-zinc-300'}><ShoppingBag size={22} /></button>
