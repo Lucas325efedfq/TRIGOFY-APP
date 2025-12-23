@@ -37,7 +37,7 @@ export default function TrigofyApp() {
   ];
 
   // ==========================================================
-  // 3. FUNÇÕES DE BANCO DE DADOS (AIRTABLE)
+  // 3. FUNÇÕES DE BANCO DE DADOS (COMUNICAÇÃO COM NUVEM)
   // ==========================================================
   const buscarDadosAirtable = async () => {
     setCarregando(true);
@@ -70,7 +70,7 @@ export default function TrigofyApp() {
 
   const salvarNoAirtable = async () => {
     if (!novoCpf || !novoNome || !novaAreaAdmin) {
-      alert("Por favor, preencha CPF, Nome e Área.");
+      alert("Por favor, preencha o CPF, o Nome e a Área.");
       return;
     }
     setCarregando(true);
@@ -85,7 +85,7 @@ export default function TrigofyApp() {
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
             nome: novoNome.toUpperCase().trim(),
-            area: novaAreaAdmin.trim()
+            area: novaAreaAdmin.trim() 
           }
         })
       });
@@ -116,7 +116,7 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
-  // 4. LÓGICA DE FORMULÁRIOS E LOGIN
+  // 4. LÓGICA DE FORMULÁRIOS, LOGIN E CHAT
   // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
@@ -141,6 +141,7 @@ export default function TrigofyApp() {
     const encontrou = usuariosAutorizados.find(
       (u) => u.usuario === usuarioInput.toLowerCase() && u.senha === senha
     );
+
     if (encontrou) {
       setEstaLogado(true);
       setErro('');
@@ -166,7 +167,7 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
-  // 5. TELAS
+  // 5. TELA DE LOGIN
   // ==========================================================
   if (!estaLogado) {
     return (
@@ -186,8 +187,12 @@ export default function TrigofyApp() {
     );
   }
 
+  // ==========================================================
+  // 6. CONTEÚDO PRINCIPAL (RENDERIZAÇÃO DE ABAS)
+  // ==========================================================
   const renderContent = () => {
     switch (activeTab) {
+      
       case 'home':
         return (
           <div className="space-y-4 animate-in fade-in duration-500 pb-10">
@@ -296,7 +301,7 @@ export default function TrigofyApp() {
               </div>
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área</label>
-                <input type="text" readOnly className="w-full p-4 border rounded-2xl font-bold bg-zinc-100 text-zinc-800" value={areaEncontrada || "Aguardando area..."} />
+                <input type="text" readOnly className="w-full p-4 border rounded-2xl font-bold bg-zinc-100 text-zinc-800" value={areaEncontrada || "Aguardando Área..."} />
               </div>
               <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black uppercase ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400'}`}>ENVIAR PEDIDO</button>
             </div>
@@ -334,13 +339,18 @@ export default function TrigofyApp() {
             </div>
           </div>
         );
-      default: return null;
+
+      default:
+        return null;
     }
   };
 
+  // ==========================================================
+  // 9. ESTRUTURA VISUAL FIXA (HEADER E MENU DE BAIXO)
+  // ==========================================================
   return (
     <div className="flex justify-center bg-zinc-200 min-h-screen font-sans text-zinc-900">
-      <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900">
+      <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 text-zinc-900">
         <header className="p-6 flex justify-between items-center bg-white border-b">
           <h1 className="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           <button onClick={fazerLogoff} className="text-zinc-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
