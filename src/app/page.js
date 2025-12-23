@@ -51,15 +51,18 @@ export default function TrigofyApp() {
       const data = await response.json();
       if (data.records) {
         const formatado = data.records.map(reg => {
-          let areaRaw = (reg.fields.area || '').trim().toLowerCase();
+          let areaRaw = (reg.fields.area || '').trim();
           
-          // TRAVA DE EXIBIÇÃO: Corrige termos errados vindos da nuvem
-          if (areaRaw === "suplementos" || areaRaw === "acessorios" || areaRaw === "suprimento") areaRaw = "Suprimentos";
-          else if (areaRaw === "painel" || areaRaw === "painal") areaRaw = "Pane";
-          else if (areaRaw === "central de medidas" || areaRaw === "centra de medidas") areaRaw = "Cozinha Central";
-          else {
-            areaRaw = areaRaw.charAt(0).toUpperCase() + areaRaw.slice(1);
+          // --- TRAVA DE CORREÇÃO FORÇADA ---
+          const check = areaRaw.toLowerCase();
+          if (check === "suplementos" || check === "acessorios" || check === "suplemento") {
+            areaRaw = "Suprimentos";
+          } else if (check === "painel" || check === "painal") {
+            areaRaw = "Pane";
+          } else if (check === "central de medidas" || check === "centra de medidas") {
+            areaRaw = "Cozinha Central";
           }
+          // ---------------------------------
 
           return {
             id: reg.id,
@@ -86,13 +89,6 @@ export default function TrigofyApp() {
       return;
     }
     setCarregando(true);
-    
-    // Normalização antes do envio para evitar que salve errado
-    let areaFinal = novaAreaAdmin.trim();
-    const areaCheck = areaFinal.toLowerCase();
-    if (areaCheck === "suplementos" || areaCheck === "acessorios") areaFinal = "Suprimentos";
-    if (areaCheck === "painel" || areaCheck === "painal") areaFinal = "Pane";
-
     try {
       const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
         method: 'POST',
@@ -104,7 +100,7 @@ export default function TrigofyApp() {
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
             nome: novoNome.toUpperCase().trim(),
-            area: areaFinal
+            area: novaAreaAdmin.trim() 
           }
         })
       });
@@ -364,6 +360,9 @@ export default function TrigofyApp() {
     }
   };
 
+  // ==========================================================
+  // 9. ESTRUTURA VISUAL FIXA (HEADER E MENU DE BAIXO)
+  // ==========================================================
   return (
     <div className="flex justify-center bg-zinc-200 min-h-screen font-sans text-zinc-900">
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 text-zinc-900">
