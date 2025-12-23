@@ -53,10 +53,11 @@ export default function TrigofyApp() {
         const formatado = data.records.map(reg => {
           let areaRaw = reg.fields.area || '';
           
-          // CORREÇÃO DE ERRO DE EXIBIÇÃO:
+          // --- BLOCO DE CORREÇÃO DE ERROS DE DIGITAÇÃO/BANCO ---
           if (areaRaw.trim().toLowerCase() === "suplementos") areaRaw = "Suprimentos";
           if (areaRaw.trim().toLowerCase() === "painal") areaRaw = "Pane";
           if (areaRaw.trim().toLowerCase() === "centra de medidas") areaRaw = "Cozinha Central";
+          // ---------------------------------------------------
 
           return {
             id: reg.id,
