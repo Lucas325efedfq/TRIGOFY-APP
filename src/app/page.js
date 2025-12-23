@@ -117,7 +117,7 @@ export default function TrigofyApp() {
   // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
-  const [areaSelecionada, setAreaSelecionada] = useState(''); // Nova área
+  const [areaSelecionada, setAreaSelecionada] = useState(''); 
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
 
@@ -305,7 +305,6 @@ export default function TrigofyApp() {
           </div>
         );
 
-      // --- ABA: TELA DE NOVO PEDIDO (ONDE FOI ADICIONADO O MENU DE ÁREA) ---
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300">
@@ -323,7 +322,6 @@ export default function TrigofyApp() {
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${nomeEncontrado ? 'bg-yellow-50 text-zinc-800' : 'bg-zinc-100 text-zinc-400'}`} value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
 
-              {/* MENU DINÂMICO DE ÁREA */}
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Qual sua área?</label>
                 <select 
