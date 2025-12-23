@@ -279,7 +279,10 @@ export default function TrigofyApp() {
             <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2">← Voltar</button>
             <div className="bg-white rounded-3xl shadow-sm border flex flex-col h-full overflow-hidden">
               <div className="bg-zinc-900 p-4 flex items-center gap-3">
-                <div className="bg-yellow-400 p-2 rounded-full"><UserCircle className="text-zinc-900" size={20} /></div>
+                {/* AQUI ESTÁ A FOTO DO TRIGER COM MÃOS E PÉS */}
+                <div className="bg-yellow-400 w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
+                  <img src="/triger.png" alt="Triger" className="w-full h-full object-cover" />
+                </div>
                 <span className="text-yellow-400 font-black uppercase text-xs italic">Agente Triger</span>
               </div>
               
