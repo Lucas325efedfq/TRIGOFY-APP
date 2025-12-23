@@ -69,10 +69,12 @@ export default function TrigofyApp() {
   }, []);
 
   const salvarNoAirtable = async () => {
+    // Verifica se os campos estão preenchidos antes de tentar salvar
     if (!novoCpf || !novoNome || !novaAreaAdmin) {
-      alert("Por favor, preencha o CPF, o Nome e a Área.");
+      alert("Erro: Preencha CPF, Nome e Área antes de salvar.");
       return;
     }
+
     setCarregando(true);
     try {
       const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
@@ -85,19 +87,24 @@ export default function TrigofyApp() {
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
             nome: novoNome.toUpperCase().trim(),
-            area: novaAreaAdmin.trim() // Salva o texto que você digitar
+            area: novaAreaAdmin.trim() // Envia o texto digitado para a coluna area
           }
         })
       });
+
       if (response.ok) {
         setNovoCpf('');
         setNovoNome('');
         setNovaAreaAdmin('');
-        await buscarDadosAirtable();
-        alert("✅ Cadastrado com sucesso na Nuvem!");
+        await buscarDadosAirtable(); // Atualiza a lista abaixo
+        alert("✅ Cadastrado com sucesso no Airtable!");
+      } else {
+        const errorData = await response.json();
+        console.error("Erro Airtable:", errorData);
+        alert("Erro ao salvar no Airtable. Verifique se o nome da coluna é 'area' (minúsculo).");
       }
     } catch (e) {
-      alert("Erro ao salvar.");
+      alert("Erro de conexão ao salvar.");
     }
     setCarregando(false);
   };
@@ -123,7 +130,7 @@ export default function TrigofyApp() {
   const [areaEncontrada, setAreaEncontrada] = useState('');
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
-  const [novaAreaAdmin, setNovaAreaAdmin] = useState(''); // Estado para o campo de texto da área
+  const [novaAreaAdmin, setNovaAreaAdmin] = useState(''); 
 
   useEffect(() => {
     const pessoa = pessoasCadastradas.find(p => p.cpf === cpfDigitado.replace(/\D/g, ''));
@@ -157,7 +164,7 @@ export default function TrigofyApp() {
     setMensagens(prev => [...prev, novaMensagemUsuario]);
     setInputChat('');
     setTimeout(() => {
-      setMensagens(prev => [...prev, { id: Date.now() + 1, texto: "Entendi! Sou o Triger e estou aqui para ajudar.", bot: true }]);
+      setMensagens(prev => [...prev, { id: Date.now() + 1, texto: "Olá! Sou o Triger. Como posso ajudar?", bot: true }]);
     }, 800);
   };
 
@@ -169,7 +176,7 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
-  // 5. TELAS E RENDERIZAÇÃO
+  // 5. TELAS (LOGIN E CONTEÚDO)
   // ==========================================================
   if (!estaLogado) {
     return (
@@ -205,11 +212,6 @@ export default function TrigofyApp() {
             </div>
             <h3 className="text-zinc-800 font-extrabold text-lg px-2 mt-6 uppercase italic tracking-tighter">Ações Rápidas</h3>
             <div className="space-y-3">
-              <div onClick={() => setActiveTab('pedidos')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
-                <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><ShoppingBag size={20} /></div>
-                <div className="flex-1 font-bold text-zinc-800 uppercase text-sm">Meus Pedidos</div>
-                <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
-              </div>
               <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50">
                 <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                   <img src="/pizza.png" alt="Novo" className="w-full h-full object-contain" />
@@ -217,13 +219,6 @@ export default function TrigofyApp() {
                 <div className="flex-1 font-bold text-zinc-800 uppercase text-sm">Produtos Disponiveis para compras</div>
                 <ChevronRight className="text-zinc-300" size={20} />
               </div>
-              {usuarioInput.toLowerCase() !== 'admin' && (
-                <div onClick={() => setActiveTab('suporte')} className="bg-yellow-400 p-4 rounded-2xl shadow-md flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
-                  <div className="bg-zinc-900 p-3 rounded-full text-yellow-400"><Megaphone size={20} /></div>
-                  <div className="flex-1 font-bold text-zinc-900 uppercase text-sm">Suporte</div>
-                  <ChevronRight className="text-zinc-800" size={20} />
-                </div>
-              )}
               {usuarioInput.toLowerCase() === 'admin' && (
                 <div onClick={() => setActiveTab('admin-painel')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-zinc-800">
                   <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><Plus size={20} /></div>
@@ -231,34 +226,6 @@ export default function TrigofyApp() {
                   <ChevronRight className="text-zinc-600" size={20} />
                 </div>
               )}
-            </div>
-          </div>
-        );
-
-      case 'suporte':
-        return (
-          <div className="animate-in slide-in-from-right duration-300 flex flex-col h-full max-h-[600px]">
-            <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2">← Voltar</button>
-            <div className="bg-white rounded-3xl shadow-sm border flex flex-col h-full overflow-hidden">
-              <div className="bg-zinc-900 p-4 flex items-center gap-3">
-                <div className="bg-yellow-400 w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
-                  <img src="/triger.png" alt="Triger" className="w-full h-full object-cover" />
-                </div>
-                <span className="text-yellow-400 font-black uppercase text-xs italic">Agente Triger</span>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-zinc-50">
-                {mensagens.map(msg => (
-                  <div key={msg.id} className={`flex ${msg.bot ? 'justify-start' : 'justify-end'}`}>
-                    <div className={`max-w-[80%] p-3 rounded-2xl text-xs font-bold ${msg.bot ? 'bg-white text-zinc-800 border' : 'bg-yellow-400 text-zinc-900 shadow-sm'}`}>
-                      {msg.texto}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <form onSubmit={enviarMensagemChat} className="p-4 border-t bg-white flex gap-2">
-                <input type="text" placeholder="Sua dúvida..." className="flex-1 bg-zinc-100 p-3 rounded-xl text-xs outline-none focus:ring-2 focus:ring-yellow-400" value={inputChat} onChange={(e) => setInputChat(e.target.value)} />
-                <button type="submit" className="bg-zinc-900 text-yellow-400 p-3 rounded-xl"><Send size={18} /></button>
-              </form>
             </div>
           </div>
         );
@@ -275,11 +242,11 @@ export default function TrigofyApp() {
               </div>
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Seu Nome</label>
-                <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${nomeEncontrado ? 'bg-yellow-50 text-zinc-800' : 'bg-zinc-100 text-zinc-400'}`} value={nomeEncontrado || "Aguardando CPF..."} />
+                <input type="text" readOnly className="w-full p-4 border rounded-2xl font-bold bg-zinc-100 text-zinc-800" value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área</label>
-                <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${areaEncontrada ? 'bg-yellow-50 text-zinc-800' : 'bg-zinc-100 text-zinc-400'}`} value={areaEncontrada || "Aguardando CPF..."} />
+                <input type="text" readOnly className="w-full p-4 border rounded-2xl font-bold bg-zinc-100 text-zinc-800" value={areaEncontrada || "Aguardando CPF..."} />
               </div>
               <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black uppercase ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400'}`}>ENVIAR PEDIDO</button>
             </div>
@@ -290,34 +257,29 @@ export default function TrigofyApp() {
         return (
           <div className="animate-in slide-in-from-right duration-300">
             <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2">← Voltar</button>
-            <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4">
+            <div className="bg-white p-6 rounded-3xl border shadow-sm space-y-4 text-zinc-900">
               <h2 className="text-lg font-bold uppercase italic border-b pb-2">Cadastrar na Nuvem</h2>
               <input type="text" placeholder="CPF" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
               <input type="text" placeholder="Nome Completo" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
+              <input type="text" placeholder="Área" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novaAreaAdmin} onChange={(e) => setNovaAreaAdmin(e.target.value)} />
               
-              {/* CAMPO DE TEXTO LIVRE PARA VOCÊ DIGITAR A ÁREA */}
-              <input 
-                type="text" 
-                placeholder="Área (Ex: Suprimentos, TI, Pane...)" 
-                className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" 
-                value={novaAreaAdmin} 
-                onChange={(e) => setNovaAreaAdmin(e.target.value)} 
-              />
-
-              <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm">
+              <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm shadow-md">
                 {carregando ? "Salvando..." : "Salvar no Airtable"}
               </button>
+              
               <div className="pt-4 space-y-2">
                 <h3 className="text-xs font-black text-zinc-400 uppercase">Lista Sincronizada</h3>
-                {pessoasCadastradas.map(p => (
-                  <div key={p.id} className="flex justify-between items-center p-3 bg-zinc-50 rounded-xl border">
-                    <div>
-                      <p className="font-bold text-xs text-zinc-800">{p.nome}</p>
-                      <p className="text-[10px] text-zinc-400">{p.cpf} - <span className="text-yellow-600 font-bold">{p.area}</span></p>
+                <div className="max-h-[300px] overflow-y-auto space-y-2">
+                  {pessoasCadastradas.map(p => (
+                    <div key={p.id} className="flex justify-between items-center p-3 bg-zinc-50 rounded-xl border">
+                      <div>
+                        <p className="font-bold text-xs text-zinc-800">{p.nome}</p>
+                        <p className="text-[10px] text-zinc-400">{p.cpf} - <span className="text-yellow-600 font-bold">{p.area}</span></p>
+                      </div>
+                      <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2"><Trash2 size={16}/></button>
                     </div>
-                    <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2"><Trash2 size={16}/></button>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -334,9 +296,8 @@ export default function TrigofyApp() {
           <button onClick={fazerLogoff} className="text-zinc-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
         </header>
         <main className="flex-1 overflow-y-auto p-5 pb-32">{renderContent()}</main>
-        <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between rounded-full shadow-2xl border">
+        <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between rounded-full shadow-2xl border text-zinc-900">
           <button onClick={() => setActiveTab('home')} className={activeTab === 'home' ? 'text-yellow-500' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
-          <button onClick={() => setActiveTab('pedidos')} className={activeTab === 'pedidos' ? 'text-yellow-500' : 'text-zinc-300'}><ShoppingBag size={22} /></button>
           <button onClick={() => setActiveTab('novo')} className={activeTab === 'novo' ? 'text-yellow-500' : 'text-zinc-300'}><ClipboardList size={22} /></button>
         </nav>
       </div>
