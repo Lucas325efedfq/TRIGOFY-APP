@@ -53,7 +53,8 @@ export default function TrigofyApp() {
         const formatado = data.records.map(reg => ({
           id: reg.id,
           cpf: reg.fields.cpf || '',
-          nome: reg.fields.nome || ''
+          nome: reg.fields.nome || '',
+          area: reg.fields.area || '' // Puxa a área da coluna criada no Airtable
         }));
         setPessoasCadastradas(formatado);
       }
@@ -68,8 +69,8 @@ export default function TrigofyApp() {
   }, []);
 
   const salvarNoAirtable = async () => {
-    if (!novoCpf || !novoNome) {
-      alert("Por favor, preencha o CPF e o Nome Completo.");
+    if (!novoCpf || !novoNome || !novaAreaAdmin) {
+      alert("Por favor, preencha o CPF, Nome e selecione a Área.");
       return;
     }
     setCarregando(true);
@@ -83,13 +84,15 @@ export default function TrigofyApp() {
         body: JSON.stringify({
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
-            nome: novoNome.toUpperCase().trim()
+            nome: novoNome.toUpperCase().trim(),
+            area: novaAreaAdmin // Envia a área para a nova coluna
           }
         })
       });
       if (response.ok) {
         setNovoCpf('');
         setNovoNome('');
+        setNovaAreaAdmin('');
         await buscarDadosAirtable();
         alert("✅ Cadastrado com sucesso na Nuvem!");
       }
@@ -117,12 +120,20 @@ export default function TrigofyApp() {
   // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
+  const [areaEncontrada, setAreaEncontrada] = useState(''); // Estado para área automática
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
+  const [novaAreaAdmin, setNovaAreaAdmin] = useState(''); // Estado para área no admin
 
   useEffect(() => {
     const pessoa = pessoasCadastradas.find(p => p.cpf === cpfDigitado.replace(/\D/g, ''));
-    setNomeEncontrado(pessoa ? pessoa.nome : '');
+    if (pessoa) {
+      setNomeEncontrado(pessoa.nome);
+      setAreaEncontrada(pessoa.area);
+    } else {
+      setNomeEncontrado('');
+      setAreaEncontrada('');
+    }
   }, [cpfDigitado, pessoasCadastradas]);
 
   const lidarComLogin = (e) => {
@@ -161,13 +172,8 @@ export default function TrigofyApp() {
 
   const responderComoTriger = (pergunta) => {
     const p = pergunta.toLowerCase();
-    
-    if (p.includes("ola") || p.includes("oi")) return "Olá! Sou o Triger. Como posso ajudar nas suas compras hoje?";
-    if (p.includes("pedido") || p.includes("comprar")) return "Para comprar, use o botão 'Produtos Disponiveis para compras' na tela inicial.";
-    if (p.includes("cpf") || p.includes("cadastro")) return "O cadastro de pessoas é feito apenas pelo Admin. Peça para ele incluir o CPF no sistema.";
-    if (p.includes("rio") || p.includes("sp")) return "As solicitações de Rio/SP têm uma aba específica no menu de Ações Rápidas.";
-    
-    return "Entendi! Ainda estou aprendendo sobre esse assunto. Pode perguntar sobre pedidos, cadastros ou suporte técnico.";
+    if (p.includes("ola") || p.includes("oi")) return "Olá! Sou o Triger. Como posso ajudar hoje?";
+    return "Entendi! Ainda estou aprendendo sobre esse assunto.";
   };
 
   const fazerLogoff = () => {
@@ -296,6 +302,7 @@ export default function TrigofyApp() {
           </div>
         );
 
+      // --- ABA: TELA DE NOVO PEDIDO (BUSCA AUTOMÁTICA DE NOME E ÁREA) ---
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300">
@@ -303,18 +310,23 @@ export default function TrigofyApp() {
             <div className="bg-white p-6 rounded-3xl shadow-sm border space-y-5">
               <h2 className="text-lg font-bold text-zinc-800 uppercase italic border-b pb-2">Novo Pedido</h2>
               <div>
-                <label className="text-[10px] font-black text-zinc-400 uppercase">Digite o CPF</label>
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Digite seu CPF</label>
                 <input type="text" placeholder="Apenas números" maxLength={11} className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
               </div>
               <div>
-                <label className="text-[10px] font-black text-zinc-400 uppercase">Nome do Solicitante</label>
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Seu Nome</label>
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${nomeEncontrado ? 'bg-yellow-50 text-zinc-800' : 'bg-zinc-100 text-zinc-400'}`} value={nomeEncontrado || "Aguardando CPF..."} />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área</label>
+                <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${areaEncontrada ? 'bg-yellow-50 text-zinc-800' : 'bg-zinc-100 text-zinc-400'}`} value={areaEncontrada || "Aguardando CPF..."} />
               </div>
               <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black uppercase ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400'}`}>ENVIAR PEDIDO</button>
             </div>
           </div>
         );
 
+      // --- ABA: PAINEL ADMIN (ONDE VOCÊ CADASTRA A ÁREA) ---
       case 'admin-painel':
         return (
           <div className="animate-in slide-in-from-right duration-300">
@@ -323,6 +335,28 @@ export default function TrigofyApp() {
               <h2 className="text-lg font-bold uppercase italic border-b pb-2">Cadastrar na Nuvem</h2>
               <input type="text" placeholder="CPF" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
               <input type="text" placeholder="Nome Completo" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
+              
+              <select className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none font-bold text-zinc-800" value={novaAreaAdmin} onChange={(e) => setNovaAreaAdmin(e.target.value)}>
+                  <option value="">Selecione a área dele...</option>
+                  <option value="Lasagna">Lasagna</option>
+                  <option value="Pesagem">Pesagem</option>
+                  <option value="Cozinha Central">Cozinha Central</option>
+                  <option value="Pane">Pane</option>
+                  <option value="Massa">Massa</option>
+                  <option value="Molho">Molho</option>
+                  <option value="Qualidade">Qualidade</option>
+                  <option value="P&D">P&D</option>
+                  <option value="Estoque">Estoque</option>
+                  <option value="Manutenção">Manutenção</option>
+                  <option value="Suprimentos">Suprimentos</option>
+                  <option value="TI">TI</option>
+                  <option value="Higienização">Higienização</option>
+                  <option value="G&G">G&G</option>
+                  <option value="Meio Ambiente">Meio Ambiente</option>
+                  <option value="Apontamento">Apontamento</option>
+                  <option value="Produção">Produção</option>
+              </select>
+
               <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm">
                 {carregando ? "Salvando..." : "Salvar no Airtable"}
               </button>
@@ -331,7 +365,10 @@ export default function TrigofyApp() {
                 <h3 className="text-xs font-black text-zinc-400 uppercase">Lista Sincronizada</h3>
                 {pessoasCadastradas.map(p => (
                   <div key={p.id} className="flex justify-between items-center p-3 bg-zinc-50 rounded-xl border">
-                    <div><p className="font-bold text-xs text-zinc-800">{p.nome}</p><p className="text-[10px] text-zinc-400">{p.cpf}</p></div>
+                    <div>
+                      <p className="font-bold text-xs text-zinc-800">{p.nome}</p>
+                      <p className="text-[10px] text-zinc-400">{p.cpf} - <span className="text-yellow-600 font-bold">{p.area}</span></p>
+                    </div>
                     <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2"><Trash2 size={16}/></button>
                   </div>
                 ))}
@@ -345,21 +382,15 @@ export default function TrigofyApp() {
     }
   };
 
-  // ==========================================================
-  // 9. ESTRUTURA VISUAL FIXA (HEADER E MENU DE BAIXO)
-  // ==========================================================
   return (
     <div className="flex justify-center bg-zinc-200 min-h-screen font-sans text-zinc-900">
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900">
-        
         <header className="p-6 flex justify-between items-center bg-white border-b">
           <h1 className="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           <button onClick={fazerLogoff} className="text-zinc-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
         </header>
-
         <main className="flex-1 overflow-y-auto p-5 pb-32">{renderContent()}</main>
-
-        <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between rounded-full shadow-2xl border">
+        <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between rounded-full shadow-2xl border text-zinc-900">
           <button onClick={() => setActiveTab('home')} className={activeTab === 'home' ? 'text-yellow-500' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
           <button onClick={() => setActiveTab('pedidos')} className={activeTab === 'pedidos' ? 'text-yellow-500' : 'text-zinc-300'}><ShoppingBag size={22} /></button>
           <button onClick={() => setActiveTab('catalogo')} className={activeTab === 'catalogo' ? 'text-yellow-500' : 'text-zinc-300'}><BookOpen size={22} /></button>
