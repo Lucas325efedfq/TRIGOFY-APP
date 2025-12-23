@@ -322,6 +322,7 @@ export default function TrigofyApp() {
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${nomeEncontrado ? 'bg-yellow-50 text-zinc-800' : 'bg-zinc-100 text-zinc-400'}`} value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
 
+              {/* LISTA DE ÁREAS EXATA CONFORME SOLICITADO */}
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Qual sua área?</label>
                 <select 
