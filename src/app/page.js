@@ -145,16 +145,29 @@ export default function TrigofyApp() {
 
     const novaMensagemUsuario = { id: Date.now(), texto: inputChat, bot: false };
     setMensagens(prev => [...prev, novaMensagemUsuario]);
+    
+    const textoPergunta = inputChat;
     setInputChat('');
 
     setTimeout(() => {
       const respostaBot = { 
         id: Date.now() + 1, 
-        texto: "Entendi sua dúvida. Como sou um assistente em treinamento, ainda estou aprendendo sobre os processos da Trigofy. Você pode tentar verificar sua aba de pedidos!", 
+        texto: responderComoTriger(textoPergunta), 
         bot: true 
       };
       setMensagens(prev => [...prev, respostaBot]);
-    }, 1000);
+    }, 800);
+  };
+
+  const responderComoTriger = (pergunta) => {
+    const p = pergunta.toLowerCase();
+    
+    if (p.includes("ola") || p.includes("oi")) return "Olá! Sou o Triger. Como posso ajudar nas suas compras hoje?";
+    if (p.includes("pedido") || p.includes("comprar")) return "Para comprar, use o botão 'Produtos Disponiveis para compras' na tela inicial.";
+    if (p.includes("cpf") || p.includes("cadastro")) return "O cadastro de pessoas é feito apenas pelo Admin. Peça para ele incluir o CPF no sistema.";
+    if (p.includes("rio") || p.includes("sp")) return "As solicitações de Rio/SP têm uma aba específica no menu de Ações Rápidas.";
+    
+    return "Entendi! Ainda estou aprendendo sobre esse assunto. Pode perguntar sobre pedidos, cadastros ou suporte técnico.";
   };
 
   const fazerLogoff = () => {
@@ -208,14 +221,12 @@ export default function TrigofyApp() {
             <h3 className="text-zinc-800 font-extrabold text-lg px-2 mt-6 uppercase italic tracking-tighter">Ações Rápidas</h3>
             <div className="space-y-3">
               
-              {/* BOTÃO: MEUS PEDIDOS */}
               <div onClick={() => setActiveTab('pedidos')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><ShoppingBag size={20} /></div>
                 <div className="flex-1 font-bold text-zinc-800 uppercase text-sm">Meus Pedidos</div>
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
-              {/* BOTÃO: SOLICITAÇÕES DE DOAÇÕES */}
               <div onClick={() => setActiveTab('catalogo')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50">
                 <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                   <img src="/doacao.png" alt="Doação" className="w-full h-full object-contain" />
@@ -224,7 +235,6 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300" size={20} />
               </div>
 
-              {/* BOTÃO: SOLICITAÇÕES RIO/SP */}
               <div onClick={() => setActiveTab('rio-sp')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50">
                 <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                   <img src="/cesta.png" alt="Cesta" className="w-full h-full object-contain" />
@@ -233,7 +243,6 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300" size={20} />
               </div>
 
-              {/* BOTÃO: NOVO PEDIDO */}
               <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50">
                 <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                   <img src="/pizza.png" alt="Novo" className="w-full h-full object-contain" />
@@ -242,7 +251,6 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300" size={20} />
               </div>
 
-              {/* BOTÃO: SUPORTE AMARELO */}
               {usuarioInput.toLowerCase() !== 'admin' && (
                 <div onClick={() => setActiveTab('suporte')} className="bg-yellow-400 p-4 rounded-2xl shadow-md flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
                   <div className="bg-zinc-900 p-3 rounded-full text-yellow-400"><Megaphone size={20} /></div>
@@ -251,7 +259,6 @@ export default function TrigofyApp() {
                 </div>
               )}
 
-              {/* BOTÃO: PAINEL ADMIN */}
               {usuarioInput.toLowerCase() === 'admin' && (
                 <div onClick={() => setActiveTab('admin-painel')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-zinc-800">
                   <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><Plus size={20} /></div>
@@ -300,7 +307,6 @@ export default function TrigofyApp() {
           </div>
         );
 
-      // --- ABA: TELA DE NOVO PEDIDO (FORMULÁRIO) ---
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300">
@@ -320,7 +326,6 @@ export default function TrigofyApp() {
           </div>
         );
 
-      // --- ABA: PAINEL ADMINISTRATIVO ---
       case 'admin-painel':
         return (
           <div className="animate-in slide-in-from-right duration-300">
@@ -355,8 +360,8 @@ export default function TrigofyApp() {
   // 9. ESTRUTURA VISUAL FIXA (HEADER E MENU DE BAIXO)
   // ==========================================================
   return (
-    <div className="flex justify-center bg-zinc-200 min-h-screen font-sans">
-      <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 text-zinc-900">
+    <div className="flex justify-center bg-zinc-200 min-h-screen font-sans text-zinc-900">
+      <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900">
         
         <header className="p-6 flex justify-between items-center bg-white border-b">
           <h1 className="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
@@ -365,7 +370,7 @@ export default function TrigofyApp() {
 
         <main className="flex-1 overflow-y-auto p-5 pb-32">{renderContent()}</main>
 
-        <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between rounded-full shadow-2xl border text-zinc-900">
+        <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between rounded-full shadow-2xl border">
           <button onClick={() => setActiveTab('home')} className={activeTab === 'home' ? 'text-yellow-500' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
           <button onClick={() => setActiveTab('pedidos')} className={activeTab === 'pedidos' ? 'text-yellow-500' : 'text-zinc-300'}><ShoppingBag size={22} /></button>
           <button onClick={() => setActiveTab('catalogo')} className={activeTab === 'catalogo' ? 'text-yellow-500' : 'text-zinc-300'}><BookOpen size={22} /></button>
