@@ -331,23 +331,23 @@ export default function TrigofyApp() {
                   onChange={(e) => setAreaSelecionada(e.target.value)}
                 >
                   <option value="">Selecione sua área...</option>
-                  <option value="Lasagna">Lasagna</option>
-                  <option value="Pesagem">Pesagem</option>
-                  <option value="Cozinha Central">Cozinha Central</option>
-                  <option value="Pane">Pane</option>
-                  <option value="Massa">Massa</option>
-                  <option value="Molho">Molho</option>
-                  <option value="Qualidade">Qualidade</option>
-                  <option value="P&D">P&D</option>
-                  <option value="Estoque">Estoque</option>
-                  <option value="Manutenção">Manutenção</option>
-                  <option value="Suprimentos">Suprimentos</option>
-                  <option value="TI">TI</option>
-                  <option value="Higienização">Higienização</option>
-                  <option value="G&G">G&G</option>
-                  <option value="Meio Ambiente">Meio Ambiente</option>
-                  <option value="Apontamento">Apontamento</option>
-                  <option value="Produção">Produção</option>
+<option value="Lasagna">Lasagna</option>
+<option value="Pesagem">Pesagem</option>
+<option value="Cozinha Central">Cozinha Central</option>
+<option value="Pane">Pane</option>
+<option value="Massa">Massa</option>
+<option value="Molho">Molho</option>
+<option value="Qualidade">Qualidade</option>
+<option value="P&D">P&D</option>
+<option value="Estoque">Estoque</option>
+<option value="Manutenção">Manutenção</option>
+<option value="Suprimentos">Suprimentos</option>
+<option value="TI">TI</option>
+<option value="Higienização">Higienização</option>
+<option value="G&G">G&G</option>
+<option value="Meio Ambiente">Meio Ambiente</option>
+<option value="Apontamento">Apontamento</option>
+<option value="Produção">Produção</option>
                 </select>
               </div>
 
