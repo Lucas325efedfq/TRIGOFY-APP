@@ -39,6 +39,17 @@ export default function TrigofyApp() {
   // ==========================================================
   // 3. FUNÇÕES DE BANCO DE DADOS (COMUNICAÇÃO COM NUVEM)
   // ==========================================================
+  
+  // FUNÇÃO DE NORMALIZAÇÃO PARA IMPEDIR ERROS DE TEXTO
+  const normalizarArea = (texto) => {
+    if (!texto) return "";
+    const t = texto.trim().toLowerCase();
+    if (t === "suplementos" || t === "acessorios" || t === "suplemento") return "Suprimentos";
+    if (t === "painel" || t === "painal") return "Pane";
+    if (t === "central de medidas" || t === "centra de medidas") return "Cozinha Central";
+    return texto;
+  };
+
   const buscarDadosAirtable = async () => {
     setCarregando(true);
     try {
@@ -54,14 +65,7 @@ export default function TrigofyApp() {
           let areaRaw = (reg.fields.area || '').trim();
           
           // --- TRAVA DE CORREÇÃO FORÇADA ---
-          const check = areaRaw.toLowerCase();
-          if (check === "suplementos" || check === "acessorios" || check === "suplemento") {
-            areaRaw = "Suprimentos";
-          } else if (check === "painel" || check === "painal") {
-            areaRaw = "Pane";
-          } else if (check === "central de medidas" || check === "centra de medidas") {
-            areaRaw = "Cozinha Central";
-          }
+          areaRaw = normalizarArea(areaRaw);
           // ---------------------------------
 
           return {
@@ -100,7 +104,7 @@ export default function TrigofyApp() {
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
             nome: novoNome.toUpperCase().trim(),
-            area: novaAreaAdmin.trim() 
+            area: normalizarArea(novaAreaAdmin) // Salva já corrigido
           }
         })
       });
@@ -140,20 +144,11 @@ export default function TrigofyApp() {
   const [novoNome, setNovoNome] = useState('');
   const [novaAreaAdmin, setNovaAreaAdmin] = useState('');
 
-  // SOLUÇÃO ADICIONADA: Filtro de Saída em Tempo Real (Blindagem)
-  const renderizarAreaCorreta = (area) => {
-    if (!area) return "Aguardando Área...";
-    const check = area.trim().toLowerCase();
-    if (check === "suplementos" || check === "acessorios" || check === "suplemento") return "Suprimentos";
-    if (check === "painel" || check === "painal") return "Pane";
-    return area;
-  };
-
   useEffect(() => {
     const pessoa = pessoasCadastradas.find(p => p.cpf === cpfDigitado.replace(/\D/g, ''));
     if (pessoa) {
       setNomeEncontrado(pessoa.nome);
-      setAreaEncontrada(pessoa.area);
+      setAreaEncontrada(normalizarArea(pessoa.area));
     } else {
       setNomeEncontrado('');
       setAreaEncontrada('');
@@ -325,7 +320,7 @@ export default function TrigofyApp() {
               </div>
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área</label>
-                <input type="text" readOnly className="w-full p-4 border rounded-2xl font-bold bg-zinc-100 text-zinc-800" value={renderizarAreaCorreta(areaEncontrada)} />
+                <input type="text" readOnly className="w-full p-4 border rounded-2xl font-bold bg-zinc-100 text-zinc-800" value={normalizarArea(areaEncontrada) || "Aguardando Área..."} />
               </div>
               <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black uppercase ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400'}`}>ENVIAR PEDIDO</button>
             </div>
