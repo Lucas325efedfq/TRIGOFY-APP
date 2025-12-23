@@ -5,7 +5,9 @@ import {
   Lock, UserCircle, LogOut, BookOpen, Plus, Trash2, Megaphone, History
 } from 'lucide-react';
 
-// --- CONFIGURAÇÃO DO AIRTABLE (NUVEM) ---
+// ==========================================================
+// 1. CONFIGURAÇÕES DE CONEXÃO (AIRTABLE)
+// ==========================================================
 const AIRTABLE_TOKEN = 'patSTombPP4bmw0AK.43e89e93f885283e025cc1c7636c3af9053c953ca812746652c883757c25cd9a';
 const BASE_ID = 'appj9MPXg5rVQf3zK';
 const TABLE_ID = 'tblcgAQwSPe8NcvRN';
@@ -19,14 +21,18 @@ export default function TrigofyApp() {
   const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
-  // --- CONTROLE DE LOGINS (CADASTRO DE USUÁRIOS DO APP) ---
+  // ==========================================================
+  // 2. CADASTRO DE USUÁRIOS (LOGINS DO APP)
+  // ==========================================================
   const usuariosAutorizados = [
     { usuario: 'admin', senha: 'T!$&gur001' },
     { usuario: 'lucas.vieira', senha: '123' },
-    { usuario: 'lucas.lopes', senha: '456'  }, // Alterado de joao.pato para lucas.lopes
+    { usuario: 'lucas.lopes', senha: '456'  },
   ];
 
-  // --- FUNÇÕES DO BANCO DE DADOS (AIRTABLE) ---
+  // ==========================================================
+  // 3. FUNÇÕES DE BANCO DE DADOS (COMUNICAÇÃO COM NUVEM)
+  // ==========================================================
   const buscarDadosAirtable = async () => {
     setCarregando(true);
     try {
@@ -100,7 +106,9 @@ export default function TrigofyApp() {
     }
   };
 
-  // --- LÓGICA DE FORMULÁRIOS ---
+  // ==========================================================
+  // 4. LÓGICA DE FORMULÁRIOS E LOGIN
+  // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
   const [novoCpf, setNovoCpf] = useState('');
@@ -132,6 +140,9 @@ export default function TrigofyApp() {
     setActiveTab('home');
   };
 
+  // ==========================================================
+  // 5. TELA DE LOGIN (O QUE APARECE ANTES DE ENTRAR)
+  // ==========================================================
   if (!estaLogado) {
     return (
       <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans text-zinc-900">
@@ -150,29 +161,38 @@ export default function TrigofyApp() {
     );
   }
 
+  // ==========================================================
+  // 6. CONTEÚDO PRINCIPAL (ABAS DO APP)
+  // ==========================================================
   const renderContent = () => {
     switch (activeTab) {
+      
+      // --- ABA HOME (MENU INICIAL) ---
       case 'home':
         return (
           <div className="space-y-4 animate-in fade-in duration-500 pb-10">
+            {/* Boas-vindas ao Usuário */}
             <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 p-6 rounded-3xl text-zinc-900 shadow-lg flex items-center gap-4 border border-yellow-300">
               <div className="bg-white p-2 rounded-2xl shadow-inner w-16 h-16 flex items-center justify-center overflow-hidden">
                 <img src="/favicon.ico" alt="Logo" className="w-full h-full object-contain scale-125" />
               </div>
               <div>
-                <h2 className="text-xl font-black tracking-tight text-zinc-900">Grupo Trigo</h2>
+                <h2 className="text-xl font-black tracking-tight">Grupo Trigo</h2>
                 <p className="text-yellow-900/80 text-sm font-medium italic">Olá, {usuarioInput}!</p>
               </div>
             </div>
 
             <h3 className="text-zinc-800 font-extrabold text-lg px-2 mt-6 uppercase italic tracking-tighter">Ações Rápidas</h3>
             <div className="space-y-3">
+              
+              {/* BOTÃO: MEUS PEDIDOS */}
               <div onClick={() => setActiveTab('pedidos')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><ShoppingBag size={20} /></div>
                 <div className="flex-1 font-bold text-zinc-800 uppercase text-sm">Meus Pedidos</div>
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
 
+              {/* BOTÃO: SOLICITAÇÕES DE DOAÇÕES */}
               <div onClick={() => setActiveTab('catalogo')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50">
                 <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                   <img src="/doacao.png" alt="Doação" className="w-full h-full object-contain" />
@@ -181,6 +201,7 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300" size={20} />
               </div>
 
+              {/* BOTÃO: SOLICITAÇÕES RIO/SP */}
               <div onClick={() => setActiveTab('rio-sp')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50">
                 <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                   <img src="/cesta.png" alt="Cesta" className="w-full h-full object-contain" />
@@ -189,6 +210,7 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300" size={20} />
               </div>
 
+              {/* BOTÃO: NOVO PEDIDO (O QUE VOCÊ QUERIA EDITAR) */}
               <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50">
                 <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                   <img src="/pizza.png" alt="Novo" className="w-full h-full object-contain" />
@@ -197,7 +219,7 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300" size={20} />
               </div>
 
-              {/* SUPORTE (ESCONDIDO PARA ADMIN) */}
+              {/* BOTÃO: SUPORTE (ESCONDIDO PARA ADMIN) */}
               {usuarioInput.toLowerCase() !== 'admin' && (
                 <div className="bg-yellow-400 p-4 rounded-2xl shadow-md flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
                   <div className="bg-zinc-900 p-3 rounded-full text-yellow-400"><Megaphone size={20} /></div>
@@ -206,7 +228,7 @@ export default function TrigofyApp() {
                 </div>
               )}
 
-              {/* PAINEL ADMIN */}
+              {/* BOTÃO: PAINEL ADMIN (APARECE SÓ PARA O ADMIN) */}
               {usuarioInput.toLowerCase() === 'admin' && (
                 <div onClick={() => setActiveTab('admin-painel')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-zinc-800">
                   <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><Plus size={20} /></div>
@@ -218,6 +240,7 @@ export default function TrigofyApp() {
           </div>
         );
 
+      // --- ABA: TELA DE NOVO PEDIDO ---
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300">
@@ -237,6 +260,7 @@ export default function TrigofyApp() {
           </div>
         );
 
+      // --- ABA: PAINEL DO ADMINISTRADOR ---
       case 'admin-painel':
         return (
           <div className="animate-in slide-in-from-right duration-300">
@@ -267,14 +291,23 @@ export default function TrigofyApp() {
     }
   };
 
+  // ==========================================================
+  // 7. ESTRUTURA VISUAL FIXA (HEADER E MENU DE BAIXO)
+  // ==========================================================
   return (
     <div className="flex justify-center bg-zinc-200 min-h-screen font-sans">
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 text-zinc-900">
+        
+        {/* CABEÇALHO COM O NOME TRIGOFY */}
         <header className="p-6 flex justify-between items-center bg-white border-b">
           <h1 className="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           <button onClick={fazerLogoff} className="text-zinc-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
         </header>
+
+        {/* ÁREA ONDE O CONTEÚDO DAS ABAS É EXIBIDO */}
         <main className="flex-1 overflow-y-auto p-5 pb-32">{renderContent()}</main>
+
+        {/* BARRA DE NAVEGAÇÃO INFERIOR (ÍCONES) */}
         <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between rounded-full shadow-2xl border text-zinc-900">
           <button onClick={() => setActiveTab('home')} className={activeTab === 'home' ? 'text-yellow-500' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
           <button onClick={() => setActiveTab('pedidos')} className={activeTab === 'pedidos' ? 'text-yellow-500' : 'text-zinc-300'}><ShoppingBag size={22} /></button>
