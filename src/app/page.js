@@ -330,7 +330,7 @@ export default function TrigofyApp() {
                 <select 
                   className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none font-bold text-zinc-800 appearance-none"
                   value={areaSelecionada}
-                  onChange={(e) => setAreaSelecionada(e.target.value)}
+                   onChange={(e) => setAreaSelecionada(e.target.value)}
                 >
                   <option value="">Selecione sua área...</option>
                   <option value="Lasagna">Lasagna</option>
