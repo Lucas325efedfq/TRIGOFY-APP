@@ -51,19 +51,18 @@ export default function TrigofyApp() {
       const data = await response.json();
       if (data.records) {
         const formatado = data.records.map(reg => {
-          let areaRaw = reg.fields.area || '';
+          let areaFinal = reg.fields.area || '';
           
-          // --- BLOCO DE CORREÇÃO DE ERROS DE DIGITAÇÃO/BANCO ---
-          if (areaRaw.trim().toLowerCase() === "suplementos") areaRaw = "Suprimentos";
-          if (areaRaw.trim().toLowerCase() === "painal") areaRaw = "Pane";
-          if (areaRaw.trim().toLowerCase() === "centra de medidas") areaRaw = "Cozinha Central";
-          // ---------------------------------------------------
+          // TRAVA ABSOLUTA: Corrige nomes errados vindos do banco
+          if (areaFinal.trim().toLowerCase() === "suplementos") areaFinal = "Suprimentos";
+          if (areaFinal.trim().toLowerCase() === "painal") areaFinal = "Pane";
+          if (areaFinal.trim().toLowerCase() === "centra de medidas") areaFinal = "Cozinha Central";
 
           return {
             id: reg.id,
             cpf: reg.fields.cpf || '',
             nome: reg.fields.nome || '',
-            area: areaRaw
+            area: areaFinal
           };
         });
         setPessoasCadastradas(formatado);
@@ -139,7 +138,10 @@ export default function TrigofyApp() {
     const pessoa = pessoasCadastradas.find(p => p.cpf === cpfDigitado.replace(/\D/g, ''));
     if (pessoa) {
       setNomeEncontrado(pessoa.nome);
-      setAreaEncontrada(pessoa.area);
+      // Segunda trava de segurança na busca local
+      let areaLimpa = pessoa.area;
+      if (areaLimpa.trim().toLowerCase() === "suplementos") areaLimpa = "Suprimentos";
+      setAreaEncontrada(areaLimpa);
     } else {
       setNomeEncontrado('');
       setAreaEncontrada('');
