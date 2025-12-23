@@ -54,7 +54,7 @@ export default function TrigofyApp() {
           id: reg.id,
           cpf: reg.fields.cpf || '',
           nome: reg.fields.nome || '',
-          area: reg.fields.area || '' // Puxa a área da coluna criada no Airtable
+          area: reg.fields.area || ''
         }));
         setPessoasCadastradas(formatado);
       }
@@ -70,7 +70,7 @@ export default function TrigofyApp() {
 
   const salvarNoAirtable = async () => {
     if (!novoCpf || !novoNome || !novaAreaAdmin) {
-      alert("Por favor, preencha o CPF, Nome e selecione a Área.");
+      alert("Por favor, preencha o CPF, o Nome e a Área.");
       return;
     }
     setCarregando(true);
@@ -85,7 +85,7 @@ export default function TrigofyApp() {
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
             nome: novoNome.toUpperCase().trim(),
-            area: novaAreaAdmin // Envia a área para a nova coluna
+            area: novaAreaAdmin.trim() // Salva o texto que você digitar
           }
         })
       });
@@ -120,10 +120,10 @@ export default function TrigofyApp() {
   // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
-  const [areaEncontrada, setAreaEncontrada] = useState(''); // Estado para área automática
+  const [areaEncontrada, setAreaEncontrada] = useState('');
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
-  const [novaAreaAdmin, setNovaAreaAdmin] = useState(''); // Estado para área no admin
+  const [novaAreaAdmin, setNovaAreaAdmin] = useState(''); // Estado para o campo de texto da área
 
   useEffect(() => {
     const pessoa = pessoasCadastradas.find(p => p.cpf === cpfDigitado.replace(/\D/g, ''));
@@ -153,27 +153,12 @@ export default function TrigofyApp() {
   const enviarMensagemChat = (e) => {
     e.preventDefault();
     if (!inputChat.trim()) return;
-
     const novaMensagemUsuario = { id: Date.now(), texto: inputChat, bot: false };
     setMensagens(prev => [...prev, novaMensagemUsuario]);
-    
-    const textoPergunta = inputChat;
     setInputChat('');
-
     setTimeout(() => {
-      const respostaBot = { 
-        id: Date.now() + 1, 
-        texto: responderComoTriger(textoPergunta), 
-        bot: true 
-      };
-      setMensagens(prev => [...prev, respostaBot]);
+      setMensagens(prev => [...prev, { id: Date.now() + 1, texto: "Entendi! Sou o Triger e estou aqui para ajudar.", bot: true }]);
     }, 800);
-  };
-
-  const responderComoTriger = (pergunta) => {
-    const p = pergunta.toLowerCase();
-    if (p.includes("ola") || p.includes("oi")) return "Olá! Sou o Triger. Como posso ajudar hoje?";
-    return "Entendi! Ainda estou aprendendo sobre esse assunto.";
   };
 
   const fazerLogoff = () => {
@@ -184,7 +169,7 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
-  // 5. TELA DE LOGIN
+  // 5. TELAS E RENDERIZAÇÃO
   // ==========================================================
   if (!estaLogado) {
     return (
@@ -204,12 +189,8 @@ export default function TrigofyApp() {
     );
   }
 
-  // ==========================================================
-  // 6. CONTEÚDO PRINCIPAL (RENDERIZAÇÃO DE ABAS)
-  // ==========================================================
   const renderContent = () => {
     switch (activeTab) {
-      
       case 'home':
         return (
           <div className="space-y-4 animate-in fade-in duration-500 pb-10">
@@ -222,7 +203,6 @@ export default function TrigofyApp() {
                 <p className="text-yellow-900/80 text-sm font-medium italic">Olá, {usuarioInput}!</p>
               </div>
             </div>
-
             <h3 className="text-zinc-800 font-extrabold text-lg px-2 mt-6 uppercase italic tracking-tighter">Ações Rápidas</h3>
             <div className="space-y-3">
               <div onClick={() => setActiveTab('pedidos')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
@@ -230,23 +210,6 @@ export default function TrigofyApp() {
                 <div className="flex-1 font-bold text-zinc-800 uppercase text-sm">Meus Pedidos</div>
                 <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
               </div>
-
-              <div onClick={() => setActiveTab('catalogo')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50">
-                <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
-                  <img src="/doacao.png" alt="Doação" className="w-full h-full object-contain" />
-                </div>
-                <div className="flex-1 font-bold text-zinc-800 uppercase text-sm">Solicitações de doações</div>
-                <ChevronRight className="text-zinc-300" size={20} />
-              </div>
-
-              <div onClick={() => setActiveTab('rio-sp')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50">
-                <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
-                  <img src="/cesta.png" alt="Cesta" className="w-full h-full object-contain" />
-                </div>
-                <div className="flex-1 font-bold text-zinc-800 uppercase text-sm leading-tight">solicitações de compras RIO/SP</div>
-                <ChevronRight className="text-zinc-300" size={20} />
-              </div>
-
               <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50">
                 <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                   <img src="/pizza.png" alt="Novo" className="w-full h-full object-contain" />
@@ -254,7 +217,6 @@ export default function TrigofyApp() {
                 <div className="flex-1 font-bold text-zinc-800 uppercase text-sm">Produtos Disponiveis para compras</div>
                 <ChevronRight className="text-zinc-300" size={20} />
               </div>
-
               {usuarioInput.toLowerCase() !== 'admin' && (
                 <div onClick={() => setActiveTab('suporte')} className="bg-yellow-400 p-4 rounded-2xl shadow-md flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
                   <div className="bg-zinc-900 p-3 rounded-full text-yellow-400"><Megaphone size={20} /></div>
@@ -262,7 +224,6 @@ export default function TrigofyApp() {
                   <ChevronRight className="text-zinc-800" size={20} />
                 </div>
               )}
-
               {usuarioInput.toLowerCase() === 'admin' && (
                 <div onClick={() => setActiveTab('admin-painel')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-zinc-800">
                   <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><Plus size={20} /></div>
@@ -302,7 +263,6 @@ export default function TrigofyApp() {
           </div>
         );
 
-      // --- ABA: TELA DE NOVO PEDIDO (BUSCA AUTOMÁTICA DE NOME E ÁREA) ---
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300">
@@ -326,7 +286,6 @@ export default function TrigofyApp() {
           </div>
         );
 
-      // --- ABA: PAINEL ADMIN (ONDE VOCÊ CADASTRA A ÁREA) ---
       case 'admin-painel':
         return (
           <div className="animate-in slide-in-from-right duration-300">
@@ -336,31 +295,18 @@ export default function TrigofyApp() {
               <input type="text" placeholder="CPF" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
               <input type="text" placeholder="Nome Completo" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
               
-              <select className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none font-bold text-zinc-800" value={novaAreaAdmin} onChange={(e) => setNovaAreaAdmin(e.target.value)}>
-                  <option value="">Selecione a área dele...</option>
-                  <option value="Lasagna">Lasagna</option>
-                  <option value="Pesagem">Pesagem</option>
-                  <option value="Cozinha Central">Cozinha Central</option>
-                  <option value="Pane">Pane</option>
-                  <option value="Massa">Massa</option>
-                  <option value="Molho">Molho</option>
-                  <option value="Qualidade">Qualidade</option>
-                  <option value="P&D">P&D</option>
-                  <option value="Estoque">Estoque</option>
-                  <option value="Manutenção">Manutenção</option>
-                  <option value="Suprimentos">Suprimentos</option>
-                  <option value="TI">TI</option>
-                  <option value="Higienização">Higienização</option>
-                  <option value="G&G">G&G</option>
-                  <option value="Meio Ambiente">Meio Ambiente</option>
-                  <option value="Apontamento">Apontamento</option>
-                  <option value="Produção">Produção</option>
-              </select>
+              {/* CAMPO DE TEXTO LIVRE PARA VOCÊ DIGITAR A ÁREA */}
+              <input 
+                type="text" 
+                placeholder="Área (Ex: Suprimentos, TI, Pane...)" 
+                className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" 
+                value={novaAreaAdmin} 
+                onChange={(e) => setNovaAreaAdmin(e.target.value)} 
+              />
 
               <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm">
                 {carregando ? "Salvando..." : "Salvar no Airtable"}
               </button>
-              
               <div className="pt-4 space-y-2">
                 <h3 className="text-xs font-black text-zinc-400 uppercase">Lista Sincronizada</h3>
                 {pessoasCadastradas.map(p => (
@@ -376,9 +322,7 @@ export default function TrigofyApp() {
             </div>
           </div>
         );
-
-      default:
-        return null;
+      default: return null;
     }
   };
 
@@ -390,10 +334,9 @@ export default function TrigofyApp() {
           <button onClick={fazerLogoff} className="text-zinc-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
         </header>
         <main className="flex-1 overflow-y-auto p-5 pb-32">{renderContent()}</main>
-        <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between rounded-full shadow-2xl border text-zinc-900">
+        <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between rounded-full shadow-2xl border">
           <button onClick={() => setActiveTab('home')} className={activeTab === 'home' ? 'text-yellow-500' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
           <button onClick={() => setActiveTab('pedidos')} className={activeTab === 'pedidos' ? 'text-yellow-500' : 'text-zinc-300'}><ShoppingBag size={22} /></button>
-          <button onClick={() => setActiveTab('catalogo')} className={activeTab === 'catalogo' ? 'text-yellow-500' : 'text-zinc-300'}><BookOpen size={22} /></button>
           <button onClick={() => setActiveTab('novo')} className={activeTab === 'novo' ? 'text-yellow-500' : 'text-zinc-300'}><ClipboardList size={22} /></button>
         </nav>
       </div>
