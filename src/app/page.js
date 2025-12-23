@@ -140,6 +140,15 @@ export default function TrigofyApp() {
   const [novoNome, setNovoNome] = useState('');
   const [novaAreaAdmin, setNovaAreaAdmin] = useState('');
 
+  // SOLUÇÃO ADICIONADA: Filtro de Saída em Tempo Real (Blindagem)
+  const renderizarAreaCorreta = (area) => {
+    if (!area) return "Aguardando Área...";
+    const check = area.trim().toLowerCase();
+    if (check === "suplementos" || check === "acessorios" || check === "suplemento") return "Suprimentos";
+    if (check === "painel" || check === "painal") return "Pane";
+    return area;
+  };
+
   useEffect(() => {
     const pessoa = pessoasCadastradas.find(p => p.cpf === cpfDigitado.replace(/\D/g, ''));
     if (pessoa) {
@@ -316,7 +325,7 @@ export default function TrigofyApp() {
               </div>
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área</label>
-                <input type="text" readOnly className="w-full p-4 border rounded-2xl font-bold bg-zinc-100 text-zinc-800" value={areaEncontrada || "Aguardando Área..."} />
+                <input type="text" readOnly className="w-full p-4 border rounded-2xl font-bold bg-zinc-100 text-zinc-800" value={renderizarAreaCorreta(areaEncontrada)} />
               </div>
               <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black uppercase ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400'}`}>ENVIAR PEDIDO</button>
             </div>
