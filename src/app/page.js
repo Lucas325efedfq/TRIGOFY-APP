@@ -21,6 +21,7 @@ export default function TrigofyApp() {
   const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
+  // Estados para o Chat do Triger
   const [mensagens, setMensagens] = useState([
     { id: 1, texto: "Olá! Eu sou o Triger, seu suporte inteligente. Como posso te ajudar hoje?", bot: true }
   ]);
@@ -52,15 +53,11 @@ export default function TrigofyApp() {
         const formatado = data.records.map(reg => {
           let areaRaw = (reg.fields.area || '').trim().toLowerCase();
           
-          // TRAVA DE FERRO: Não importa como venha do banco/cache, forçamos o certo
-          if (areaRaw === "suplementos" || areaRaw === "acessorios" || areaRaw === "suprimento" || areaRaw === "suprimentos") {
-            areaRaw = "Suprimentos";
-          } else if (areaRaw === "painal" || areaRaw === "painel" || areaRaw === "pane") {
-            areaRaw = "Pane";
-          } else if (areaRaw === "centra de medidas" || areaRaw === "cozinha central") {
-            areaRaw = "Cozinha Central";
-          } else {
-            // Se não for nenhum dos erros conhecidos, apenas capitaliza a primeira letra
+          // TRAVA DE EXIBIÇÃO: Corrige termos errados vindos da nuvem
+          if (areaRaw === "suplementos" || areaRaw === "acessorios" || areaRaw === "suprimento") areaRaw = "Suprimentos";
+          else if (areaRaw === "painel" || areaRaw === "painal") areaRaw = "Pane";
+          else if (areaRaw === "central de medidas" || areaRaw === "centra de medidas") areaRaw = "Cozinha Central";
+          else {
             areaRaw = areaRaw.charAt(0).toUpperCase() + areaRaw.slice(1);
           }
 
@@ -89,12 +86,14 @@ export default function TrigofyApp() {
       return;
     }
     setCarregando(true);
-    try {
-      // Normalização antes de enviar para garantir que salve limpo
-      let areaParaSalvar = novaAreaAdmin.trim();
-      const check = areaParaSalvar.toLowerCase();
-      if (check === "suplementos" || check === "acessorios") areaParaSalvar = "Suprimentos";
+    
+    // Normalização antes do envio para evitar que salve errado
+    let areaFinal = novaAreaAdmin.trim();
+    const areaCheck = areaFinal.toLowerCase();
+    if (areaCheck === "suplementos" || areaCheck === "acessorios") areaFinal = "Suprimentos";
+    if (areaCheck === "painel" || areaCheck === "painal") areaFinal = "Pane";
 
+    try {
       const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
         method: 'POST',
         headers: {
@@ -105,7 +104,7 @@ export default function TrigofyApp() {
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
             nome: novoNome.toUpperCase().trim(),
-            area: areaParaSalvar
+            area: areaFinal
           }
         })
       });
@@ -161,6 +160,7 @@ export default function TrigofyApp() {
     const encontrou = usuariosAutorizados.find(
       (u) => u.usuario === usuarioInput.toLowerCase() && u.senha === senha
     );
+
     if (encontrou) {
       setEstaLogado(true);
       setErro('');
@@ -238,7 +238,7 @@ export default function TrigofyApp() {
                   <img src="/doacao.png" alt="Doação" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex-1 font-bold text-zinc-800 uppercase text-sm">Solicitações de doações</div>
-                <ChevronRight size={20} />
+                <ChevronRight className="text-zinc-300" size={20} />
               </div>
 
               <div onClick={() => setActiveTab('rio-sp')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50">
@@ -246,7 +246,7 @@ export default function TrigofyApp() {
                   <img src="/cesta.png" alt="Cesta" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex-1 font-bold text-zinc-800 uppercase text-sm leading-tight">solicitações de compras RIO/SP</div>
-                <ChevronRight size={20} />
+                <ChevronRight className="text-zinc-300" size={20} />
               </div>
 
               <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50">
@@ -254,14 +254,14 @@ export default function TrigofyApp() {
                   <img src="/pizza.png" alt="Novo" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex-1 font-bold text-zinc-800 uppercase text-sm">Produtos Disponíveis para compras</div>
-                <ChevronRight size={20} />
+                <ChevronRight className="text-zinc-300" size={20} />
               </div>
 
               {usuarioInput.toLowerCase() !== 'admin' && (
                 <div onClick={() => setActiveTab('suporte')} className="bg-yellow-400 p-4 rounded-2xl shadow-md flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
                   <div className="bg-zinc-900 p-3 rounded-full text-yellow-400"><Megaphone size={20} /></div>
                   <div className="flex-1 font-bold text-zinc-900 uppercase text-sm">Suporte</div>
-                  <ChevronRight size={20} />
+                  <ChevronRight className="text-zinc-800" size={20} />
                 </div>
               )}
 
@@ -269,7 +269,7 @@ export default function TrigofyApp() {
                 <div onClick={() => setActiveTab('admin-painel')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-zinc-800">
                   <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><Plus size={20} /></div>
                   <div className="flex-1 text-white font-bold uppercase text-sm italic">Painel Admin - Nuvem</div>
-                  <ChevronRight size={20} />
+                  <ChevronRight className="text-zinc-600" size={20} />
                 </div>
               )}
             </div>
@@ -364,9 +364,6 @@ export default function TrigofyApp() {
     }
   };
 
-  // ==========================================================
-  // 9. ESTRUTURA VISUAL FIXA (HEADER E MENU DE BAIXO)
-  // ==========================================================
   return (
     <div className="flex justify-center bg-zinc-200 min-h-screen font-sans text-zinc-900">
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 text-zinc-900">
