@@ -117,7 +117,6 @@ export default function TrigofyApp() {
   // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
-  const [areaSelecionada, setAreaSelecionada] = useState(''); 
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
 
@@ -269,9 +268,6 @@ export default function TrigofyApp() {
           </div>
         );
 
-      // ==========================================================
-      // 8. AGENTE DE I.A (SUPORTE TRIGER)
-      // ==========================================================
       case 'suporte':
         return (
           <div className="animate-in slide-in-from-right duration-300 flex flex-col h-full max-h-[600px]">
@@ -283,7 +279,6 @@ export default function TrigofyApp() {
                 </div>
                 <span className="text-yellow-400 font-black uppercase text-xs italic">Agente Triger</span>
               </div>
-              
               <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-zinc-50">
                 {mensagens.map(msg => (
                   <div key={msg.id} className={`flex ${msg.bot ? 'justify-start' : 'justify-end'}`}>
@@ -293,15 +288,8 @@ export default function TrigofyApp() {
                   </div>
                 ))}
               </div>
-
               <form onSubmit={enviarMensagemChat} className="p-4 border-t bg-white flex gap-2">
-                <input 
-                  type="text" 
-                  placeholder="Sua dúvida..." 
-                  className="flex-1 bg-zinc-100 p-3 rounded-xl text-xs outline-none focus:ring-2 focus:ring-yellow-400"
-                  value={inputChat}
-                  onChange={(e) => setInputChat(e.target.value)}
-                />
+                <input type="text" placeholder="Sua dúvida..." className="flex-1 bg-zinc-100 p-3 rounded-xl text-xs outline-none focus:ring-2 focus:ring-yellow-400" value={inputChat} onChange={(e) => setInputChat(e.target.value)} />
                 <button type="submit" className="bg-zinc-900 text-yellow-400 p-3 rounded-xl"><Send size={18} /></button>
               </form>
             </div>
@@ -314,51 +302,15 @@ export default function TrigofyApp() {
             <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2">← Voltar</button>
             <div className="bg-white p-6 rounded-3xl shadow-sm border space-y-5">
               <h2 className="text-lg font-bold text-zinc-800 uppercase italic border-b pb-2">Novo Pedido</h2>
-              
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Digite o CPF</label>
                 <input type="text" placeholder="Apenas números" maxLength={11} className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
               </div>
-              
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Nome do Solicitante</label>
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${nomeEncontrado ? 'bg-yellow-50 text-zinc-800' : 'bg-zinc-100 text-zinc-400'}`} value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
-
-              <div>
-                <label className="text-[10px] font-black text-zinc-400 uppercase">Qual sua área?</label>
-                <select 
-                  className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none font-bold text-zinc-800 appearance-none"
-                  value={areaSelecionada}
-                   onChange={(e) => setAreaSelecionada(e.target.value)}
-                >
-                  <option value="">Selecione sua área...</option>
-                  <option value="Lasagna">Lasagna</option>
-                  <option value="Pesagem">Pesagem</option>
-                  <option value="Cozinha Central">Cozinha Central</option>
-                  <option value="Pane">Pane</option>
-                  <option value="Massa">Massa</option>
-                  <option value="Molho">Molho</option>
-                  <option value="Qualidade">Qualidade</option>
-                  <option value="P&D">P&D</option>
-                  <option value="Estoque">Estoque</option>
-                  <option value="Manutenção">Manutenção</option>
-                  <option value="Suprimentos">Suprimentos</option>
-                  <option value="TI">TI</option>
-                  <option value="Higienização">Higienização</option>
-                  <option value="G&G">G&G</option>
-                  <option value="Meio Ambiente">Meio Ambiente</option>
-                  <option value="Apontamento">Apontamento</option>
-                  <option value="Produção">Produção</option>
-                </select>
-              </div>
-
-              <button 
-                disabled={!nomeEncontrado || !areaSelecionada} 
-                className={`w-full py-4 rounded-2xl font-black uppercase ${nomeEncontrado && areaSelecionada ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400'}`}
-              >
-                ENVIAR PEDIDO
-              </button>
+              <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black uppercase ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400'}`}>ENVIAR PEDIDO</button>
             </div>
           </div>
         );
