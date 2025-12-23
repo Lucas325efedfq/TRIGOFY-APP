@@ -210,12 +210,12 @@ export default function TrigofyApp() {
                 <ChevronRight className="text-zinc-300" size={20} />
               </div>
 
-              {/* BOTÃO: NOVO PEDIDO (O QUE VOCÊ QUERIA EDITAR) */}
+              {/* BOTÃO: NOVO PEDIDO */}
               <div onClick={() => setActiveTab('novo')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50">
                 <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                   <img src="/pizza.png" alt="Novo" className="w-full h-full object-contain" />
                 </div>
-                <div className="flex-1 font-bold text-zinc-800 uppercase text-sm">Novo Pedido</div>
+                <div className="flex-1 font-bold text-zinc-800 uppercase text-sm">Produtos Disponiveis para compras</div>
                 <ChevronRight className="text-zinc-300" size={20} />
               </div>
 
