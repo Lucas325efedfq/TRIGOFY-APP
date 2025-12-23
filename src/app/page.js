@@ -39,17 +39,6 @@ export default function TrigofyApp() {
   // ==========================================================
   // 3. FUNÇÕES DE BANCO DE DADOS (COMUNICAÇÃO COM NUVEM)
   // ==========================================================
-  
-  // FUNÇÃO DE NORMALIZAÇÃO PARA IMPEDIR ERROS DE TEXTO
-  const normalizarArea = (texto) => {
-    if (!texto) return "";
-    const t = texto.trim().toLowerCase();
-    if (t === "suplementos" || t === "acessorios" || t === "suplemento") return "Suprimentos";
-    if (t === "painel" || t === "painal") return "Pane";
-    if (t === "central de medidas" || t === "centra de medidas") return "Cozinha Central";
-    return texto;
-  };
-
   const buscarDadosAirtable = async () => {
     setCarregando(true);
     try {
@@ -61,20 +50,12 @@ export default function TrigofyApp() {
       });
       const data = await response.json();
       if (data.records) {
-        const formatado = data.records.map(reg => {
-          let areaRaw = (reg.fields.area || '').trim();
-          
-          // --- TRAVA DE CORREÇÃO FORÇADA ---
-          areaRaw = normalizarArea(areaRaw);
-          // ---------------------------------
-
-          return {
-            id: reg.id,
-            cpf: reg.fields.cpf || '',
-            nome: reg.fields.nome || '',
-            area: areaRaw
-          };
-        });
+        const formatado = data.records.map(reg => ({
+          id: reg.id,
+          cpf: reg.fields.cpf || '',
+          nome: reg.fields.nome || '',
+          area: reg.fields.area || ''
+        }));
         setPessoasCadastradas(formatado);
       }
     } catch (e) {
@@ -104,7 +85,7 @@ export default function TrigofyApp() {
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
             nome: novoNome.toUpperCase().trim(),
-            area: normalizarArea(novaAreaAdmin) // Salva já corrigido
+            area: novaAreaAdmin.trim() 
           }
         })
       });
@@ -148,7 +129,7 @@ export default function TrigofyApp() {
     const pessoa = pessoasCadastradas.find(p => p.cpf === cpfDigitado.replace(/\D/g, ''));
     if (pessoa) {
       setNomeEncontrado(pessoa.nome);
-      setAreaEncontrada(normalizarArea(pessoa.area));
+      setAreaEncontrada(pessoa.area);
     } else {
       setNomeEncontrado('');
       setAreaEncontrada('');
@@ -320,7 +301,7 @@ export default function TrigofyApp() {
               </div>
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área</label>
-                <input type="text" readOnly className="w-full p-4 border rounded-2xl font-bold bg-zinc-100 text-zinc-800" value={normalizarArea(areaEncontrada) || "Aguardando Área..."} />
+                <input type="text" readOnly className="w-full p-4 border rounded-2xl font-bold bg-zinc-100 text-zinc-800" value={areaEncontrada || "Aguardando Área..."} />
               </div>
               <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black uppercase ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400'}`}>ENVIAR PEDIDO</button>
             </div>
@@ -335,7 +316,7 @@ export default function TrigofyApp() {
               <h2 className="text-lg font-bold uppercase italic border-b pb-2">Cadastrar na Nuvem</h2>
               <input type="text" placeholder="CPF" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
               <input type="text" placeholder="Nome Completo" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
-              <input type="text" placeholder="Área" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novaAreaAdmin} onChange={(e) => setNovaAreaAdmin(e.target.value)} spellCheck="false" autoComplete="off" />
+              <input type="text" placeholder="Área" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novaAreaAdmin} onChange={(e) => setNovaAreaAdmin(e.target.value)} />
               
               <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm">
                 {carregando ? "Salvando..." : "Salvar no Airtable"}
@@ -364,9 +345,6 @@ export default function TrigofyApp() {
     }
   };
 
-  // ==========================================================
-  // 9. ESTRUTURA VISUAL FIXA (HEADER E MENU DE BAIXO)
-  // ==========================================================
   return (
     <div className="flex justify-center bg-zinc-200 min-h-screen font-sans text-zinc-900">
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 text-zinc-900">
