@@ -117,6 +117,7 @@ export default function TrigofyApp() {
   // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
+  const [areaSelecionada, setAreaSelecionada] = useState(''); // Nova área
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
 
@@ -178,7 +179,7 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
-  // 5. TELA DE LOGIN (O QUE APARECE ANTES DE ENTRAR)
+  // 5. TELA DE LOGIN
   // ==========================================================
   if (!estaLogado) {
     return (
@@ -204,7 +205,6 @@ export default function TrigofyApp() {
   const renderContent = () => {
     switch (activeTab) {
       
-      // --- ABA HOME (MENU INICIAL) ---
       case 'home':
         return (
           <div className="space-y-4 animate-in fade-in duration-500 pb-10">
@@ -213,14 +213,13 @@ export default function TrigofyApp() {
                 <img src="/favicon.ico" alt="Logo" className="w-full h-full object-contain scale-125" />
               </div>
               <div>
-                <h2 className="text-xl font-black tracking-tight">Grupo Trigo</h2>
+                <h2 className="text-xl font-black tracking-tight text-zinc-900">Grupo Trigo</h2>
                 <p className="text-yellow-900/80 text-sm font-medium italic">Olá, {usuarioInput}!</p>
               </div>
             </div>
 
             <h3 className="text-zinc-800 font-extrabold text-lg px-2 mt-6 uppercase italic tracking-tighter">Ações Rápidas</h3>
             <div className="space-y-3">
-              
               <div onClick={() => setActiveTab('pedidos')} className="bg-white p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group">
                 <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><ShoppingBag size={20} /></div>
                 <div className="flex-1 font-bold text-zinc-800 uppercase text-sm">Meus Pedidos</div>
@@ -270,16 +269,12 @@ export default function TrigofyApp() {
           </div>
         );
 
-      // ==========================================================
-      // 8. AGENTE DE I.A (SUPORTE TRIGER)
-      // ==========================================================
       case 'suporte':
         return (
           <div className="animate-in slide-in-from-right duration-300 flex flex-col h-full max-h-[600px]">
             <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2">← Voltar</button>
             <div className="bg-white rounded-3xl shadow-sm border flex flex-col h-full overflow-hidden">
               <div className="bg-zinc-900 p-4 flex items-center gap-3">
-                {/* AQUI ESTÁ A FOTO DO TRIGER COM MÃOS E PÉS */}
                 <div className="bg-yellow-400 w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
                   <img src="/triger.png" alt="Triger" className="w-full h-full object-cover" />
                 </div>
@@ -310,21 +305,59 @@ export default function TrigofyApp() {
           </div>
         );
 
+      // --- ABA: TELA DE NOVO PEDIDO (ONDE FOI ADICIONADO O MENU DE ÁREA) ---
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300">
             <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2">← Voltar</button>
             <div className="bg-white p-6 rounded-3xl shadow-sm border space-y-5">
               <h2 className="text-lg font-bold text-zinc-800 uppercase italic border-b pb-2">Novo Pedido</h2>
+              
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Digite o CPF</label>
                 <input type="text" placeholder="Apenas números" maxLength={11} className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
               </div>
+              
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Nome do Solicitante</label>
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${nomeEncontrado ? 'bg-yellow-50 text-zinc-800' : 'bg-zinc-100 text-zinc-400'}`} value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
-              <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black uppercase ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400'}`}>ENVIAR PEDIDO</button>
+
+              {/* MENU DINÂMICO DE ÁREA */}
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Qual sua área?</label>
+                <select 
+                  className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none font-bold text-zinc-800 appearance-none"
+                  value={areaSelecionada}
+                  onChange={(e) => setAreaSelecionada(e.target.value)}
+                >
+                  <option value="">Selecione sua área...</option>
+                  <option value="Lasagna">Lasagna</option>
+                  <option value="Pesagem">Pesagem</option>
+                  <option value="Cozinha Central">Cozinha Central</option>
+                  <option value="Pane">Pane</option>
+                  <option value="Massa">Massa</option>
+                  <option value="Molho">Molho</option>
+                  <option value="Qualidade">Qualidade</option>
+                  <option value="P&D">P&D</option>
+                  <option value="Estoque">Estoque</option>
+                  <option value="Manutenção">Manutenção</option>
+                  <option value="Suprimentos">Suprimentos</option>
+                  <option value="TI">TI</option>
+                  <option value="Higienização">Higienização</option>
+                  <option value="G&G">G&G</option>
+                  <option value="Meio Ambiente">Meio Ambiente</option>
+                  <option value="Apontamento">Apontamento</option>
+                  <option value="Produção">Produção</option>
+                </select>
+              </div>
+
+              <button 
+                disabled={!nomeEncontrado || !areaSelecionada} 
+                className={`w-full py-4 rounded-2xl font-black uppercase ${nomeEncontrado && areaSelecionada ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400'}`}
+              >
+                ENVIAR PEDIDO
+              </button>
             </div>
           </div>
         );
@@ -359,9 +392,6 @@ export default function TrigofyApp() {
     }
   };
 
-  // ==========================================================
-  // 9. ESTRUTURA VISUAL FIXA (HEADER E MENU DE BAIXO)
-  // ==========================================================
   return (
     <div className="flex justify-center bg-zinc-200 min-h-screen font-sans text-zinc-900">
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900">
