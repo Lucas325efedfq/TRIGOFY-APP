@@ -37,7 +37,7 @@ export default function TrigofyApp() {
   ];
 
   // ==========================================================
-  // 3. FUNÇÕES DE BANCO DE DADOS (COMUNICAÇÃO COM NUVEM)
+  // 3. FUNÇÕES DE BANCO DE DADOS (AIRTABLE)
   // ==========================================================
   const buscarDadosAirtable = async () => {
     setCarregando(true);
@@ -113,7 +113,7 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
-  // 4. LÓGICA DE FORMULÁRIOS, LOGIN E CHAT
+  // 4. LÓGICA DE FORMULÁRIOS E LOGIN
   // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
@@ -140,35 +140,26 @@ export default function TrigofyApp() {
     }
   };
 
+  const responderComoTriger = (pergunta) => {
+    const p = pergunta.toLowerCase();
+    if (p.includes("ola") || p.includes("oi")) return "Olá! Sou o Triger. Como posso ajudar nas suas compras hoje?";
+    if (p.includes("pedido") || p.includes("comprar")) return "Para comprar, use o botão 'Produtos Disponíveis para compras' na tela inicial.";
+    if (p.includes("cpf") || p.includes("cadastro")) return "O cadastro de pessoas é feito apenas pelo Admin. Peça para ele incluir o CPF no sistema.";
+    if (p.includes("rio") || p.includes("sp")) return "As solicitações de Rio/SP têm uma aba específica no menu de Ações Rápidas.";
+    return "Entendi! Ainda estou aprendendo. Pode perguntar sobre pedidos, cadastros ou suporte técnico.";
+  };
+
   const enviarMensagemChat = (e) => {
     e.preventDefault();
     if (!inputChat.trim()) return;
-
     const novaMensagemUsuario = { id: Date.now(), texto: inputChat, bot: false };
     setMensagens(prev => [...prev, novaMensagemUsuario]);
-    
     const textoPergunta = inputChat;
     setInputChat('');
-
     setTimeout(() => {
-      const respostaBot = { 
-        id: Date.now() + 1, 
-        texto: responderComoTriger(textoPergunta), 
-        bot: true 
-      };
+      const respostaBot = { id: Date.now() + 1, texto: responderComoTriger(textoPergunta), bot: true };
       setMensagens(prev => [...prev, respostaBot]);
     }, 800);
-  };
-
-  const responderComoTriger = (pergunta) => {
-    const p = pergunta.toLowerCase();
-    
-    if (p.includes("ola") || p.includes("oi")) return "Olá! Sou o Triger. Como posso ajudar nas suas compras hoje?";
-    if (p.includes("pedido") || p.includes("comprar")) return "Para comprar, use o botão 'Produtos Disponiveis para compras' na tela inicial.";
-    if (p.includes("cpf") || p.includes("cadastro")) return "O cadastro de pessoas é feito apenas pelo Admin. Peça para ele incluir o CPF no sistema.";
-    if (p.includes("rio") || p.includes("sp")) return "As solicitações de Rio/SP têm uma aba específica no menu de Ações Rápidas.";
-    
-    return "Entendi! Ainda estou aprendendo sobre esse assunto. Pode perguntar sobre pedidos, cadastros ou suporte técnico.";
   };
 
   const fazerLogoff = () => {
@@ -204,7 +195,6 @@ export default function TrigofyApp() {
   // ==========================================================
   const renderContent = () => {
     switch (activeTab) {
-      
       case 'home':
         return (
           <div className="space-y-4 animate-in fade-in duration-500 pb-10">
@@ -269,6 +259,9 @@ export default function TrigofyApp() {
           </div>
         );
 
+      // ==========================================================
+      // 8. AGENTE DE I.A (SUPORTE TRIGER)
+      // ==========================================================
       case 'suporte':
         return (
           <div className="animate-in slide-in-from-right duration-300 flex flex-col h-full max-h-[600px]">
@@ -280,7 +273,6 @@ export default function TrigofyApp() {
                 </div>
                 <span className="text-yellow-400 font-black uppercase text-xs italic">Agente Triger</span>
               </div>
-              
               <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-zinc-50">
                 {mensagens.map(msg => (
                   <div key={msg.id} className={`flex ${msg.bot ? 'justify-start' : 'justify-end'}`}>
@@ -290,15 +282,8 @@ export default function TrigofyApp() {
                   </div>
                 ))}
               </div>
-
               <form onSubmit={enviarMensagemChat} className="p-4 border-t bg-white flex gap-2">
-                <input 
-                  type="text" 
-                  placeholder="Sua dúvida..." 
-                  className="flex-1 bg-zinc-100 p-3 rounded-xl text-xs outline-none focus:ring-2 focus:ring-yellow-400"
-                  value={inputChat}
-                  onChange={(e) => setInputChat(e.target.value)}
-                />
+                <input type="text" placeholder="Sua dúvida..." className="flex-1 bg-zinc-100 p-3 rounded-xl text-xs outline-none focus:ring-2 focus:ring-yellow-400" value={inputChat} onChange={(e) => setInputChat(e.target.value)} />
                 <button type="submit" className="bg-zinc-900 text-yellow-400 p-3 rounded-xl"><Send size={18} /></button>
               </form>
             </div>
@@ -311,52 +296,38 @@ export default function TrigofyApp() {
             <button onClick={() => setActiveTab('home')} className="text-zinc-400 font-bold text-xs uppercase mb-2">← Voltar</button>
             <div className="bg-white p-6 rounded-3xl shadow-sm border space-y-5">
               <h2 className="text-lg font-bold text-zinc-800 uppercase italic border-b pb-2">Novo Pedido</h2>
-              
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Digite o CPF</label>
                 <input type="text" placeholder="Apenas números" maxLength={11} className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
               </div>
-              
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Nome do Solicitante</label>
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${nomeEncontrado ? 'bg-yellow-50 text-zinc-800' : 'bg-zinc-100 text-zinc-400'}`} value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
-
-              {/* LISTA DE ÁREAS EXATA CONFORME SOLICITADO */}
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Qual sua área?</label>
-                <select 
-                  className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none font-bold text-zinc-800 appearance-none"
-                  value={areaSelecionada}
-                  onChange={(e) => setAreaSelecionada(e.target.value)}
-                >
+                <select className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none font-bold text-zinc-800 appearance-none" value={areaSelecionada} onChange={(e) => setAreaSelecionada(e.target.value)}>
                   <option value="">Selecione sua área...</option>
-<option value="Lasagna">Lasagna</option>
-<option value="Pesagem">Pesagem</option>
-<option value="Cozinha Central">Cozinha Central</option>
-<option value="Pane">Pane</option>
-<option value="Massa">Massa</option>
-<option value="Molho">Molho</option>
-<option value="Qualidade">Qualidade</option>
-<option value="P&D">P&D</option>
-<option value="Estoque">Estoque</option>
-<option value="Manutenção">Manutenção</option>
-<option value="Suprimentos">Suprimentos</option>
-<option value="TI">TI</option>
-<option value="Higienização">Higienização</option>
-<option value="G&G">G&G</option>
-<option value="Meio Ambiente">Meio Ambiente</option>
-<option value="Apontamento">Apontamento</option>
-<option value="Produção">Produção</option>
+                  <option value="Lasagna">Lasagna</option>
+                  <option value="Pesagem">Pesagem</option>
+                  <option value="Cozinha Central">Cozinha Central</option>
+                  <option value="Pane">Pane</option>
+                  <option value="Massa">Massa</option>
+                  <option value="Molho">Molho</option>
+                  <option value="Qualidade">Qualidade</option>
+                  <option value="P&D">P&D</option>
+                  <option value="Estoque">Estoque</option>
+                  <option value="Manutenção">Manutenção</option>
+                  <option value="Suprimentos">Suprimentos</option>
+                  <option value="TI">TI</option>
+                  <option value="Higienização">Higienização</option>
+                  <option value="G&G">G&G</option>
+                  <option value="Meio Ambiente">Meio Ambiente</option>
+                  <option value="Apontamento">Apontamento</option>
+                  <option value="Produção">Produção</option>
                 </select>
               </div>
-
-              <button 
-                disabled={!nomeEncontrado || !areaSelecionada} 
-                className={`w-full py-4 rounded-2xl font-black uppercase ${nomeEncontrado && areaSelecionada ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400'}`}
-              >
-                ENVIAR PEDIDO
-              </button>
+              <button disabled={!nomeEncontrado || !areaSelecionada} className={`w-full py-4 rounded-2xl font-black uppercase ${nomeEncontrado && areaSelecionada ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400'}`}>ENVIAR PEDIDO</button>
             </div>
           </div>
         );
@@ -372,7 +343,6 @@ export default function TrigofyApp() {
               <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm">
                 {carregando ? "Salvando..." : "Salvar no Airtable"}
               </button>
-              
               <div className="pt-4 space-y-2">
                 <h3 className="text-xs font-black text-zinc-400 uppercase">Lista Sincronizada</h3>
                 {pessoasCadastradas.map(p => (
@@ -385,24 +355,22 @@ export default function TrigofyApp() {
             </div>
           </div>
         );
-
-      default:
-        return null;
+      default: return null;
     }
   };
 
+  // ==========================================================
+  // 9. ESTRUTURA VISUAL FIXA (HEADER E MENU DE BAIXO)
+  // ==========================================================
   return (
     <div className="flex justify-center bg-zinc-200 min-h-screen font-sans text-zinc-900">
       <div className="w-full max-w-[390px] bg-zinc-50 h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900">
-        
         <header className="p-6 flex justify-between items-center bg-white border-b">
           <h1 className="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           <button onClick={fazerLogoff} className="text-zinc-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
         </header>
-
         <main className="flex-1 overflow-y-auto p-5 pb-32">{renderContent()}</main>
-
-        <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between rounded-full shadow-2xl border">
+        <nav className="absolute bottom-8 left-4 right-4 bg-white/95 backdrop-blur-md px-4 py-3 flex justify-between rounded-full shadow-2xl border text-zinc-900">
           <button onClick={() => setActiveTab('home')} className={activeTab === 'home' ? 'text-yellow-500' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
           <button onClick={() => setActiveTab('pedidos')} className={activeTab === 'pedidos' ? 'text-yellow-500' : 'text-zinc-300'}><ShoppingBag size={22} /></button>
           <button onClick={() => setActiveTab('catalogo')} className={activeTab === 'catalogo' ? 'text-yellow-500' : 'text-zinc-300'}><BookOpen size={22} /></button>
