@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutGrid, Send, ChevronRight, ShoppingBag, 
-  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock
+  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3
 } from 'lucide-react';
 
 // ==========================================================
@@ -25,7 +25,7 @@ export default function TrigofyApp() {
   const [siteFiltro, setSiteFiltro] = useState(''); 
   const [siteUsuarioIdentificado, setSiteUsuarioIdentificado] = useState('');
   
-  // NOVO: Estado para armazenar a origem do usuário que fez login
+  // Estado para armazenar a origem do usuário que fez login
   const [usuarioLogadoOrigem, setUsuarioLogadoOrigem] = useState('');
 
   // Estado para controle de tema (Claro/Escuro)
@@ -38,7 +38,7 @@ export default function TrigofyApp() {
   const [inputChat, setInputChat] = useState('');
 
   // ==========================================================
-  // 2. CADASTRO DE USUÁRIOS (LOGINS DO APP COM ORIGEM)
+  // 2. CADASTRO DE USUÁRIOS (TRANSFORMADO EM ESTADO PARA GESTÃO)
   // ==========================================================
   const [usuariosAutorizados, setUsuariosAutorizados] = useState([
     { usuario: 'admin', senha: 'T!$&gur001', origem: 'ALL' },
@@ -47,6 +47,12 @@ export default function TrigofyApp() {
   ]);
 
   const [novaSenhaInput, setNovaSenhaInput] = useState('');
+
+  // Estados para o Admin gerenciar logins
+  const [usuarioEmEdicao, setUsuarioEmEdicao] = useState(null);
+  const [editNome, setEditNome] = useState('');
+  const [editSenha, setEditSenha] = useState('');
+  const [editOrigem, setEditOrigem] = useState('');
 
   // ==========================================================
   // 3. FUNÇÕES DE BANCO DE DADOS (COMUNICAÇÃO COM NUVEM)
@@ -174,6 +180,25 @@ export default function TrigofyApp() {
     setUsuariosAutorizados(novosUsuarios);
     setNovaSenhaInput('');
     alert("Senha alterada com sucesso!");
+  };
+
+  // Lógica de Admin para salvar alteração de outros usuários
+  const adminSalvarUsuario = () => {
+    const novos = usuariosAutorizados.map(u => {
+      if (u.usuario === usuarioEmEdicao) {
+        return { usuario: editNome.toLowerCase(), senha: editSenha, origem: editOrigem };
+      }
+      return u;
+    });
+    setUsuariosAutorizados(novos);
+    setUsuarioEmEdicao(null);
+    alert("Dados do usuário atualizados!");
+  };
+
+  const adminExcluirUsuario = (user) => {
+    if (user === 'admin') return alert("Não é possível remover o acesso do administrador.");
+    if (!confirm(`Excluir login de ${user}?`)) return;
+    setUsuariosAutorizados(usuariosAutorizados.filter(u => u.usuario !== user));
   };
 
   const enviarMensagemChat = (e) => {
@@ -347,7 +372,7 @@ export default function TrigofyApp() {
               </div>
               
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-zinc-400 uppercase">Alterar Senha</label>
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Alterar Minha Senha</label>
                 <div className="flex gap-2">
                   <input 
                     type="password" 
@@ -383,8 +408,10 @@ export default function TrigofyApp() {
 
       case 'admin-painel':
         return (
-          <div className="animate-in slide-in-from-right duration-300">
+          <div className="animate-in slide-in-from-right duration-300 space-y-6 pb-20">
             <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
+            
+            {/* GESTÃO DE COLABORADORES (AIRTABLE) */}
             <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
               <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Cadastrar na Nuvem</h2>
               <input type="text" placeholder="CPF" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
@@ -392,7 +419,7 @@ export default function TrigofyApp() {
               <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">
                 {carregando ? "Salvando..." : "Salvar no Airtable"}
               </button>
-              <div className="max-h-[250px] overflow-y-auto space-y-2 pt-4 border-t mt-4">
+              <div className="max-h-[200px] overflow-y-auto space-y-2 pt-4">
                 {pessoasCadastradas.map(p => (
                   <div key={p.id} className={`flex justify-between items-center p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50'}`}>
                     <div>
@@ -400,6 +427,49 @@ export default function TrigofyApp() {
                       <p className="text-[10px] text-zinc-400">{p.cpf}</p>
                     </div>
                     <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* GESTÃO DE USUÁRIOS DO SISTEMA (AQUI ESTÁ A LISTAGEM SOLICITADA) */}
+            <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
+              <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Usuários do App</h2>
+              
+              {usuarioEmEdicao && (
+                <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-200 space-y-3 mb-4">
+                  <p className="text-[10px] font-black uppercase text-yellow-700">Editando: {usuarioEmEdicao}</p>
+                  <input type="text" placeholder="Nome do Login" className="w-full p-3 rounded-xl border text-sm" value={editNome} onChange={(e) => setEditNome(e.target.value)} />
+                  <input type="text" placeholder="Senha" className="w-full p-3 rounded-xl border text-sm" value={editSenha} onChange={(e) => setEditSenha(e.target.value)} />
+                  <select className="w-full p-3 rounded-xl border text-sm" value={editOrigem} onChange={(e) => setEditOrigem(e.target.value)}>
+                    <option value="VR">VR</option>
+                    <option value="RIO">RIO</option>
+                    <option value="SP">SP</option>
+                    <option value="ALL">ALL (Admin)</option>
+                  </select>
+                  <div className="flex gap-2">
+                    <button onClick={adminSalvarUsuario} className="flex-1 bg-zinc-900 text-white py-2 rounded-xl font-bold text-xs uppercase">Salvar</button>
+                    <button onClick={() => setUsuarioEmEdicao(null)} className="flex-1 bg-zinc-200 text-zinc-600 py-2 rounded-xl font-bold text-xs uppercase">Cancelar</button>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                {usuariosAutorizados.map(u => (
+                  <div key={u.usuario} className={`flex justify-between items-center p-4 rounded-2xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-100'}`}>
+                    <div>
+                      <p className={`font-black uppercase text-xs ${textMain}`}>{u.usuario}</p>
+                      <p className="text-[9px] text-zinc-400 uppercase font-bold">Senha: {u.senha} | Origem: {u.origem}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button onClick={() => {
+                        setUsuarioEmEdicao(u.usuario);
+                        setEditNome(u.usuario);
+                        setEditSenha(u.senha);
+                        setEditOrigem(u.origem);
+                      }} className="p-2 text-zinc-400 hover:text-blue-500"><Edit3 size={16}/></button>
+                      <button onClick={() => adminExcluirUsuario(u.usuario)} className="p-2 text-zinc-400 hover:text-red-500"><Trash2 size={16}/></button>
+                    </div>
                   </div>
                 ))}
               </div>
