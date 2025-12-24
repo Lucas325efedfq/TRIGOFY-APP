@@ -20,6 +20,7 @@ export default function TrigofyApp() {
   const [erro, setErro] = useState('');
   const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const [siteFiltro, setSiteFiltro] = useState(''); // Controla se veio por VR ou Rio/SP
   
   // Estado para controle de tema (Claro/Escuro)
   const [temaEscuro, setTemaEscuro] = useState(false);
@@ -56,7 +57,8 @@ export default function TrigofyApp() {
         const formatado = data.records.map(reg => ({
           id: reg.id,
           cpf: reg.fields.cpf || '',
-          nome: reg.fields.nome || ''
+          nome: reg.fields.nome || '',
+          site: reg.fields.site || '' // Carrega o site do banco
         }));
         setPessoasCadastradas(formatado);
       }
@@ -72,10 +74,11 @@ export default function TrigofyApp() {
 
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
+  const [novoSite, setNovoSite] = useState(''); // Admin digita o site
 
   const salvarNoAirtable = async () => {
-    if (!novoCpf || !novoNome) {
-      alert("Por favor, preencha o CPF e o Nome.");
+    if (!novoCpf || !novoNome || !novoSite) {
+      alert("Por favor, preencha CPF, Nome e Site.");
       return;
     }
     setCarregando(true);
@@ -89,13 +92,15 @@ export default function TrigofyApp() {
         body: JSON.stringify({
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
-            nome: novoNome.toUpperCase().trim()
+            nome: novoNome.toUpperCase().trim(),
+            site: novoSite.trim() // Salva o site digitado
           }
         })
       });
       if (response.ok) {
         setNovoCpf('');
         setNovoNome('');
+        setNovoSite('');
         await buscarDadosAirtable();
         alert("✅ Cadastrado com sucesso!");
       }
@@ -125,13 +130,18 @@ export default function TrigofyApp() {
   const [nomeEncontrado, setNomeEncontrado] = useState('');
 
   useEffect(() => {
-    const pessoa = pessoasCadastradas.find(p => p.cpf === cpfDigitado.replace(/\D/g, ''));
+    // Filtra pelo CPF e também valida se o site da pessoa condiz com o botão clicado
+    const pessoa = pessoasCadastradas.find(p => 
+      p.cpf === cpfDigitado.replace(/\D/g, '') && 
+      (siteFiltro === '' || p.site.toUpperCase() === siteFiltro.toUpperCase())
+    );
+    
     if (pessoa) {
       setNomeEncontrado(pessoa.nome);
     } else {
       setNomeEncontrado('');
     }
-  }, [cpfDigitado, pessoasCadastradas]);
+  }, [cpfDigitado, pessoasCadastradas, siteFiltro]);
 
   const lidarComLogin = (e) => {
     e.preventDefault();
@@ -176,10 +186,10 @@ export default function TrigofyApp() {
             <h1 className="text-4xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           </div>
           <form onSubmit={lidarComLogin} className="space-y-4">
-            <input type="text" placeholder="Usuário" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={usuarioInput} onChange={(e) => setUsuarioInput(e.target.value)} required />
-            <input type="password" placeholder="Senha" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={senha} onChange={(e) => setSenha(e.target.value)} required />
+            <input type="text" placeholder="Usuário" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none font-bold" value={usuarioInput} onChange={(e) => setUsuarioInput(e.target.value)} required />
+            <input type="password" placeholder="Senha" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none font-bold" value={senha} onChange={(e) => setSenha(e.target.value)} required />
             {erro && <p className="text-red-500 text-xs text-center font-bold">{erro}</p>}
-            <button type="submit" className="w-full bg-zinc-900 text-yellow-400 py-4 rounded-2xl font-black uppercase shadow-lg">ENTRAR</button>
+            <button type="submit" className="w-full bg-zinc-900 text-yellow-400 py-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">ENTRAR</button>
           </form>
         </div>
       </div>
@@ -230,7 +240,8 @@ export default function TrigofyApp() {
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  <div onClick={() => setActiveTab('rio-sp')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
+                  {/* Redireciona para Novo Pedido com Filtro Rio/SP */}
+                  <div onClick={() => { setSiteFiltro('RIO/SP'); setActiveTab('novo'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                       <img src="/cesta.png" alt="Cesta" className="w-full h-full object-contain" />
                     </div>
@@ -238,7 +249,8 @@ export default function TrigofyApp() {
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  <div onClick={() => setActiveTab('novo')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
+                  {/* Redireciona para Novo Pedido com Filtro VR (Produtos Disponíveis) */}
+                  <div onClick={() => { setSiteFiltro('VR'); setActiveTab('novo'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                       <img src="/pizza.png" alt="Novo" className="w-full h-full object-contain" />
                     </div>
@@ -253,7 +265,7 @@ export default function TrigofyApp() {
                   </div>
                 </>
               ) : (
-                <div onClick={() => setActiveTab('admin-painel')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-zinc-800">
+                <div onClick={() => setActiveTab('admin-painel')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-zinc-800 active:scale-95 transition-all">
                   <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><Plus size={20} /></div>
                   <div className="flex-1 text-white font-bold uppercase text-sm italic">Painel Admin - Nuvem</div>
                   <ChevronRight className="text-zinc-600" size={20} />
@@ -294,18 +306,20 @@ export default function TrigofyApp() {
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300">
-            <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
+            <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <div className={`${bgCard} p-6 rounded-3xl shadow-sm border space-y-5`}>
-              <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Novo Pedido</h2>
+              <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
+                {siteFiltro === 'RIO/SP' ? 'Compras RIO/SP' : 'Produtos Disponíveis'}
+              </h2>
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Digite o CPF</label>
-                <input type="text" placeholder="Apenas números" maxLength={11} className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
+                <input type="text" placeholder="Apenas números" maxLength={11} className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
               </div>
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Nome do Solicitante</label>
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
-              <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black uppercase ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400'}`}>ENVIAR PEDIDO</button>
+              <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}>ENVIAR PEDIDO</button>
             </div>
           </div>
         );
@@ -344,9 +358,10 @@ export default function TrigofyApp() {
             <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
               <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Cadastrar na Nuvem</h2>
-              <input type="text" placeholder="CPF" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
-              <input type="text" placeholder="Nome Completo" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
-              <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm">
+              <input type="text" placeholder="CPF" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
+              <input type="text" placeholder="Nome Completo" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
+              <input type="text" placeholder="Site (Ex: VR, Rio, SP)" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoSite} onChange={(e) => setNovoSite(e.target.value)} />
+              <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm shadow-md active:scale-95 transition-all">
                 {carregando ? "Salvando..." : "Salvar no Airtable"}
               </button>
               <div className="max-h-[250px] overflow-y-auto space-y-2 pt-4">
@@ -354,9 +369,9 @@ export default function TrigofyApp() {
                   <div key={p.id} className={`flex justify-between items-center p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50'}`}>
                     <div>
                       <p className={`font-bold text-xs ${textMain}`}>{p.nome}</p>
-                      <p className="text-[10px] text-zinc-400">{p.cpf}</p>
+                      <p className="text-[10px] text-zinc-400">{p.cpf} - <span className="text-yellow-600 font-bold">{p.site}</span></p>
                     </div>
-                    <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2"><Trash2 size={16}/></button>
+                    <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
                   </div>
                 ))}
               </div>
@@ -382,10 +397,10 @@ export default function TrigofyApp() {
         </main>
 
         <nav className={`absolute bottom-8 left-4 right-4 px-4 py-3 flex justify-between rounded-full shadow-2xl border transition-colors ${temaEscuro ? 'bg-zinc-800/90 border-zinc-700 backdrop-blur-md' : 'bg-white/95 border-zinc-200 backdrop-blur-sm'}`}>
-          <button onClick={() => setActiveTab('home')} className={activeTab === 'home' ? 'text-yellow-500' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
-          <button onClick={() => setActiveTab('pedidos')} className={activeTab === 'pedidos' ? 'text-yellow-500' : 'text-zinc-300'}><ShoppingBag size={22} /></button>
-          <button onClick={() => setActiveTab('catalogo')} className={activeTab === 'catalogo' ? 'text-yellow-500' : 'text-zinc-300'}><BookOpen size={22} /></button>
-          <button onClick={() => setActiveTab('config')} className={activeTab === 'config' ? 'text-yellow-500' : 'text-zinc-300'}><Settings size={22} /></button>
+          <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); }} className={activeTab === 'home' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
+          <button onClick={() => setActiveTab('pedidos')} className={activeTab === 'pedidos' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><ShoppingBag size={22} /></button>
+          <button onClick={() => setActiveTab('catalogo')} className={activeTab === 'catalogo' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><BookOpen size={22} /></button>
+          <button onClick={() => setActiveTab('config')} className={activeTab === 'config' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><Settings size={22} /></button>
         </nav>
       </div>
     </div>
