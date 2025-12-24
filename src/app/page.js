@@ -24,6 +24,9 @@ export default function TrigofyApp() {
   // Controles de Site e Filtro
   const [siteFiltro, setSiteFiltro] = useState(''); 
   const [siteUsuarioIdentificado, setSiteUsuarioIdentificado] = useState('');
+  
+  // NOVO: Estado para armazenar a origem do usuário que fez login
+  const [usuarioLogadoOrigem, setUsuarioLogadoOrigem] = useState('');
 
   // Estado para controle de tema (Claro/Escuro)
   const [temaEscuro, setTemaEscuro] = useState(false);
@@ -35,12 +38,12 @@ export default function TrigofyApp() {
   const [inputChat, setInputChat] = useState('');
 
   // ==========================================================
-  // 2. CADASTRO DE USUÁRIOS (LOGINS DO APP)
+  // 2. CADASTRO DE USUÁRIOS (LOGINS DO APP COM ORIGEM)
   // ==========================================================
   const usuariosAutorizados = [
-    { usuario: 'admin', senha: 'T!$&gur001' },
-    { usuario: 'lucas.vieira', senha: '123' },
-    { usuario: 'lucas.lopes', senha: '456'  },
+    { usuario: 'admin', senha: 'T!$&gur001', origem: 'ALL' },
+    { usuario: 'lucas.vieira', senha: '123', origem: 'RIO' },
+    { usuario: 'lucas.lopes', senha: '456', origem: 'VR' },
   ];
 
   // ==========================================================
@@ -151,6 +154,7 @@ export default function TrigofyApp() {
 
     if (encontrou) {
       setEstaLogado(true);
+      setUsuarioLogadoOrigem(encontrou.origem); // Define a origem do usuário logado
       setErro('');
     } else {
       setErro('Usuário ou senha incorretos.');
@@ -173,8 +177,8 @@ export default function TrigofyApp() {
     setActiveTab('home');
     setUsuarioInput('');
     setSenha('');
+    setUsuarioLogadoOrigem('');
     setCpfDigitado('');
-    setSiteUsuarioIdentificado('');
   };
 
   // ==========================================================
@@ -242,16 +246,16 @@ export default function TrigofyApp() {
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  {/* LÓGICA: Restrição Rio/SP - Bloqueia se for VR */}
+                  {/* LÓGICA: Restrição Rio/SP - Bloqueia se o usuário logado for VR */}
                   <div 
                     onClick={() => {
-                      if (siteUsuarioIdentificado === 'VR') {
-                        alert("Acesso negado. Este botão é exclusivo para RIO ou SP.");
+                      if (usuarioLogadoOrigem === 'VR') {
+                        alert("Acesso negado. Seu perfil de Volta Redonda não tem permissão para compras RIO/SP.");
                       } else {
                         setSiteFiltro('RIO/SP'); setActiveTab('novo');
                       }
                     }} 
-                    className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${siteUsuarioIdentificado === 'VR' ? 'opacity-30 grayscale' : ''}`}
+                    className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${usuarioLogadoOrigem === 'VR' ? 'opacity-30' : ''}`}
                   >
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                       <img src="/cesta.png" alt="Cesta" className="w-full h-full object-contain" />
@@ -260,16 +264,16 @@ export default function TrigofyApp() {
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  {/* LÓGICA: Restrição VR - Bloqueia se for Rio ou SP */}
+                  {/* LÓGICA: Restrição VR - Bloqueia se o usuário logado for RIO ou SP */}
                   <div 
                     onClick={() => {
-                      if (siteUsuarioIdentificado === 'RIO' || siteUsuarioIdentificado === 'SP') {
-                        alert("Acesso negado. Este botão é exclusivo para Volta Redonda.");
+                      if (usuarioLogadoOrigem === 'RIO' || usuarioLogadoOrigem === 'SP') {
+                        alert("Acesso negado. Seu perfil de RIO/SP não tem permissão para compras de Volta Redonda.");
                       } else {
                         setSiteFiltro('VR'); setActiveTab('novo');
                       }
                     }} 
-                    className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${(siteUsuarioIdentificado === 'RIO' || siteUsuarioIdentificado === 'SP') ? 'opacity-30 grayscale' : ''}`}
+                    className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${(usuarioLogadoOrigem === 'RIO' || usuarioLogadoOrigem === 'SP') ? 'opacity-30' : ''}`}
                   >
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                       <img src="/pizza.png" alt="Novo" className="w-full h-full object-contain" />
@@ -353,7 +357,7 @@ export default function TrigofyApp() {
               <input type="text" placeholder="CPF" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
               <input type="text" placeholder="Nome Completo" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
               <input type="text" placeholder="Site (Ex: VR, Rio, SP)" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoSite} onChange={(e) => setNovoSite(e.target.value)} />
-              <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm shadow-md active:scale-95 transition-all">
+              <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">
                 {carregando ? "Salvando..." : "Salvar no Airtable"}
               </button>
               <div className="max-h-[250px] overflow-y-auto space-y-2 pt-4 border-t mt-4">
