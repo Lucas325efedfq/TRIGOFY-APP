@@ -42,7 +42,7 @@ export default function TrigofyApp() {
   // ==========================================================
   const usuariosAutorizados = [
     { usuario: 'admin', senha: 'T!$&gur001', origem: 'ALL' },
-    { usuario: 'lucas.vieira', senha: '123', origem: 'RIO' },
+    { usuario: 'lucas.vieira', senha: '123', origem: 'VR' },
     { usuario: 'lucas.lopes', senha: '456', origem: 'VR' },
   ];
 
