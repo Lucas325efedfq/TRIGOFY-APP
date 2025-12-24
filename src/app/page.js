@@ -169,13 +169,6 @@ export default function TrigofyApp() {
       setEstaLogado(true);
       setUsuarioLogadoOrigem(encontrou.origem); 
       setErro('');
-      // Redireciona Admin direto para o painel
-      if (encontrou.usuario === 'admin') {
-        setActiveTab('admin-painel');
-        setSubAbaAdmin('menu');
-      } else {
-        setActiveTab('home');
-      }
     } else {
       setErro('Usuário ou senha incorretos.');
     }
@@ -298,7 +291,28 @@ export default function TrigofyApp() {
               {isAdmin ? 'Controle Admin' : 'Ações Rápidas'}
             </h3>
             <div className="space-y-3">
-              {!isAdmin ? (
+              {isAdmin ? (
+                // --- BOTÕES DE ADMIN EXPOSTOS DIRETAMENTE ---
+                <>
+                  <div onClick={() => { setSubAbaAdmin('nuvem'); setActiveTab('admin-painel'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer active:scale-95 transition-all`}>
+                    <div className="bg-blue-500 p-3 rounded-full text-white"><Database size={20} /></div>
+                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Nuvem (Airtable)</div>
+                    <ChevronRight className="text-zinc-300" size={20} />
+                  </div>
+
+                  <div onClick={() => { setSubAbaAdmin('cadastro'); setActiveTab('admin-painel'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer active:scale-95 transition-all`}>
+                    <div className="bg-green-500 p-3 rounded-full text-white"><UserPlus size={20} /></div>
+                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Cadastrar Novo Usuário</div>
+                    <ChevronRight className="text-zinc-300" size={20} />
+                  </div>
+
+                  <div onClick={() => { setSubAbaAdmin('lista'); setActiveTab('admin-painel'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer active:scale-95 transition-all`}>
+                    <div className="bg-yellow-500 p-3 rounded-full text-white"><Users size={20} /></div>
+                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Lista de Usuários</div>
+                    <ChevronRight className="text-zinc-300" size={20} />
+                  </div>
+                </>
+              ) : (
                 <>
                   <div onClick={() => setActiveTab('pedidos')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
                     <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><ShoppingBag size={20} /></div>
@@ -354,12 +368,6 @@ export default function TrigofyApp() {
                     <ChevronRight className="text-zinc-800" size={20} />
                   </div>
                 </>
-              ) : (
-                <div onClick={() => setActiveTab('admin-painel')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-zinc-800 active:scale-95 transition-all">
-                  <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><Plus size={20} /></div>
-                  <div className="flex-1 text-white font-bold uppercase text-sm italic">Painel Admin - Nuvem</div>
-                  <ChevronRight className="text-zinc-600" size={20} />
-                </div>
               )}
             </div>
           </div>
@@ -468,35 +476,8 @@ export default function TrigofyApp() {
         return (
           <div className="animate-in slide-in-from-right duration-300 space-y-6 pb-20">
             <div className="flex items-center gap-2">
-              <button onClick={() => {
-                if(subAbaAdmin === 'menu') setActiveTab('home');
-                else setSubAbaAdmin('menu');
-              }} className={`${textSub} font-bold text-xs uppercase`}>← {subAbaAdmin === 'menu' ? 'Voltar' : 'Menu Admin'}</button>
+              <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase`}>← Voltar</button>
             </div>
-
-            {subAbaAdmin === 'menu' && (
-              <div className="space-y-3">
-                <h2 className={`text-xl font-black uppercase italic ${textMain}`}>Painel Administrativo</h2>
-                
-                <div onClick={() => setSubAbaAdmin('nuvem')} className={`${bgCard} p-5 rounded-2xl border flex items-center gap-4 cursor-pointer active:scale-95 transition-all group`}>
-                  <div className="bg-blue-500 p-3 rounded-full text-white"><Database size={20} /></div>
-                  <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Nuvem (Airtable)</div>
-                  <ChevronRight size={20} className="text-zinc-300" />
-                </div>
-
-                <div onClick={() => setSubAbaAdmin('cadastro')} className={`${bgCard} p-5 rounded-2xl border flex items-center gap-4 cursor-pointer active:scale-95 transition-all group`}>
-                  <div className="bg-green-500 p-3 rounded-full text-white"><UserPlus size={20} /></div>
-                  <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Cadastrar Novo Usuário</div>
-                  <ChevronRight size={20} className="text-zinc-300" />
-                </div>
-
-                <div onClick={() => setSubAbaAdmin('lista')} className={`${bgCard} p-5 rounded-2xl border flex items-center gap-4 cursor-pointer active:scale-95 transition-all group`}>
-                  <div className="bg-yellow-500 p-3 rounded-full text-white"><Users size={20} /></div>
-                  <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Lista de Usuários</div>
-                  <ChevronRight size={20} className="text-zinc-300" />
-                </div>
-              </div>
-            )}
 
             {subAbaAdmin === 'nuvem' && (
               <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4 animate-in fade-in`}>
