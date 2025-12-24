@@ -292,7 +292,6 @@ export default function TrigofyApp() {
             </h3>
             <div className="space-y-3">
               {isAdmin ? (
-                // --- BOTÕES DE ADMIN EXPOSTOS DIRETAMENTE ---
                 <>
                   <div onClick={() => { setSubAbaAdmin('nuvem'); setActiveTab('admin-painel'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer active:scale-95 transition-all`}>
                     <div className="bg-blue-500 p-3 rounded-full text-white"><Database size={20} /></div>
@@ -519,20 +518,6 @@ export default function TrigofyApp() {
             {subAbaAdmin === 'lista' && (
               <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4 animate-in fade-in`}>
                 <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Usuários Ativos</h2>
-                {usuarioEmEdicao && (
-                  <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-200 space-y-3 mb-4">
-                    <p className="text-[10px] font-black uppercase text-yellow-700 italic">Editando: {usuarioEmEdicao}</p>
-                    <input type="text" className="w-full p-3 rounded-xl border text-sm" value={editNome} onChange={(e) => setEditNome(e.target.value)} />
-                    <input type="text" className="w-full p-3 rounded-xl border text-sm" value={editSenha} onChange={(e) => setEditSenha(e.target.value)} />
-                    <select className="w-full p-3 rounded-xl border text-sm" value={editOrigem} onChange={(e) => setEditOrigem(e.target.value)}>
-                      <option value="VR">VR</option><option value="RIO">RIO</option><option value="SP">SP</option><option value="ALL">ALL</option>
-                    </select>
-                    <div className="flex gap-2">
-                      <button onClick={adminSalvarUsuario} className="flex-1 bg-zinc-900 text-white py-2 rounded-xl font-bold text-xs uppercase">Salvar</button>
-                      <button onClick={() => setUsuarioEmEdicao(null)} className="flex-1 bg-zinc-200 text-zinc-600 py-2 rounded-xl font-bold text-xs uppercase">Cancelar</button>
-                    </div>
-                  </div>
-                )}
                 <div className="space-y-2">
                   {usuariosAutorizados.map(u => (
                     <div key={u.usuario} className={`flex justify-between items-center p-4 rounded-2xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-100'}`}>
@@ -541,7 +526,7 @@ export default function TrigofyApp() {
                         <p className="text-[9px] text-zinc-400 uppercase font-bold">Senha: {u.senha} | Origem: {u.origem}</p>
                       </div>
                       <div className="flex gap-1">
-                        <button onClick={() => { setUsuarioEmEdicao(u.usuario); setEditNome(u.usuario); setEditSenha(u.senha); setEditOrigem(u.origem); }} className="p-2 text-zinc-400 hover:text-blue-500"><Edit3 size={16}/></button>
+                        {/* LÁPIS REMOVIDO CONFORME SOLICITADO */}
                         <button onClick={() => adminExcluirUsuario(u.usuario)} className="p-2 text-zinc-400 hover:text-red-500"><Trash2 size={16}/></button>
                       </div>
                     </div>
