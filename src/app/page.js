@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutGrid, Send, ChevronRight, ShoppingBag, 
-  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus, Database, Users
+  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus, Database, Users, Package
 } from 'lucide-react';
 
 // ==========================================================
@@ -49,7 +49,7 @@ export default function TrigofyApp() {
   const [novaSenhaInput, setNovaSenhaInput] = useState('');
 
   // Controle de sub-telas do Admin
-  const [subAbaAdmin, setSubAbaAdmin] = useState('menu'); // menu, nuvem, cadastro, lista
+  const [subAbaAdmin, setSubAbaAdmin] = useState('menu'); // menu, nuvem, cadastro, lista, produtos
 
   // Estados para Cadastro de Novo Usuário (Admin)
   const [novoUserLogin, setNovoUserLogin] = useState('');
@@ -310,6 +310,12 @@ export default function TrigofyApp() {
                     <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Lista de Usuários</div>
                     <ChevronRight className="text-zinc-300" size={20} />
                   </div>
+
+                  <div onClick={() => { setSubAbaAdmin('produtos'); setActiveTab('admin-painel'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer active:scale-95 transition-all`}>
+                    <div className="bg-zinc-900 p-3 rounded-full text-yellow-400"><Package size={20} /></div>
+                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Lançar Produtos</div>
+                    <ChevronRight className="text-zinc-300" size={20} />
+                  </div>
                 </>
               ) : (
                 <>
@@ -526,11 +532,19 @@ export default function TrigofyApp() {
                         <p className="text-[9px] text-zinc-400 uppercase font-bold">Senha: {u.senha} | Origem: {u.origem}</p>
                       </div>
                       <div className="flex gap-1">
-                        {/* LÁPIS REMOVIDO CONFORME SOLICITADO */}
                         <button onClick={() => adminExcluirUsuario(u.usuario)} className="p-2 text-zinc-400 hover:text-red-500"><Trash2 size={16}/></button>
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {subAbaAdmin === 'produtos' && (
+              <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4 animate-in fade-in`}>
+                <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Lançar Produtos</h2>
+                <div className="p-4 border-2 border-dashed border-zinc-300 rounded-2xl text-center">
+                  <p className="text-zinc-500 font-bold text-sm uppercase italic">Área para configuração de produtos em desenvolvimento</p>
                 </div>
               </div>
             )}
