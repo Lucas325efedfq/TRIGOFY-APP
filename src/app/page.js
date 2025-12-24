@@ -47,7 +47,7 @@ export default function TrigofyApp() {
   ]);
 
   const [produtosLancados, setProdutosLancados] = useState([
-    { id: 1, nome: 'Exemplo Produto VR', preco: '10.00', site: 'VR', imagem: '' }
+    { id: 1, nome: 'PRODUTO EXEMPLO VR', preco: '10.00', site: 'VR', imagem: '' }
   ]);
 
   const [novaSenhaInput, setNovaSenhaInput] = useState('');
@@ -198,18 +198,6 @@ export default function TrigofyApp() {
     setNovoUserSenha('');
     alert("Usuário cadastrado com sucesso!");
     setSubAbaAdmin('lista'); 
-  };
-
-  const adminSalvarUsuario = () => {
-    const novos = usuariosAutorizados.map(u => {
-      if (u.usuario === usuarioEmEdicao) {
-        return { usuario: editNome.toLowerCase(), senha: editSenha, origem: editOrigem };
-      }
-      return u;
-    });
-    setUsuariosAutorizados(novos);
-    setUsuarioEmEdicao(null);
-    alert("Dados do usuário atualizados!");
   };
 
   const adminExcluirUsuario = (user) => {
@@ -440,7 +428,7 @@ export default function TrigofyApp() {
                             <div 
                                 key={p.id} 
                                 onClick={() => setProdutoSelecionado(p.id)}
-                                className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${produtoSelecionado === p.id ? 'border-yellow-500 bg-yellow-50' : 'border-zinc-100'}`}
+                                className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${produtoSelecionado === p.id ? 'border-yellow-500 bg-yellow-50 shadow-inner' : 'border-zinc-100'}`}
                             >
                                 <div className="w-12 h-12 rounded-lg bg-zinc-100 overflow-hidden flex items-center justify-center border">
                                     {p.imagem ? <img src={p.imagem} className="w-full h-full object-cover"/> : <Package size={20} className="text-zinc-300"/>}
@@ -461,7 +449,7 @@ export default function TrigofyApp() {
 
               <button 
                 disabled={!nomeEncontrado || !produtoSelecionado} 
-                onClick={() => alert("✅ Pedido enviado com sucesso!")}
+                onClick={() => alert(`✅ Pedido enviado: ${produtosLancados.find(p => p.id === produtoSelecionado)?.nome}`)}
                 className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtoSelecionado ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
               >
                 ENVIAR PEDIDO
@@ -632,8 +620,8 @@ export default function TrigofyApp() {
                   </div>
                   <button onClick={handleLancarProduto} className="w-full bg-zinc-900 text-yellow-400 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">LANÇAR PRODUTO</button>
                   
-                  <div className="pt-4 border-t space-y-2">
-                    <p className="text-[10px] font-black text-zinc-400 uppercase">Produtos em Estoque:</p>
+                  <div className="pt-4 border-t space-y-2 max-h-[200px] overflow-y-auto">
+                    <p className="text-[10px] font-black text-zinc-400 uppercase italic">Produtos em Estoque:</p>
                     {produtosLancados.map(p => (
                         <div key={p.id} className="flex justify-between items-center p-2 rounded-xl bg-zinc-50 border border-zinc-100">
                             <div className="flex items-center gap-2">
