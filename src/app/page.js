@@ -161,6 +161,8 @@ export default function TrigofyApp() {
   const fazerLogoff = () => {
     setEstaLogado(false);
     setActiveTab('home');
+    setUsuarioInput(''); // Limpa o campo de usuário
+    setSenha('');        // Limpa o campo de senha
   };
 
   // ==========================================================
@@ -351,7 +353,7 @@ export default function TrigofyApp() {
                 {pessoasCadastradas.map(p => (
                   <div key={p.id} className={`flex justify-between items-center p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50'}`}>
                     <div>
-                      <p className={`font-bold text-xs ${textPrimary}`}>{p.nome}</p>
+                      <p className={`font-bold text-xs ${textMain}`}>{p.nome}</p>
                       <p className="text-[10px] text-zinc-400">{p.cpf}</p>
                     </div>
                     <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2"><Trash2 size={16}/></button>
