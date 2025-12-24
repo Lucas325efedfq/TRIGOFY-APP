@@ -256,7 +256,7 @@ export default function TrigofyApp() {
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                       <img src="/cesta.png" alt="Cesta" className="w-full h-full object-contain" />
                     </div>
-                    <div className={`flex-1 font-bold uppercase text-sm leading-tight ${textMain}`}>Produto disponíveis para compra RIO/SP</div>
+                    <div className={`flex-1 font-bold uppercase text-sm leading-tight ${textMain}`}>Produtos disponíveis para compra RIO/SP</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
