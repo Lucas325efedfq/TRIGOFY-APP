@@ -21,11 +21,17 @@ export default function TrigofyApp() {
   const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   
+  // Controles de Site e Filtro
   const [siteFiltro, setSiteFiltro] = useState(''); 
   const [siteUsuarioIdentificado, setSiteUsuarioIdentificado] = useState('');
+  
+  // Estado para armazenar a origem do usuário que fez login
   const [usuarioLogadoOrigem, setUsuarioLogadoOrigem] = useState('');
+
+  // Estado para controle de tema (Claro/Escuro)
   const [temaEscuro, setTemaEscuro] = useState(false);
 
+  // Estados para o Chat do Triger
   const [mensagens, setMensagens] = useState([
     { id: 1, texto: "Olá! Eu sou o Triger, seu suporte inteligente. Como posso te ajudar hoje?", bot: true }
   ]);
@@ -45,17 +51,28 @@ export default function TrigofyApp() {
   ]);
 
   const [novaSenhaInput, setNovaSenhaInput] = useState('');
+
+  // Controle de sub-telas do Admin
   const [subAbaAdmin, setSubAbaAdmin] = useState('menu'); 
 
+  // Estados para Cadastro de Novo Usuário (Admin)
   const [novoUserLogin, setNovoUserLogin] = useState('');
   const [novoUserSenha, setNovoUserSenha] = useState('');
   const [novoUserOrigem, setNovoUserOrigem] = useState('VR');
 
+  // Estados para Edição de Usuário Existente
+  const [usuarioEmEdicao, setUsuarioEmEdicao] = useState(null);
+  const [editNome, setEditNome] = useState('');
+  const [editSenha, setEditSenha] = useState('');
+  const [editOrigem, setEditOrigem] = useState('');
+
+  // Estados para Cadastro de Produtos (Admin)
   const [prodNome, setProdNome] = useState('');
   const [prodPreco, setProdPreco] = useState('');
   const [prodSite, setProdSite] = useState('VR');
   const [prodImagem, setProdImagem] = useState('');
 
+  // Estados de Compra do Usuário
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
 
   // ==========================================================
@@ -183,6 +200,18 @@ export default function TrigofyApp() {
     setSubAbaAdmin('lista'); 
   };
 
+  const adminSalvarUsuario = () => {
+    const novos = usuariosAutorizados.map(u => {
+      if (u.usuario === usuarioEmEdicao) {
+        return { usuario: editNome.toLowerCase(), senha: editSenha, origem: editOrigem };
+      }
+      return u;
+    });
+    setUsuariosAutorizados(novos);
+    setUsuarioEmEdicao(null);
+    alert("Dados do usuário atualizados!");
+  };
+
   const adminExcluirUsuario = (user) => {
     if (user === 'admin') return alert("Não é possível remover o acesso do administrador.");
     if (!confirm(`Excluir login de ${user}?`)) return;
@@ -280,6 +309,7 @@ export default function TrigofyApp() {
     const textSub = temaEscuro ? 'text-zinc-400' : 'text-zinc-500';
 
     switch (activeTab) {
+      
       case 'home':
         return (
           <div className="space-y-4 animate-in fade-in duration-500 pb-10">
@@ -392,9 +422,19 @@ export default function TrigofyApp() {
               <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
                 {siteFiltro === 'RIO/SP' ? 'Compras RIO/SP' : 'Compras Volta Redonda'}
               </h2>
-              
-              {/* Seção de Produtos - Agora visível imediatamente */}
-              <div className="space-y-3">
+
+              {/* IDENTIFICAÇÃO NO TOPO */}
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Digite o CPF</label>
+                <input type="text" placeholder="Apenas números" maxLength={11} className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Nome do Solicitante</label>
+                <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeEncontrado || "Aguardando CPF..."} />
+              </div>
+
+              {/* PRODUTOS ABAIXO */}
+              <div className="animate-in fade-in duration-500 space-y-3 border-t pt-4">
                 <label className="text-[10px] font-black text-zinc-400 uppercase italic">Selecione o Produto:</label>
                 <div className="grid grid-cols-1 gap-2">
                   {produtosLancados.filter(p => p.site === siteFiltro).length > 0 ? (
@@ -402,7 +442,7 @@ export default function TrigofyApp() {
                           <div 
                               key={p.id} 
                               onClick={() => setProdutoSelecionado(p.id)}
-                              className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${produtoSelecionado === p.id ? 'border-yellow-500 bg-yellow-50 shadow-inner' : 'border-zinc-100'}`}
+                              className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${produtoSelecionado === p.id ? 'border-yellow-500 bg-yellow-50' : 'border-zinc-100'}`}
                           >
                               <div className="w-12 h-12 rounded-lg bg-zinc-100 overflow-hidden flex items-center justify-center border">
                                   {p.imagem ? <img src={p.imagem} className="w-full h-full object-cover"/> : <Package size={20} className="text-zinc-300"/>}
@@ -420,23 +460,9 @@ export default function TrigofyApp() {
                 </div>
               </div>
 
-              <hr className="opacity-10" />
-
-              {/* Seção de Identificação */}
-              <div className="space-y-4">
-                <div>
-                  <label className="text-[10px] font-black text-zinc-400 uppercase">Digite seu CPF</label>
-                  <input type="text" placeholder="Apenas números" maxLength={11} className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black text-zinc-400 uppercase">Seu Nome</label>
-                  <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeEncontrado || "Aguardando CPF..."} />
-                </div>
-              </div>
-
               <button 
                 disabled={!nomeEncontrado || !produtoSelecionado} 
-                onClick={() => alert(`✅ Pedido enviado: ${produtosLancados.find(p => p.id === produtoSelecionado)?.nome}`)}
+                onClick={() => alert("✅ Pedido enviado com sucesso!")}
                 className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtoSelecionado ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
               >
                 ENVIAR PEDIDO
