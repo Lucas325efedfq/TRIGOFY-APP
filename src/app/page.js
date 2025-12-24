@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutGrid, Send, ChevronRight, ShoppingBag, 
-  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus, Database, Users, Package
+  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus, Database, Users, Package, Image as ImageIcon
 } from 'lucide-react';
 
 // ==========================================================
@@ -61,6 +61,12 @@ export default function TrigofyApp() {
   const [editNome, setEditNome] = useState('');
   const [editSenha, setEditSenha] = useState('');
   const [editOrigem, setEditOrigem] = useState('');
+
+  // Estados para Cadastro de Produtos (Admin)
+  const [prodNome, setProdNome] = useState('');
+  const [prodPreco, setProdPreco] = useState('');
+  const [prodSite, setProdSite] = useState('VR');
+  const [prodImagem, setProdImagem] = useState('');
 
   // ==========================================================
   // 3. FUNÇÕES DE BANCO DE DADOS (AIRTABLE)
@@ -240,6 +246,14 @@ export default function TrigofyApp() {
     setSenha('');
     setUsuarioLogadoOrigem('');
     setCpfDigitado('');
+  };
+
+  const handleLancarProduto = () => {
+    if(!prodNome || !prodPreco) return alert("Preencha o nome e o preço.");
+    alert(`Produto ${prodNome} lançado com sucesso para ${prodSite}!`);
+    setProdNome('');
+    setProdPreco('');
+    setProdImagem('');
   };
 
   // ==========================================================
@@ -543,8 +557,23 @@ export default function TrigofyApp() {
             {subAbaAdmin === 'produtos' && (
               <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4 animate-in fade-in`}>
                 <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Lançar Produtos</h2>
-                <div className="p-4 border-2 border-dashed border-zinc-300 rounded-2xl text-center">
-                  <p className="text-zinc-500 font-bold text-sm uppercase italic">Área para configuração de produtos em desenvolvimento</p>
+                <div className="space-y-4">
+                   <input type="text" placeholder="Nome do Produto" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={prodNome} onChange={(e) => setProdNome(e.target.value)} />
+                   <input type="text" placeholder="Preço (Ex: 25.00)" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={prodPreco} onChange={(e) => setProdPreco(e.target.value)} />
+                   <select className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={prodSite} onChange={(e) => setProdSite(e.target.value)}>
+                    <option value="VR">Volta Redonda (VR)</option>
+                    <option value="RIO/SP">Rio de Janeiro / São Paulo</option>
+                  </select>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase px-1">URL da Imagem do Produto</label>
+                    <div className="flex gap-2">
+                      <input type="text" placeholder="http://..." className={`flex-1 p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={prodImagem} onChange={(e) => setProdImagem(e.target.value)} />
+                      <div className="w-14 h-14 bg-zinc-100 rounded-2xl flex items-center justify-center border overflow-hidden">
+                        {prodImagem ? <img src={prodImagem} alt="Preview" className="w-full h-full object-cover" /> : <ImageIcon className="text-zinc-300" size={24} />}
+                      </div>
+                    </div>
+                  </div>
+                  <button onClick={handleLancarProduto} className="w-full bg-zinc-900 text-yellow-400 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">LANÇAR PRODUTO</button>
                 </div>
               </div>
             )}
