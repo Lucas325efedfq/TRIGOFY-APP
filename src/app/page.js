@@ -20,8 +20,11 @@ export default function TrigofyApp() {
   const [erro, setErro] = useState('');
   const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
   const [carregando, setCarregando] = useState(true);
-  const [siteFiltro, setSiteFiltro] = useState(''); // Controla se veio por VR ou Rio/SP
   
+  // Controles de Site e Filtro
+  const [siteFiltro, setSiteFiltro] = useState(''); 
+  const [siteUsuarioIdentificado, setSiteUsuarioIdentificado] = useState('');
+
   // Estado para controle de tema (Claro/Escuro)
   const [temaEscuro, setTemaEscuro] = useState(false);
 
@@ -58,7 +61,7 @@ export default function TrigofyApp() {
           id: reg.id,
           cpf: reg.fields.cpf || '',
           nome: reg.fields.nome || '',
-          site: reg.fields.site || '' // Carrega o site do banco
+          site: (reg.fields.site || '').toUpperCase()
         }));
         setPessoasCadastradas(formatado);
       }
@@ -74,7 +77,7 @@ export default function TrigofyApp() {
 
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
-  const [novoSite, setNovoSite] = useState(''); // Admin digita o site
+  const [novoSite, setNovoSite] = useState(''); 
 
   const salvarNoAirtable = async () => {
     if (!novoCpf || !novoNome || !novoSite) {
@@ -93,7 +96,7 @@ export default function TrigofyApp() {
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
             nome: novoNome.toUpperCase().trim(),
-            site: novoSite.trim() // Salva o site digitado
+            site: novoSite.toUpperCase().trim()
           }
         })
       });
@@ -130,18 +133,15 @@ export default function TrigofyApp() {
   const [nomeEncontrado, setNomeEncontrado] = useState('');
 
   useEffect(() => {
-    // Filtra pelo CPF e também valida se o site da pessoa condiz com o botão clicado
-    const pessoa = pessoasCadastradas.find(p => 
-      p.cpf === cpfDigitado.replace(/\D/g, '') && 
-      (siteFiltro === '' || p.site.toUpperCase() === siteFiltro.toUpperCase())
-    );
-    
+    const pessoa = pessoasCadastradas.find(p => p.cpf === cpfDigitado.replace(/\D/g, ''));
     if (pessoa) {
       setNomeEncontrado(pessoa.nome);
+      setSiteUsuarioIdentificado(pessoa.site);
     } else {
       setNomeEncontrado('');
+      setSiteUsuarioIdentificado('');
     }
-  }, [cpfDigitado, pessoasCadastradas, siteFiltro]);
+  }, [cpfDigitado, pessoasCadastradas]);
 
   const lidarComLogin = (e) => {
     e.preventDefault();
@@ -173,6 +173,8 @@ export default function TrigofyApp() {
     setActiveTab('home');
     setUsuarioInput('');
     setSenha('');
+    setCpfDigitado('');
+    setSiteUsuarioIdentificado('');
   };
 
   // ==========================================================
@@ -240,8 +242,17 @@ export default function TrigofyApp() {
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  {/* Redireciona para Novo Pedido com Filtro Rio/SP */}
-                  <div onClick={() => { setSiteFiltro('RIO/SP'); setActiveTab('novo'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
+                  {/* LÓGICA: Restrição Rio/SP - Bloqueia se for VR */}
+                  <div 
+                    onClick={() => {
+                      if (siteUsuarioIdentificado === 'VR') {
+                        alert("Acesso negado. Este botão é exclusivo para RIO ou SP.");
+                      } else {
+                        setSiteFiltro('RIO/SP'); setActiveTab('novo');
+                      }
+                    }} 
+                    className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${siteUsuarioIdentificado === 'VR' ? 'opacity-30 grayscale' : ''}`}
+                  >
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                       <img src="/cesta.png" alt="Cesta" className="w-full h-full object-contain" />
                     </div>
@@ -249,8 +260,17 @@ export default function TrigofyApp() {
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  {/* Redireciona para Novo Pedido com Filtro VR (Produtos Disponíveis) */}
-                  <div onClick={() => { setSiteFiltro('VR'); setActiveTab('novo'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
+                  {/* LÓGICA: Restrição VR - Bloqueia se for Rio ou SP */}
+                  <div 
+                    onClick={() => {
+                      if (siteUsuarioIdentificado === 'RIO' || siteUsuarioIdentificado === 'SP') {
+                        alert("Acesso negado. Este botão é exclusivo para Volta Redonda.");
+                      } else {
+                        setSiteFiltro('VR'); setActiveTab('novo');
+                      }
+                    }} 
+                    className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${(siteUsuarioIdentificado === 'RIO' || siteUsuarioIdentificado === 'SP') ? 'opacity-30 grayscale' : ''}`}
+                  >
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                       <img src="/pizza.png" alt="Novo" className="w-full h-full object-contain" />
                     </div>
@@ -271,34 +291,6 @@ export default function TrigofyApp() {
                   <ChevronRight className="text-zinc-600" size={20} />
                 </div>
               )}
-            </div>
-          </div>
-        );
-
-      case 'suporte':
-        return (
-          <div className="animate-in slide-in-from-right duration-300 flex flex-col h-full max-h-[600px]">
-            <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
-            <div className={`${bgCard} rounded-3xl shadow-sm border flex flex-col h-full overflow-hidden`}>
-              <div className="bg-zinc-900 p-4 flex items-center gap-3">
-                <div className="bg-yellow-400 w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
-                  <img src="/triger.png" alt="Triger" className="w-full h-full object-cover" />
-                </div>
-                <span className="text-yellow-400 font-black uppercase text-xs italic">Agente Triger</span>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-zinc-50">
-                {mensagens.map(msg => (
-                  <div key={msg.id} className={`flex ${msg.bot ? 'justify-start' : 'justify-end'}`}>
-                    <div className={`max-w-[80%] p-3 rounded-2xl text-xs font-bold ${msg.bot ? 'bg-white text-zinc-800 border' : 'bg-yellow-400 text-zinc-900 shadow-sm'}`}>
-                      {msg.texto}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <form onSubmit={enviarMensagemChat} className="p-4 border-t bg-white flex gap-2">
-                <input type="text" placeholder="Sua dúvida..." className="flex-1 bg-zinc-100 p-3 rounded-xl text-xs outline-none focus:ring-2 focus:ring-yellow-400" value={inputChat} onChange={(e) => setInputChat(e.target.value)} />
-                <button type="submit" className="bg-zinc-900 text-yellow-400 p-3 rounded-xl"><Send size={18} /></button>
-              </form>
             </div>
           </div>
         );
@@ -364,7 +356,7 @@ export default function TrigofyApp() {
               <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm shadow-md active:scale-95 transition-all">
                 {carregando ? "Salvando..." : "Salvar no Airtable"}
               </button>
-              <div className="max-h-[250px] overflow-y-auto space-y-2 pt-4">
+              <div className="max-h-[250px] overflow-y-auto space-y-2 pt-4 border-t mt-4">
                 {pessoasCadastradas.map(p => (
                   <div key={p.id} className={`flex justify-between items-center p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50'}`}>
                     <div>
