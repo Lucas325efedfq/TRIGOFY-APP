@@ -169,6 +169,13 @@ export default function TrigofyApp() {
       setEstaLogado(true);
       setUsuarioLogadoOrigem(encontrou.origem); 
       setErro('');
+      // Redireciona Admin direto para o painel
+      if (encontrou.usuario === 'admin') {
+        setActiveTab('admin-painel');
+        setSubAbaAdmin('menu');
+      } else {
+        setActiveTab('home');
+      }
     } else {
       setErro('Usuário ou senha incorretos.');
     }
@@ -184,7 +191,7 @@ export default function TrigofyApp() {
     setNovoUserLogin('');
     setNovoUserSenha('');
     alert("Usuário cadastrado com sucesso!");
-    setSubAbaAdmin('lista'); // Vai para a lista após cadastrar
+    setSubAbaAdmin('lista'); 
   };
 
   const adminSalvarUsuario = () => {
