@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutGrid, Send, ChevronRight, ShoppingBag, 
-  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus, Database, Users, Package, Image as ImageIcon
+  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus, Database, Users, Package, Image as ImageIcon, CheckCircle2
 } from 'lucide-react';
 
 // ==========================================================
@@ -38,7 +38,7 @@ export default function TrigofyApp() {
   const [inputChat, setInputChat] = useState('');
 
   // ==========================================================
-  // 2. CADASTRO DE USUÁRIOS (SISTEMA DE LOGINS)
+  // 2. CADASTRO DE USUÁRIOS E PRODUTOS
   // ==========================================================
   const [usuariosAutorizados, setUsuariosAutorizados] = useState([
     { usuario: 'admin', senha: 'T!$&gur001', origem: 'ALL' },
@@ -46,10 +46,14 @@ export default function TrigofyApp() {
     { usuario: 'lucas.lopes', senha: '456', origem: 'VR' },
   ]);
 
+  const [produtosLancados, setProdutosLancados] = useState([
+    { id: 1, nome: 'Exemplo Produto VR', preco: '10.00', site: 'VR', imagem: '' }
+  ]);
+
   const [novaSenhaInput, setNovaSenhaInput] = useState('');
 
   // Controle de sub-telas do Admin
-  const [subAbaAdmin, setSubAbaAdmin] = useState('menu'); // menu, nuvem, cadastro, lista, produtos
+  const [subAbaAdmin, setSubAbaAdmin] = useState('menu'); 
 
   // Estados para Cadastro de Novo Usuário (Admin)
   const [novoUserLogin, setNovoUserLogin] = useState('');
@@ -67,6 +71,9 @@ export default function TrigofyApp() {
   const [prodPreco, setProdPreco] = useState('');
   const [prodSite, setProdSite] = useState('VR');
   const [prodImagem, setProdImagem] = useState('');
+
+  // Estados de Compra do Usuário
+  const [produtoSelecionado, setProdutoSelecionado] = useState(null);
 
   // ==========================================================
   // 3. FUNÇÕES DE BANCO DE DADOS (AIRTABLE)
@@ -246,14 +253,29 @@ export default function TrigofyApp() {
     setSenha('');
     setUsuarioLogadoOrigem('');
     setCpfDigitado('');
+    setProdutoSelecionado(null);
   };
 
   const handleLancarProduto = () => {
     if(!prodNome || !prodPreco) return alert("Preencha o nome e o preço.");
+    
+    const novoProduto = {
+        id: Date.now(),
+        nome: prodNome.toUpperCase(),
+        preco: prodPreco,
+        site: prodSite,
+        imagem: prodImagem
+    };
+
+    setProdutosLancados([...produtosLancados, novoProduto]);
     alert(`Produto ${prodNome} lançado com sucesso para ${prodSite}!`);
     setProdNome('');
     setProdPreco('');
     setProdImagem('');
+  };
+
+  const excluirProduto = (id) => {
+    setProdutosLancados(produtosLancados.filter(p => p.id !== id));
   };
 
   // ==========================================================
@@ -394,11 +416,11 @@ export default function TrigofyApp() {
 
       case 'novo':
         return (
-          <div className="animate-in slide-in-from-right duration-300">
-            <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
+          <div className="animate-in slide-in-from-right duration-300 pb-20">
+            <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); setProdutoSelecionado(null); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <div className={`${bgCard} p-6 rounded-3xl shadow-sm border space-y-5`}>
               <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
-                {siteFiltro === 'RIO/SP' ? 'Compras RIO/SP' : 'Produtos Disponíveis'}
+                {siteFiltro === 'RIO/SP' ? 'Compras RIO/SP' : 'Compras Volta Redonda'}
               </h2>
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Digite o CPF</label>
@@ -408,7 +430,42 @@ export default function TrigofyApp() {
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Nome do Solicitante</label>
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
-              <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}>ENVIAR PEDIDO</button>
+
+              {nomeEncontrado && (
+                <div className="animate-in fade-in duration-500 space-y-3">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase italic">Selecione o Produto:</label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {produtosLancados.filter(p => p.site === siteFiltro).length > 0 ? (
+                        produtosLancados.filter(p => p.site === siteFiltro).map(p => (
+                            <div 
+                                key={p.id} 
+                                onClick={() => setProdutoSelecionado(p.id)}
+                                className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${produtoSelecionado === p.id ? 'border-yellow-500 bg-yellow-50' : 'border-zinc-100'}`}
+                            >
+                                <div className="w-12 h-12 rounded-lg bg-zinc-100 overflow-hidden flex items-center justify-center border">
+                                    {p.imagem ? <img src={p.imagem} className="w-full h-full object-cover"/> : <Package size={20} className="text-zinc-300"/>}
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-xs font-black uppercase tracking-tight">{p.nome}</p>
+                                    <p className="text-[10px] font-bold text-yellow-600 italic">R$ {p.preco}</p>
+                                </div>
+                                {produtoSelecionado === p.id && <CheckCircle2 className="text-yellow-500" size={18}/>}
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-center text-[10px] text-zinc-400 font-bold uppercase italic p-4 border rounded-2xl border-dashed">Nenhum produto disponível nesta região</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <button 
+                disabled={!nomeEncontrado || !produtoSelecionado} 
+                onClick={() => alert("✅ Pedido enviado com sucesso!")}
+                className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtoSelecionado ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
+              >
+                ENVIAR PEDIDO
+              </button>
             </div>
           </div>
         );
@@ -574,6 +631,21 @@ export default function TrigofyApp() {
                     </div>
                   </div>
                   <button onClick={handleLancarProduto} className="w-full bg-zinc-900 text-yellow-400 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">LANÇAR PRODUTO</button>
+                  
+                  <div className="pt-4 border-t space-y-2">
+                    <p className="text-[10px] font-black text-zinc-400 uppercase">Produtos em Estoque:</p>
+                    {produtosLancados.map(p => (
+                        <div key={p.id} className="flex justify-between items-center p-2 rounded-xl bg-zinc-50 border border-zinc-100">
+                            <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-white border flex items-center justify-center overflow-hidden">
+                                    {p.imagem ? <img src={p.imagem} className="w-full h-full object-cover"/> : <Package size={14}/>}
+                                </div>
+                                <span className="text-[10px] font-bold uppercase">{p.nome} ({p.site})</span>
+                            </div>
+                            <button onClick={() => excluirProduto(p.id)} className="text-red-400 p-1"><Trash2 size={14}/></button>
+                        </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
