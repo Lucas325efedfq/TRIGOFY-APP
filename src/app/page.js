@@ -53,8 +53,7 @@ export default function TrigofyApp() {
         const formatado = data.records.map(reg => ({
           id: reg.id,
           cpf: reg.fields.cpf || '',
-          nome: reg.fields.nome || '',
-          area: reg.fields.area || ''
+          nome: reg.fields.nome || ''
         }));
         setPessoasCadastradas(formatado);
       }
@@ -69,8 +68,8 @@ export default function TrigofyApp() {
   }, []);
 
   const salvarNoAirtable = async () => {
-    if (!novoCpf || !novoNome || !novaAreaAdmin) {
-      alert("Por favor, preencha o CPF, o Nome e a Área.");
+    if (!novoCpf || !novoNome) {
+      alert("Por favor, preencha o CPF e o Nome.");
       return;
     }
     setCarregando(true);
@@ -84,15 +83,13 @@ export default function TrigofyApp() {
         body: JSON.stringify({
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
-            nome: novoNome.toUpperCase().trim(),
-            area: novaAreaAdmin.trim() 
+            nome: novoNome.toUpperCase().trim()
           }
         })
       });
       if (response.ok) {
         setNovoCpf('');
         setNovoNome('');
-        setNovaAreaAdmin('');
         await buscarDadosAirtable();
         alert("✅ Cadastrado com sucesso!");
       }
@@ -120,19 +117,15 @@ export default function TrigofyApp() {
   // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
-  const [areaEncontrada, setAreaEncontrada] = useState('');
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
-  const [novaAreaAdmin, setNovaAreaAdmin] = useState('');
 
   useEffect(() => {
     const pessoa = pessoasCadastradas.find(p => p.cpf === cpfDigitado.replace(/\D/g, ''));
     if (pessoa) {
       setNomeEncontrado(pessoa.nome);
-      setAreaEncontrada(pessoa.area);
     } else {
       setNomeEncontrado('');
-      setAreaEncontrada('');
     }
   }, [cpfDigitado, pessoasCadastradas]);
 
@@ -299,10 +292,6 @@ export default function TrigofyApp() {
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Nome do Solicitante</label>
                 <input type="text" readOnly className="w-full p-4 border rounded-2xl font-bold bg-zinc-100 text-zinc-800" value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
-              <div>
-                <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área</label>
-                <input type="text" readOnly className="w-full p-4 border rounded-2xl font-bold bg-zinc-100 text-zinc-800" value={areaEncontrada || "Aguardando Área..."} />
-              </div>
               <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black uppercase ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400' : 'bg-zinc-200 text-zinc-400'}`}>ENVIAR PEDIDO</button>
             </div>
           </div>
@@ -316,7 +305,6 @@ export default function TrigofyApp() {
               <h2 className="text-lg font-bold uppercase italic border-b pb-2">Cadastrar na Nuvem</h2>
               <input type="text" placeholder="CPF" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
               <input type="text" placeholder="Nome Completo" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
-              <input type="text" placeholder="Área" className="w-full p-4 bg-zinc-50 border rounded-2xl outline-none" value={novaAreaAdmin} onChange={(e) => setNovaAreaAdmin(e.target.value)} />
               
               <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm">
                 {carregando ? "Salvando..." : "Salvar no Airtable"}
@@ -329,7 +317,7 @@ export default function TrigofyApp() {
                     <div key={p.id} className="flex justify-between items-center p-3 bg-zinc-50 rounded-xl border">
                       <div>
                         <p className="font-bold text-xs text-zinc-800">{p.nome}</p>
-                        <p className="text-[10px] text-zinc-400">{p.cpf} - <span className="text-yellow-600 font-bold">{p.area}</span></p>
+                        <p className="text-[10px] text-zinc-400">{p.cpf}</p>
                       </div>
                       <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2"><Trash2 size={16}/></button>
                     </div>
