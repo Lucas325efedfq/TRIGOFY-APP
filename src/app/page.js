@@ -140,7 +140,7 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
-  // 4. LÓGICA DE USUÁRIOS E LOGIN
+  // 4. LÓGICA DE FORMULÁRIOS, LOGIN E CHAT
   // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
@@ -171,7 +171,6 @@ export default function TrigofyApp() {
     }
   };
 
-  // Funções do Admin para Gerenciar Logins
   const cadastrarNovoUsuarioSistema = () => {
     if (!novoUserLogin || !novoUserSenha) return alert("Preencha login e senha.");
     const existe = usuariosAutorizados.find(u => u.usuario === novoUserLogin.toLowerCase());
@@ -193,20 +192,40 @@ export default function TrigofyApp() {
     });
     setUsuariosAutorizados(novos);
     setUsuarioEmEdicao(null);
-    alert("Dados atualizados!");
+    alert("Dados do usuário atualizados!");
   };
 
   const adminExcluirUsuario = (user) => {
-    if (user === 'admin') return alert("Admin não pode ser excluído.");
+    if (user === 'admin') return alert("Não é possível remover o acesso do administrador.");
     if (!confirm(`Excluir login de ${user}?`)) return;
     setUsuariosAutorizados(usuariosAutorizados.filter(u => u.usuario !== user));
   };
 
   const alterarSenhaUsuario = () => {
-    if (!novaSenhaInput) return alert("Digite a nova senha.");
-    setUsuariosAutorizados(usuariosAutorizados.map(u => u.usuario === usuarioInput.toLowerCase() ? { ...u, senha: novaSenhaInput } : u));
+    if (!novaSenhaInput) {
+      alert("Digite a nova senha.");
+      return;
+    }
+    const novosUsuarios = usuariosAutorizados.map(u => {
+      if (u.usuario === usuarioInput.toLowerCase()) {
+        return { ...u, senha: novaSenhaInput };
+      }
+      return u;
+    });
+    setUsuariosAutorizados(novosUsuarios);
     setNovaSenhaInput('');
-    alert("Senha alterada!");
+    alert("Senha alterada com sucesso!");
+  };
+
+  const enviarMensagemChat = (e) => {
+    e.preventDefault();
+    if (!inputChat.trim()) return;
+    const novaMensagemUsuario = { id: Date.now(), texto: inputChat, bot: false };
+    setMensagens(prev => [...prev, novaMensagemUsuario]);
+    setInputChat('');
+    setTimeout(() => {
+      setMensagens(prev => [...prev, { id: Date.now() + 1, texto: "Olá! Sou o Triger. Como posso ajudar?", bot: true }]);
+    }, 800);
   };
 
   const fazerLogoff = () => {
@@ -214,6 +233,8 @@ export default function TrigofyApp() {
     setActiveTab('home');
     setUsuarioInput('');
     setSenha('');
+    setUsuarioLogadoOrigem('');
+    setCpfDigitado('');
   };
 
   // ==========================================================
@@ -238,7 +259,7 @@ export default function TrigofyApp() {
   }
 
   // ==========================================================
-  // 6. RENDERIZAÇÃO DE ABAS
+  // 6. CONTEÚDO PRINCIPAL (RENDERIZAÇÃO DE ABAS)
   // ==========================================================
   const renderContent = () => {
     const isAdmin = usuarioInput.toLowerCase() === 'admin';
@@ -247,6 +268,7 @@ export default function TrigofyApp() {
     const textSub = temaEscuro ? 'text-zinc-400' : 'text-zinc-500';
 
     switch (activeTab) {
+      
       case 'home':
         return (
           <div className="space-y-4 animate-in fade-in duration-500 pb-10">
@@ -271,10 +293,53 @@ export default function TrigofyApp() {
                     <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Meus Pedidos</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
-                  <div onClick={() => { if (usuarioLogadoOrigem === 'VR') alert("Negado para VR"); else { setSiteFiltro('RIO/SP'); setActiveTab('novo'); }}} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${usuarioLogadoOrigem === 'VR' ? 'opacity-30' : ''}`}>
-                    <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden"><img src="/cesta.png" className="w-full h-full object-contain" /></div>
-                    <div className={`flex-1 font-bold uppercase text-sm leading-tight ${textMain}`}>Compras RIO/SP</div>
+
+                  <div onClick={() => setActiveTab('catalogo')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
+                    <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
+                      <img src="/doacao.png" alt="Doação" className="w-full h-full object-contain" />
+                    </div>
+                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Solicitações de doações</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
+                  </div>
+
+                  <div 
+                    onClick={() => {
+                      if (usuarioLogadoOrigem === 'VR') {
+                        alert("Acesso negado. Seu perfil de Volta Redonda não tem permissão para compras RIO/SP.");
+                      } else {
+                        setSiteFiltro('RIO/SP'); setActiveTab('novo');
+                      }
+                    }} 
+                    className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${usuarioLogadoOrigem === 'VR' ? 'opacity-30' : ''}`}
+                  >
+                    <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
+                      <img src="/cesta.png" alt="Cesta" className="w-full h-full object-contain" />
+                    </div>
+                    <div className={`flex-1 font-bold uppercase text-sm leading-tight ${textMain}`}>Produtos disponíveis para compra RIO/SP</div>
+                    <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
+                  </div>
+
+                  <div 
+                    onClick={() => {
+                      if (usuarioLogadoOrigem === 'RIO' || usuarioLogadoOrigem === 'SP') {
+                        alert("Acesso negado. Seu perfil de RIO/SP não tem permissão para compras de Volta Redonda.");
+                      } else {
+                        setSiteFiltro('VR'); setActiveTab('novo');
+                      }
+                    }} 
+                    className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${(usuarioLogadoOrigem === 'RIO' || usuarioLogadoOrigem === 'SP') ? 'opacity-30' : ''}`}
+                  >
+                    <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
+                      <img src="/pizza.png" alt="Novo" className="w-full h-full object-contain" />
+                    </div>
+                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Produtos Disponíveis para compras Volta Redonda</div>
+                    <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
+                  </div>
+
+                  <div onClick={() => setActiveTab('suporte')} className="bg-yellow-400 p-4 rounded-2xl shadow-md flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
+                    <div className="bg-zinc-900 p-3 rounded-full text-yellow-400"><Megaphone size={20} /></div>
+                    <div className="flex-1 font-bold text-zinc-900 uppercase text-sm">Suporte</div>
+                    <ChevronRight className="text-zinc-800" size={20} />
                   </div>
                 </>
               ) : (
@@ -284,6 +349,105 @@ export default function TrigofyApp() {
                   <ChevronRight className="text-zinc-600" size={20} />
                 </div>
               )}
+            </div>
+          </div>
+        );
+
+      case 'novo':
+        return (
+          <div className="animate-in slide-in-from-right duration-300">
+            <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
+            <div className={`${bgCard} p-6 rounded-3xl shadow-sm border space-y-5`}>
+              <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
+                {siteFiltro === 'RIO/SP' ? 'Compras RIO/SP' : 'Produtos Disponíveis'}
+              </h2>
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Digite o CPF</label>
+                <input type="text" placeholder="Apenas números" maxLength={11} className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Nome do Solicitante</label>
+                <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeEncontrado || "Aguardando CPF..."} />
+              </div>
+              <button disabled={!nomeEncontrado} className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}>ENVIAR PEDIDO</button>
+            </div>
+          </div>
+        );
+
+      case 'pedidos':
+        return (
+          <div className="animate-in slide-in-from-right duration-300">
+            <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Meus Pedidos</h2>
+            <div className={`${bgCard} p-8 rounded-3xl border shadow-sm text-center space-y-3`}>
+              <ShoppingBag className="mx-auto text-zinc-200" size={48} />
+              <p className={`font-bold text-sm ${textSub}`}>Você ainda não possui pedidos realizados.</p>
+            </div>
+          </div>
+        );
+
+      case 'catalogo':
+        return (
+          <div className="animate-in slide-in-from-right duration-300">
+            <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Doações</h2>
+            <div className={`${bgCard} p-8 rounded-3xl border shadow-sm text-center space-y-3`}>
+              <BookOpen className="mx-auto text-zinc-200" size={48} />
+              <p className={`font-bold text-sm ${textSub}`}>Catálogo de doações indisponível no momento.</p>
+            </div>
+          </div>
+        );
+
+      case 'suporte':
+        return (
+          <div className="flex flex-col h-full animate-in slide-in-from-right duration-300">
+            <div className="flex-1 space-y-4 mb-4">
+              {mensagens.map(m => (
+                <div key={m.id} className={`flex ${m.bot ? 'justify-start' : 'justify-end'}`}>
+                  <div className={`max-w-[80%] p-4 rounded-2xl font-medium text-sm shadow-sm ${m.bot ? (temaEscuro ? 'bg-zinc-800 text-white' : 'bg-white text-zinc-800') : 'bg-yellow-400 text-zinc-900'}`}>
+                    {m.texto}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <form onSubmit={enviarMensagemChat} className="flex gap-2 mb-20">
+              <input type="text" placeholder="Como podemos ajudar?" className={`flex-1 p-4 rounded-2xl outline-none border shadow-sm ${temaEscuro ? 'bg-zinc-800 border-zinc-700 text-white' : 'bg-white'}`} value={inputChat} onChange={(e) => setInputChat(e.target.value)} />
+              <button type="submit" className="bg-zinc-900 text-yellow-400 p-4 rounded-2xl shadow-lg active:scale-95 transition-all"><Send size={20}/></button>
+            </form>
+          </div>
+        );
+
+      case 'config':
+        return (
+          <div className="animate-in slide-in-from-bottom duration-300 space-y-4">
+            <h2 className={`text-xl font-black uppercase italic ${textMain}`}>Configurações</h2>
+            <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-6`}>
+              <div className="flex items-center gap-4 border-b pb-4 border-zinc-100 dark:border-zinc-700">
+                <div className="bg-yellow-400 p-3 rounded-full"><User className="text-zinc-900" size={24}/></div>
+                <div>
+                  <p className={`font-black uppercase text-sm ${textMain}`}>{usuarioInput}</p>
+                  <p className="text-[10px] text-zinc-400 uppercase">Usuário Ativo</p>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Alterar Minha Senha</label>
+                <div className="flex gap-2">
+                  <input type="password" placeholder="Nova senha" className={`flex-1 p-3 rounded-xl border text-sm outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={novaSenhaInput} onChange={(e) => setNovaSenhaInput(e.target.value)} />
+                  <button onClick={alterarSenhaUsuario} className="bg-zinc-900 text-yellow-400 px-4 rounded-xl font-bold text-xs uppercase">Salvar</button>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  {temaEscuro ? <Moon className="text-yellow-400" size={20}/> : <Sun className="text-yellow-500" size={20}/>}
+                  <span className={`font-bold text-sm ${textMain}`}>Tema do Aplicativo</span>
+                </div>
+                <button onClick={() => setTemaEscuro(!temaEscuro)} className={`w-12 h-6 rounded-full relative transition-colors ${temaEscuro ? 'bg-yellow-400' : 'bg-zinc-300'}`}>
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${temaEscuro ? 'left-7' : 'left-1'}`} />
+                </button>
+              </div>
+              <button onClick={fazerLogoff} className="w-full flex items-center justify-center gap-2 p-4 bg-red-50 text-red-500 rounded-2xl font-bold text-sm hover:bg-red-100 transition-colors">
+                <LogOut size={18}/> SAIR DA CONTA
+              </button>
             </div>
           </div>
         );
@@ -316,8 +480,8 @@ export default function TrigofyApp() {
               {usuarioEmEdicao && (
                 <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-200 space-y-3 mb-4">
                   <p className="text-[10px] font-black uppercase text-yellow-700 italic">Editando: {usuarioEmEdicao}</p>
-                  <input type="text" className="w-full p-3 rounded-xl border text-sm" value={editNome} onChange={(e) => setEditNome(e.target.value)} />
-                  <input type="text" className="w-full p-3 rounded-xl border text-sm" value={editSenha} onChange={(e) => setEditSenha(e.target.value)} />
+                  <input type="text" placeholder="Nome do Login" className="w-full p-3 rounded-xl border text-sm" value={editNome} onChange={(e) => setEditNome(e.target.value)} />
+                  <input type="text" placeholder="Senha" className="w-full p-3 rounded-xl border text-sm" value={editSenha} onChange={(e) => setEditSenha(e.target.value)} />
                   <select className="w-full p-3 rounded-xl border text-sm" value={editOrigem} onChange={(e) => setEditOrigem(e.target.value)}>
                     <option value="VR">VR</option><option value="RIO">RIO</option><option value="SP">SP</option><option value="ALL">ALL</option>
                   </select>
@@ -343,34 +507,31 @@ export default function TrigofyApp() {
               </div>
             </div>
             
-            {/* CADASTRO NO AIRTABLE (MANTIDO) */}
+            {/* GESTÃO DE COLABORADORES (AIRTABLE) */}
             <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
               <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Nuvem (Airtable)</h2>
-              <input type="text" placeholder="CPF" className={`w-full p-4 rounded-2xl border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
-              <input type="text" placeholder="Nome Completo" className={`w-full p-4 rounded-2xl border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
-              <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase">Salvar Airtable</button>
-            </div>
-          </div>
-        );
-
-      case 'config':
-        return (
-          <div className="animate-in slide-in-from-bottom duration-300 space-y-4">
-            <h2 className={`text-xl font-black uppercase italic ${textMain}`}>Configurações</h2>
-            <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-6`}>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-zinc-400 uppercase">Alterar Minha Senha</label>
-                <div className="flex gap-2">
-                  <input type="password" placeholder="Nova senha" className={`flex-1 p-3 rounded-xl border text-sm outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={novaSenhaInput} onChange={(e) => setNovaSenhaInput(e.target.value)} />
-                  <button onClick={alterarSenhaUsuario} className="bg-zinc-900 text-yellow-400 px-4 rounded-xl font-bold text-xs uppercase">Salvar</button>
-                </div>
+              <input type="text" placeholder="CPF" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
+              <input type="text" placeholder="Nome Completo" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
+              <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">
+                {carregando ? "Salvando..." : "Salvar no Airtable"}
+              </button>
+              <div className="max-h-[200px] overflow-y-auto space-y-2 pt-4">
+                {pessoasCadastradas.map(p => (
+                  <div key={p.id} className={`flex justify-between items-center p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50'}`}>
+                    <div>
+                      <p className={`font-bold text-xs ${textMain}`}>{p.nome}</p>
+                      <p className="text-[10px] text-zinc-400">{p.cpf}</p>
+                    </div>
+                    <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
+                  </div>
+                ))}
               </div>
-              <button onClick={fazerLogoff} className="w-full p-4 bg-red-50 text-red-500 rounded-2xl font-bold text-sm">SAIR DA CONTA</button>
             </div>
           </div>
         );
 
-      default: return null;
+      default:
+        return null;
     }
   };
 
@@ -381,9 +542,15 @@ export default function TrigofyApp() {
           <h1 className="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           <button onClick={fazerLogoff} className="text-zinc-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
         </header>
-        <main className="flex-1 overflow-y-auto p-5 pb-32">{renderContent()}</main>
+        
+        <main className="flex-1 overflow-y-auto p-5 pb-32">
+          {renderContent()}
+        </main>
+
         <nav className={`absolute bottom-8 left-4 right-4 px-4 py-3 flex justify-between rounded-full shadow-2xl border transition-colors ${temaEscuro ? 'bg-zinc-800/90 border-zinc-700 backdrop-blur-md' : 'bg-white/95 border-zinc-200 backdrop-blur-sm'}`}>
-          <button onClick={() => setActiveTab('home')} className={activeTab === 'home' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
+          <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); }} className={activeTab === 'home' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
+          <button onClick={() => setActiveTab('pedidos')} className={activeTab === 'pedidos' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><ShoppingBag size={22} /></button>
+          <button onClick={() => setActiveTab('catalogo')} className={activeTab === 'catalogo' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><BookOpen size={22} /></button>
           <button onClick={() => setActiveTab('config')} className={activeTab === 'config' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><Settings size={22} /></button>
         </nav>
       </div>
