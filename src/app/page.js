@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutGrid, Send, ChevronRight, ShoppingBag, 
-  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus
+  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus, Database, Users
 } from 'lucide-react';
 
 // ==========================================================
@@ -47,6 +47,9 @@ export default function TrigofyApp() {
   ]);
 
   const [novaSenhaInput, setNovaSenhaInput] = useState('');
+
+  // Controle de sub-telas do Admin
+  const [subAbaAdmin, setSubAbaAdmin] = useState('menu'); // menu, nuvem, cadastro, lista
 
   // Estados para Cadastro de Novo Usuário (Admin)
   const [novoUserLogin, setNovoUserLogin] = useState('');
@@ -181,6 +184,7 @@ export default function TrigofyApp() {
     setNovoUserLogin('');
     setNovoUserSenha('');
     alert("Usuário cadastrado com sucesso!");
+    setSubAbaAdmin('lista'); // Vai para a lista após cadastrar
   };
 
   const adminSalvarUsuario = () => {
@@ -231,6 +235,7 @@ export default function TrigofyApp() {
   const fazerLogoff = () => {
     setEstaLogado(false);
     setActiveTab('home');
+    setSubAbaAdmin('menu');
     setUsuarioInput('');
     setSenha('');
     setUsuarioLogadoOrigem('');
@@ -455,78 +460,107 @@ export default function TrigofyApp() {
       case 'admin-painel':
         return (
           <div className="animate-in slide-in-from-right duration-300 space-y-6 pb-20">
-            <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
-            
-            {/* NOVO: CADASTRO DE LOGIN DO APP */}
-            <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
-              <div className="flex items-center gap-2 border-b pb-2">
-                <UserPlus className="text-yellow-500" size={20}/>
-                <h2 className={`text-lg font-bold uppercase italic ${textMain}`}>Novo Usuário do App</h2>
-              </div>
-              <input type="text" placeholder="Nome de Usuário (Ex: joao.silva)" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoUserLogin} onChange={(e) => setNovoUserLogin(e.target.value)} />
-              <input type="text" placeholder="Senha de Acesso" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoUserSenha} onChange={(e) => setNovoUserSenha(e.target.value)} />
-              <select className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={novoUserOrigem} onChange={(e) => setNovoUserOrigem(e.target.value)}>
-                <option value="VR">Volta Redonda (VR)</option>
-                <option value="RIO">Rio de Janeiro (RIO)</option>
-                <option value="SP">São Paulo (SP)</option>
-                <option value="ALL">Administrador (ALL)</option>
-              </select>
-              <button onClick={cadastrarNovoUsuarioSistema} className="w-full bg-zinc-900 text-yellow-400 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">CADASTRAR ACESSO</button>
+            <div className="flex items-center gap-2">
+              <button onClick={() => {
+                if(subAbaAdmin === 'menu') setActiveTab('home');
+                else setSubAbaAdmin('menu');
+              }} className={`${textSub} font-bold text-xs uppercase`}>← {subAbaAdmin === 'menu' ? 'Voltar' : 'Menu Admin'}</button>
             </div>
 
-            {/* LISTAGEM E EDIÇÃO DE USUÁRIOS */}
-            <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
-              <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Usuários Ativos</h2>
-              {usuarioEmEdicao && (
-                <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-200 space-y-3 mb-4">
-                  <p className="text-[10px] font-black uppercase text-yellow-700 italic">Editando: {usuarioEmEdicao}</p>
-                  <input type="text" placeholder="Nome do Login" className="w-full p-3 rounded-xl border text-sm" value={editNome} onChange={(e) => setEditNome(e.target.value)} />
-                  <input type="text" placeholder="Senha" className="w-full p-3 rounded-xl border text-sm" value={editSenha} onChange={(e) => setEditSenha(e.target.value)} />
-                  <select className="w-full p-3 rounded-xl border text-sm" value={editOrigem} onChange={(e) => setEditOrigem(e.target.value)}>
-                    <option value="VR">VR</option><option value="RIO">RIO</option><option value="SP">SP</option><option value="ALL">ALL</option>
-                  </select>
-                  <div className="flex gap-2">
-                    <button onClick={adminSalvarUsuario} className="flex-1 bg-zinc-900 text-white py-2 rounded-xl font-bold text-xs uppercase">Salvar</button>
-                    <button onClick={() => setUsuarioEmEdicao(null)} className="flex-1 bg-zinc-200 text-zinc-600 py-2 rounded-xl font-bold text-xs uppercase">Cancelar</button>
-                  </div>
+            {subAbaAdmin === 'menu' && (
+              <div className="space-y-3">
+                <h2 className={`text-xl font-black uppercase italic ${textMain}`}>Painel Administrativo</h2>
+                
+                <div onClick={() => setSubAbaAdmin('nuvem')} className={`${bgCard} p-5 rounded-2xl border flex items-center gap-4 cursor-pointer active:scale-95 transition-all group`}>
+                  <div className="bg-blue-500 p-3 rounded-full text-white"><Database size={20} /></div>
+                  <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Nuvem (Airtable)</div>
+                  <ChevronRight size={20} className="text-zinc-300" />
                 </div>
-              )}
-              <div className="space-y-2">
-                {usuariosAutorizados.map(u => (
-                  <div key={u.usuario} className={`flex justify-between items-center p-4 rounded-2xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-100'}`}>
-                    <div>
-                      <p className={`font-black uppercase text-xs ${textMain}`}>{u.usuario}</p>
-                      <p className="text-[9px] text-zinc-400 uppercase font-bold">Senha: {u.senha} | Origem: {u.origem}</p>
+
+                <div onClick={() => setSubAbaAdmin('cadastro')} className={`${bgCard} p-5 rounded-2xl border flex items-center gap-4 cursor-pointer active:scale-95 transition-all group`}>
+                  <div className="bg-green-500 p-3 rounded-full text-white"><UserPlus size={20} /></div>
+                  <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Cadastrar Novo Usuário</div>
+                  <ChevronRight size={20} className="text-zinc-300" />
+                </div>
+
+                <div onClick={() => setSubAbaAdmin('lista')} className={`${bgCard} p-5 rounded-2xl border flex items-center gap-4 cursor-pointer active:scale-95 transition-all group`}>
+                  <div className="bg-yellow-500 p-3 rounded-full text-white"><Users size={20} /></div>
+                  <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Lista de Usuários</div>
+                  <ChevronRight size={20} className="text-zinc-300" />
+                </div>
+              </div>
+            )}
+
+            {subAbaAdmin === 'nuvem' && (
+              <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4 animate-in fade-in`}>
+                <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Nuvem (Airtable)</h2>
+                <input type="text" placeholder="CPF" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
+                <input type="text" placeholder="Nome Completo" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
+                <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">
+                  {carregando ? "Salvando..." : "Salvar no Airtable"}
+                </button>
+                <div className="max-h-[300px] overflow-y-auto space-y-2 pt-4">
+                  {pessoasCadastradas.map(p => (
+                    <div key={p.id} className={`flex justify-between items-center p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50'}`}>
+                      <div>
+                        <p className={`font-bold text-xs ${textMain}`}>{p.nome}</p>
+                        <p className="text-[10px] text-zinc-400">{p.cpf}</p>
+                      </div>
+                      <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg"><Trash2 size={16}/></button>
                     </div>
-                    <div className="flex gap-1">
-                      <button onClick={() => { setUsuarioEmEdicao(u.usuario); setEditNome(u.usuario); setEditSenha(u.senha); setEditOrigem(u.origem); }} className="p-2 text-zinc-400 hover:text-blue-500"><Edit3 size={16}/></button>
-                      <button onClick={() => adminExcluirUsuario(u.usuario)} className="p-2 text-zinc-400 hover:text-red-500"><Trash2 size={16}/></button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {subAbaAdmin === 'cadastro' && (
+              <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4 animate-in fade-in`}>
+                <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Novo Usuário do App</h2>
+                <input type="text" placeholder="Nome de Usuário" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoUserLogin} onChange={(e) => setNovoUserLogin(e.target.value)} />
+                <input type="text" placeholder="Senha de Acesso" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoUserSenha} onChange={(e) => setNovoUserSenha(e.target.value)} />
+                <select className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={novoUserOrigem} onChange={(e) => setNovoUserOrigem(e.target.value)}>
+                  <option value="VR">Volta Redonda (VR)</option>
+                  <option value="RIO">Rio de Janeiro (RIO)</option>
+                  <option value="SP">São Paulo (SP)</option>
+                  <option value="ALL">Administrador (ALL)</option>
+                </select>
+                <button onClick={cadastrarNovoUsuarioSistema} className="w-full bg-zinc-900 text-yellow-400 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">CADASTRAR ACESSO</button>
+              </div>
+            )}
+
+            {subAbaAdmin === 'lista' && (
+              <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4 animate-in fade-in`}>
+                <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Usuários Ativos</h2>
+                {usuarioEmEdicao && (
+                  <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-200 space-y-3 mb-4">
+                    <p className="text-[10px] font-black uppercase text-yellow-700 italic">Editando: {usuarioEmEdicao}</p>
+                    <input type="text" className="w-full p-3 rounded-xl border text-sm" value={editNome} onChange={(e) => setEditNome(e.target.value)} />
+                    <input type="text" className="w-full p-3 rounded-xl border text-sm" value={editSenha} onChange={(e) => setEditSenha(e.target.value)} />
+                    <select className="w-full p-3 rounded-xl border text-sm" value={editOrigem} onChange={(e) => setEditOrigem(e.target.value)}>
+                      <option value="VR">VR</option><option value="RIO">RIO</option><option value="SP">SP</option><option value="ALL">ALL</option>
+                    </select>
+                    <div className="flex gap-2">
+                      <button onClick={adminSalvarUsuario} className="flex-1 bg-zinc-900 text-white py-2 rounded-xl font-bold text-xs uppercase">Salvar</button>
+                      <button onClick={() => setUsuarioEmEdicao(null)} className="flex-1 bg-zinc-200 text-zinc-600 py-2 rounded-xl font-bold text-xs uppercase">Cancelar</button>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-            
-            {/* GESTÃO DE COLABORADORES (AIRTABLE) */}
-            <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
-              <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Nuvem (Airtable)</h2>
-              <input type="text" placeholder="CPF" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
-              <input type="text" placeholder="Nome Completo" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
-              <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">
-                {carregando ? "Salvando..." : "Salvar no Airtable"}
-              </button>
-              <div className="max-h-[200px] overflow-y-auto space-y-2 pt-4">
-                {pessoasCadastradas.map(p => (
-                  <div key={p.id} className={`flex justify-between items-center p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50'}`}>
-                    <div>
-                      <p className={`font-bold text-xs ${textMain}`}>{p.nome}</p>
-                      <p className="text-[10px] text-zinc-400">{p.cpf}</p>
+                )}
+                <div className="space-y-2">
+                  {usuariosAutorizados.map(u => (
+                    <div key={u.usuario} className={`flex justify-between items-center p-4 rounded-2xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-100'}`}>
+                      <div>
+                        <p className={`font-black uppercase text-xs ${textMain}`}>{u.usuario}</p>
+                        <p className="text-[9px] text-zinc-400 uppercase font-bold">Senha: {u.senha} | Origem: {u.origem}</p>
+                      </div>
+                      <div className="flex gap-1">
+                        <button onClick={() => { setUsuarioEmEdicao(u.usuario); setEditNome(u.usuario); setEditSenha(u.senha); setEditOrigem(u.origem); }} className="p-2 text-zinc-400 hover:text-blue-500"><Edit3 size={16}/></button>
+                        <button onClick={() => adminExcluirUsuario(u.usuario)} className="p-2 text-zinc-400 hover:text-red-500"><Trash2 size={16}/></button>
+                      </div>
                     </div>
-                    <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         );
 
@@ -548,7 +582,7 @@ export default function TrigofyApp() {
         </main>
 
         <nav className={`absolute bottom-8 left-4 right-4 px-4 py-3 flex justify-between rounded-full shadow-2xl border transition-colors ${temaEscuro ? 'bg-zinc-800/90 border-zinc-700 backdrop-blur-md' : 'bg-white/95 border-zinc-200 backdrop-blur-sm'}`}>
-          <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); }} className={activeTab === 'home' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
+          <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setSubAbaAdmin('menu'); }} className={activeTab === 'home' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
           <button onClick={() => setActiveTab('pedidos')} className={activeTab === 'pedidos' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><ShoppingBag size={22} /></button>
           <button onClick={() => setActiveTab('catalogo')} className={activeTab === 'catalogo' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><BookOpen size={22} /></button>
           <button onClick={() => setActiveTab('config')} className={activeTab === 'config' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><Settings size={22} /></button>
