@@ -80,11 +80,10 @@ export default function TrigofyApp() {
 
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
-  const [novoSite, setNovoSite] = useState(''); 
 
   const salvarNoAirtable = async () => {
-    if (!novoCpf || !novoNome || !novoSite) {
-      alert("Por favor, preencha CPF, Nome e Site.");
+    if (!novoCpf || !novoNome) {
+      alert("Por favor, preencha CPF e Nome.");
       return;
     }
     setCarregando(true);
@@ -98,15 +97,13 @@ export default function TrigofyApp() {
         body: JSON.stringify({
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
-            nome: novoNome.toUpperCase().trim(),
-            site: novoSite.toUpperCase().trim()
+            nome: novoNome.toUpperCase().trim()
           }
         })
       });
       if (response.ok) {
         setNovoCpf('');
         setNovoNome('');
-        setNovoSite('');
         await buscarDadosAirtable();
         alert("✅ Cadastrado com sucesso!");
       }
@@ -356,7 +353,6 @@ export default function TrigofyApp() {
               <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Cadastrar na Nuvem</h2>
               <input type="text" placeholder="CPF" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
               <input type="text" placeholder="Nome Completo" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
-              <input type="text" placeholder="Site (Ex: VR, Rio, SP)" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoSite} onChange={(e) => setNovoSite(e.target.value)} />
               <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">
                 {carregando ? "Salvando..." : "Salvar no Airtable"}
               </button>
@@ -365,7 +361,7 @@ export default function TrigofyApp() {
                   <div key={p.id} className={`flex justify-between items-center p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50'}`}>
                     <div>
                       <p className={`font-bold text-xs ${textMain}`}>{p.nome}</p>
-                      <p className="text-[10px] text-zinc-400">{p.cpf} - <span className="text-yellow-600 font-bold">{p.site}</span></p>
+                      <p className="text-[10px] text-zinc-400">{p.cpf}</p>
                     </div>
                     <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
                   </div>
