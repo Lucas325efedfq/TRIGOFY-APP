@@ -11,6 +11,7 @@ import {
 const AIRTABLE_TOKEN = 'patSTombPP4bmw0AK.43e89e93f885283e025cc1c7636c3af9053c953ca812746652c883757c25cd9a';
 const BASE_ID = 'appj9MPXg5rVQf3zK';
 const TABLE_ID = 'tblcgAQwSPe8NcvRN';
+const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
 
 export default function TrigofyApp() {
   const [estaLogado, setEstaLogado] = useState(false);
@@ -46,9 +47,7 @@ export default function TrigofyApp() {
     { usuario: 'lucas.lopes', senha: '456', origem: 'VR' },
   ]);
 
-  const [produtosLancados, setProdutosLancados] = useState([
-    { id: 1, nome: 'PRODUTO EXEMPLO VR', preco: '10.00', site: 'VR', imagem: '' }
-  ]);
+  const [produtosLancados, setProdutosLancados] = useState([]);
 
   const [novaSenhaInput, setNovaSenhaInput] = useState('');
 
@@ -81,15 +80,16 @@ export default function TrigofyApp() {
   const buscarDadosAirtable = async () => {
     setCarregando(true);
     try {
-      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
+      // BUSCA PESSOAS
+      const resPessoas = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
         headers: { 
           Authorization: `Bearer ${AIRTABLE_TOKEN}`,
           "Content-Type": "application/json"
         }
       });
-      const data = await response.json();
-      if (data.records) {
-        const formatado = data.records.map(reg => ({
+      const dataPessoas = await resPessoas.json();
+      if (dataPessoas.records) {
+        const formatado = dataPessoas.records.map(reg => ({
           id: reg.id,
           cpf: reg.fields.cpf || '',
           nome: reg.fields.nome || '',
@@ -97,6 +97,25 @@ export default function TrigofyApp() {
         }));
         setPessoasCadastradas(formatado);
       }
+
+      // BUSCA PRODUTOS (NOVA INTEGRAÇÃO)
+      const resProdutos = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PRODUTOS}`, {
+        headers: { 
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+          "Content-Type": "application/json"
+        }
+      });
+      const dataProd = await resProdutos.json();
+      if (dataProd.records) {
+        setProdutosLancados(dataProd.records.map(reg => ({
+          id: reg.id,
+          nome: reg.fields.nome || '',
+          preco: reg.fields.preco || '',
+          site: reg.fields.site || '',
+          imagem: reg.fields.imagem || ''
+        })));
+      }
+
     } catch (e) {
       console.error("Erro ao buscar dados:", e);
     }
@@ -256,26 +275,49 @@ export default function TrigofyApp() {
     setProdutoSelecionado(null);
   };
 
-  const handleLancarProduto = () => {
+  const handleLancarProduto = async () => {
     if(!prodNome || !prodPreco) return alert("Preencha o nome e o preço.");
-    
-    const novoProduto = {
-        id: Date.now(),
-        nome: prodNome.toUpperCase(),
-        preco: prodPreco,
-        site: prodSite,
-        imagem: prodImagem
-    };
-
-    setProdutosLancados([...produtosLancados, novoProduto]);
-    alert(`Produto ${prodNome} lançado com sucesso para ${prodSite}!`);
-    setProdNome('');
-    setProdPreco('');
-    setProdImagem('');
+    setCarregando(true);
+    try {
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PRODUTOS}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fields: {
+            nome: prodNome.toUpperCase(),
+            preco: prodPreco,
+            site: prodSite,
+            imagem: prodImagem
+          }
+        })
+      });
+      if (response.ok) {
+        alert(`Produto ${prodNome} lançado no Airtable com sucesso!`);
+        setProdNome('');
+        setProdPreco('');
+        setProdImagem('');
+        await buscarDadosAirtable();
+      }
+    } catch (e) {
+      alert("Erro ao lançar no Airtable.");
+    }
+    setCarregando(false);
   };
 
-  const excluirProduto = (id) => {
-    setProdutosLancados(produtosLancados.filter(p => p.id !== id));
+  const excluirProduto = async (id) => {
+    if (!confirm("Excluir permanentemente do Airtable?")) return;
+    try {
+      await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PRODUTOS}/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
+      });
+      buscarDadosAirtable();
+    } catch (e) {
+      alert("Erro ao excluir.");
+    }
   };
 
   // ==========================================================
@@ -423,7 +465,7 @@ export default function TrigofyApp() {
                 {siteFiltro === 'RIO/SP' ? 'Compras RIO/SP' : 'Compras Volta Redonda'}
               </h2>
 
-              {/* IDENTIFICAÇÃO NO TOPO */}
+              {/* IDENTIFICAÇÃO NO TOPO (CONFORME PEDIDO) */}
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Digite o CPF</label>
                 <input type="text" placeholder="Apenas números" maxLength={11} className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
@@ -433,7 +475,7 @@ export default function TrigofyApp() {
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
 
-              {/* PRODUTOS ABAIXO */}
+              {/* PRODUTOS ABAIXO (CONFORME PEDIDO) */}
               <div className="animate-in fade-in duration-500 space-y-3 border-t pt-4">
                 <label className="text-[10px] font-black text-zinc-400 uppercase italic">Selecione o Produto:</label>
                 <div className="grid grid-cols-1 gap-2">
@@ -614,7 +656,7 @@ export default function TrigofyApp() {
 
             {subAbaAdmin === 'produtos' && (
               <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4 animate-in fade-in`}>
-                <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Lançar Produtos</h2>
+                <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Lançar Produtos (Airtable)</h2>
                 <div className="space-y-4">
                    <input type="text" placeholder="Nome do Produto" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={prodNome} onChange={(e) => setProdNome(e.target.value)} />
                    <input type="text" placeholder="Preço (Ex: 25.00)" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={prodPreco} onChange={(e) => setProdPreco(e.target.value)} />
@@ -631,7 +673,7 @@ export default function TrigofyApp() {
                       </div>
                     </div>
                   </div>
-                  <button onClick={handleLancarProduto} className="w-full bg-zinc-900 text-yellow-400 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">LANÇAR PRODUTO</button>
+                  <button onClick={handleLancarProduto} className="w-full bg-zinc-900 text-yellow-400 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">LANÇAR NO AIRTABLE</button>
                   
                   <div className="pt-4 border-t space-y-2 max-h-[200px] overflow-y-auto">
                     <p className="text-[10px] font-black text-zinc-400 uppercase italic">Produtos em Estoque:</p>
