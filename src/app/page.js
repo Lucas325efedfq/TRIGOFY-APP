@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutGrid, Send, ChevronRight, ShoppingBag, 
-  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User
+  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock
 } from 'lucide-react';
 
 // ==========================================================
@@ -40,11 +40,13 @@ export default function TrigofyApp() {
   // ==========================================================
   // 2. CADASTRO DE USUÁRIOS (LOGINS DO APP COM ORIGEM)
   // ==========================================================
-  const usuariosAutorizados = [
+  const [usuariosAutorizados, setUsuariosAutorizados] = useState([
     { usuario: 'admin', senha: 'T!$&gur001', origem: 'ALL' },
     { usuario: 'lucas.vieira', senha: '123', origem: 'VR' },
     { usuario: 'lucas.lopes', senha: '456', origem: 'VR' },
-  ];
+  ]);
+
+  const [novaSenhaInput, setNovaSenhaInput] = useState('');
 
   // ==========================================================
   // 3. FUNÇÕES DE BANCO DE DADOS (COMUNICAÇÃO COM NUVEM)
@@ -151,11 +153,27 @@ export default function TrigofyApp() {
 
     if (encontrou) {
       setEstaLogado(true);
-      setUsuarioLogadoOrigem(encontrou.origem); // Define a origem do usuário logado
+      setUsuarioLogadoOrigem(encontrou.origem); 
       setErro('');
     } else {
       setErro('Usuário ou senha incorretos.');
     }
+  };
+
+  const alterarSenhaUsuario = () => {
+    if (!novaSenhaInput) {
+      alert("Digite a nova senha.");
+      return;
+    }
+    const novosUsuarios = usuariosAutorizados.map(u => {
+      if (u.usuario === usuarioInput.toLowerCase()) {
+        return { ...u, senha: novaSenhaInput };
+      }
+      return u;
+    });
+    setUsuariosAutorizados(novosUsuarios);
+    setNovaSenhaInput('');
+    alert("Senha alterada com sucesso!");
   };
 
   const enviarMensagemChat = (e) => {
@@ -243,7 +261,6 @@ export default function TrigofyApp() {
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  {/* LÓGICA: Restrição Rio/SP - Bloqueia se o usuário logado for VR */}
                   <div 
                     onClick={() => {
                       if (usuarioLogadoOrigem === 'VR') {
@@ -261,7 +278,6 @@ export default function TrigofyApp() {
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  {/* LÓGICA: Restrição VR - Bloqueia se o usuário logado for RIO ou SP */}
                   <div 
                     onClick={() => {
                       if (usuarioLogadoOrigem === 'RIO' || usuarioLogadoOrigem === 'SP') {
@@ -329,6 +345,26 @@ export default function TrigofyApp() {
                   <p className="text-[10px] text-zinc-400 uppercase">Usuário Ativo</p>
                 </div>
               </div>
+              
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Alterar Senha</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="password" 
+                    placeholder="Nova senha" 
+                    className={`flex-1 p-3 rounded-xl border text-sm outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`}
+                    value={novaSenhaInput}
+                    onChange={(e) => setNovaSenhaInput(e.target.value)}
+                  />
+                  <button 
+                    onClick={alterarSenhaUsuario}
+                    className="bg-zinc-900 text-yellow-400 px-4 rounded-xl font-bold text-xs uppercase"
+                  >
+                    Salvar
+                  </button>
+                </div>
+              </div>
+
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   {temaEscuro ? <Moon className="text-yellow-400" size={20}/> : <Sun className="text-yellow-500" size={20}/>}
