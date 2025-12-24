@@ -21,7 +21,7 @@ export default function TrigofyApp() {
   const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   
-  // NOVO: Estado para controle de tema (Claro/Escuro)
+  // Estado para controle de tema (Claro/Escuro)
   const [temaEscuro, setTemaEscuro] = useState(false);
 
   // Estados para o Chat do Triger
@@ -161,8 +161,8 @@ export default function TrigofyApp() {
   const fazerLogoff = () => {
     setEstaLogado(false);
     setActiveTab('home');
-    setUsuarioInput(''); // Limpa o campo de usuário
-    setSenha('');        // Limpa o campo de senha
+    setUsuarioInput('');
+    setSenha('');
   };
 
   // ==========================================================
@@ -216,34 +216,34 @@ export default function TrigofyApp() {
             <div className="space-y-3">
               {!isAdmin ? (
                 <>
-                  <div onClick={() => setActiveTab('pedidos')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50 transition-all group`}>
+                  <div onClick={() => setActiveTab('pedidos')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
                     <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><ShoppingBag size={20} /></div>
                     <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Meus Pedidos</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  <div onClick={() => setActiveTab('catalogo')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50`}>
+                  <div onClick={() => setActiveTab('catalogo')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                       <img src="/doacao.png" alt="Doação" className="w-full h-full object-contain" />
                     </div>
                     <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Solicitações de doações</div>
-                    <ChevronRight className="text-zinc-300" size={20} />
+                    <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  <div onClick={() => setActiveTab('rio-sp')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50`}>
+                  <div onClick={() => setActiveTab('rio-sp')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                       <img src="/cesta.png" alt="Cesta" className="w-full h-full object-contain" />
                     </div>
                     <div className={`flex-1 font-bold uppercase text-sm leading-tight ${textMain}`}>solicitações de compras RIO/SP</div>
-                    <ChevronRight className="text-zinc-300" size={20} />
+                    <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  <div onClick={() => setActiveTab('novo')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer hover:bg-yellow-50`}>
+                  <div onClick={() => setActiveTab('novo')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                       <img src="/pizza.png" alt="Novo" className="w-full h-full object-contain" />
                     </div>
                     <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Produtos Disponíveis para compras</div>
-                    <ChevronRight className="text-zinc-300" size={20} />
+                    <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
                   <div onClick={() => setActiveTab('suporte')} className="bg-yellow-400 p-4 rounded-2xl shadow-md flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
@@ -369,9 +369,6 @@ export default function TrigofyApp() {
     }
   };
 
-  // ==========================================================
-  // 7. ESTRUTURA VISUAL (HEADER, MAIN E NAV)
-  // ==========================================================
   return (
     <div className={`flex justify-center min-h-screen font-sans transition-colors duration-300 ${temaEscuro ? 'bg-zinc-950 text-white' : 'bg-zinc-200 text-zinc-900'}`}>
       <div className={`w-full max-w-[390px] h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 transition-colors ${temaEscuro ? 'bg-zinc-900' : 'bg-zinc-50'}`}>
