@@ -21,17 +21,11 @@ export default function TrigofyApp() {
   const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   
-  // Controles de Site e Filtro
   const [siteFiltro, setSiteFiltro] = useState(''); 
   const [siteUsuarioIdentificado, setSiteUsuarioIdentificado] = useState('');
-  
-  // Estado para armazenar a origem do usuário que fez login
   const [usuarioLogadoOrigem, setUsuarioLogadoOrigem] = useState('');
-
-  // Estado para controle de tema (Claro/Escuro)
   const [temaEscuro, setTemaEscuro] = useState(false);
 
-  // Estados para o Chat do Triger
   const [mensagens, setMensagens] = useState([
     { id: 1, texto: "Olá! Eu sou o Triger, seu suporte inteligente. Como posso te ajudar hoje?", bot: true }
   ]);
@@ -51,28 +45,17 @@ export default function TrigofyApp() {
   ]);
 
   const [novaSenhaInput, setNovaSenhaInput] = useState('');
-
-  // Controle de sub-telas do Admin
   const [subAbaAdmin, setSubAbaAdmin] = useState('menu'); 
 
-  // Estados para Cadastro de Novo Usuário (Admin)
   const [novoUserLogin, setNovoUserLogin] = useState('');
   const [novoUserSenha, setNovoUserSenha] = useState('');
   const [novoUserOrigem, setNovoUserOrigem] = useState('VR');
 
-  // Estados para Edição de Usuário Existente
-  const [usuarioEmEdicao, setUsuarioEmEdicao] = useState(null);
-  const [editNome, setEditNome] = useState('');
-  const [editSenha, setEditSenha] = useState('');
-  const [editOrigem, setEditOrigem] = useState('');
-
-  // Estados para Cadastro de Produtos (Admin)
   const [prodNome, setProdNome] = useState('');
   const [prodPreco, setProdPreco] = useState('');
   const [prodSite, setProdSite] = useState('VR');
   const [prodImagem, setProdImagem] = useState('');
 
-  // Estados de Compra do Usuário
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
 
   // ==========================================================
@@ -297,7 +280,6 @@ export default function TrigofyApp() {
     const textSub = temaEscuro ? 'text-zinc-400' : 'text-zinc-500';
 
     switch (activeTab) {
-      
       case 'home':
         return (
           <div className="space-y-4 animate-in fade-in duration-500 pb-10">
@@ -410,42 +392,47 @@ export default function TrigofyApp() {
               <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
                 {siteFiltro === 'RIO/SP' ? 'Compras RIO/SP' : 'Compras Volta Redonda'}
               </h2>
-              <div>
-                <label className="text-[10px] font-black text-zinc-400 uppercase">Digite o CPF</label>
-                <input type="text" placeholder="Apenas números" maxLength={11} className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
-              </div>
-              <div>
-                <label className="text-[10px] font-black text-zinc-400 uppercase">Nome do Solicitante</label>
-                <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeEncontrado || "Aguardando CPF..."} />
+              
+              {/* Seção de Produtos - Agora visível imediatamente */}
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-zinc-400 uppercase italic">Selecione o Produto:</label>
+                <div className="grid grid-cols-1 gap-2">
+                  {produtosLancados.filter(p => p.site === siteFiltro).length > 0 ? (
+                      produtosLancados.filter(p => p.site === siteFiltro).map(p => (
+                          <div 
+                              key={p.id} 
+                              onClick={() => setProdutoSelecionado(p.id)}
+                              className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${produtoSelecionado === p.id ? 'border-yellow-500 bg-yellow-50 shadow-inner' : 'border-zinc-100'}`}
+                          >
+                              <div className="w-12 h-12 rounded-lg bg-zinc-100 overflow-hidden flex items-center justify-center border">
+                                  {p.imagem ? <img src={p.imagem} className="w-full h-full object-cover"/> : <Package size={20} className="text-zinc-300"/>}
+                              </div>
+                              <div className="flex-1">
+                                  <p className="text-xs font-black uppercase tracking-tight">{p.nome}</p>
+                                  <p className="text-[10px] font-bold text-yellow-600 italic">R$ {p.preco}</p>
+                              </div>
+                              {produtoSelecionado === p.id && <CheckCircle2 className="text-yellow-500" size={18}/>}
+                          </div>
+                      ))
+                  ) : (
+                      <p className="text-center text-[10px] text-zinc-400 font-bold uppercase italic p-4 border rounded-2xl border-dashed">Nenhum produto disponível nesta região</p>
+                  )}
+                </div>
               </div>
 
-              {nomeEncontrado && (
-                <div className="animate-in fade-in duration-500 space-y-3">
-                  <label className="text-[10px] font-black text-zinc-400 uppercase italic">Selecione o Produto:</label>
-                  <div className="grid grid-cols-1 gap-2">
-                    {produtosLancados.filter(p => p.site === siteFiltro).length > 0 ? (
-                        produtosLancados.filter(p => p.site === siteFiltro).map(p => (
-                            <div 
-                                key={p.id} 
-                                onClick={() => setProdutoSelecionado(p.id)}
-                                className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${produtoSelecionado === p.id ? 'border-yellow-500 bg-yellow-50 shadow-inner' : 'border-zinc-100'}`}
-                            >
-                                <div className="w-12 h-12 rounded-lg bg-zinc-100 overflow-hidden flex items-center justify-center border">
-                                    {p.imagem ? <img src={p.imagem} className="w-full h-full object-cover"/> : <Package size={20} className="text-zinc-300"/>}
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-xs font-black uppercase tracking-tight">{p.nome}</p>
-                                    <p className="text-[10px] font-bold text-yellow-600 italic">R$ {p.preco}</p>
-                                </div>
-                                {produtoSelecionado === p.id && <CheckCircle2 className="text-yellow-500" size={18}/>}
-                            </div>
-                        ))
-                    ) : (
-                        <p className="text-center text-[10px] text-zinc-400 font-bold uppercase italic p-4 border rounded-2xl border-dashed">Nenhum produto disponível nesta região</p>
-                    )}
-                  </div>
+              <hr className="opacity-10" />
+
+              {/* Seção de Identificação */}
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-black text-zinc-400 uppercase">Digite seu CPF</label>
+                  <input type="text" placeholder="Apenas números" maxLength={11} className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
                 </div>
-              )}
+                <div>
+                  <label className="text-[10px] font-black text-zinc-400 uppercase">Seu Nome</label>
+                  <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeEncontrado || "Aguardando CPF..."} />
+                </div>
+              </div>
 
               <button 
                 disabled={!nomeEncontrado || !produtoSelecionado} 
@@ -658,7 +645,7 @@ export default function TrigofyApp() {
         </main>
 
         <nav className={`absolute bottom-8 left-4 right-4 px-4 py-3 flex justify-between rounded-full shadow-2xl border transition-colors ${temaEscuro ? 'bg-zinc-800/90 border-zinc-700 backdrop-blur-md' : 'bg-white/95 border-zinc-200 backdrop-blur-sm'}`}>
-          <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setSubAbaAdmin('menu'); }} className={activeTab === 'home' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
+          <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); setSubAbaAdmin('menu'); }} className={activeTab === 'home' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><LayoutGrid size={22} /></button>
           <button onClick={() => setActiveTab('pedidos')} className={activeTab === 'pedidos' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><ShoppingBag size={22} /></button>
           <button onClick={() => setActiveTab('catalogo')} className={activeTab === 'catalogo' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><BookOpen size={22} /></button>
           <button onClick={() => setActiveTab('config')} className={activeTab === 'config' ? 'text-yellow-500 scale-110' : 'text-zinc-300'}><Settings size={22} /></button>
