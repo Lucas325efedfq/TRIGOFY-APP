@@ -13,6 +13,7 @@ const BASE_ID = 'appj9MPXg5rVQf3zK';
 const TABLE_ID = 'tblcgAQwSPe8NcvRN';
 const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
 const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios
+const TABLE_ID_USUARIOS = 'tblUsuarios'; // Tabela de Usuários
 
 export default function TrigofyApp() {
   const [estaLogado, setEstaLogado] = useState(false);
@@ -44,12 +45,10 @@ export default function TrigofyApp() {
   const [inputChat, setInputChat] = useState('');
 
   // ==========================================================
-  // 2. CADASTRO DE USUÁRIOS E PRODUTOS (AGORA COM FUNÇÃO)
+  // 2. CADASTRO DE USUÁRIOS E PRODUTOS (SINCRONIZADO COM AIRTABLE)
   // ==========================================================
   const [usuariosAutorizados, setUsuariosAutorizados] = useState([
     { usuario: 'admin', senha: 'T!$&gur001', origem: 'ALL', funcao: 'ADMIN' },
-    { usuario: 'lucas.vieira', senha: '123', origem: 'VR', funcao: 'USER' },
-    { usuario: 'lucas.lopes', senha: '456', origem: 'VR', funcao: 'USER' },
   ]);
 
   const [produtosLancados, setProdutosLancados] = useState([]);
@@ -120,6 +119,26 @@ export default function TrigofyApp() {
           site: reg.fields.site || '',
           imagem: reg.fields.imagem || ''
         })));
+      }
+
+      // BUSCA USUÁRIOS NA TABELA tblUsuarios
+      const resUsers = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_USUARIOS}`, {
+        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
+      });
+      const dataUsers = await resUsers.json();
+      if (dataUsers.records) {
+        const usersCarregados = dataUsers.records.map(reg => ({
+          id: reg.id,
+          usuario: reg.fields.usuario || '',
+          senha: reg.fields.senha || '',
+          origem: reg.fields.origem || 'VR',
+          funcao: reg.fields.funcao || 'USER'
+        }));
+        // Junta o admin master fixo com os do banco
+        setUsuariosAutorizados([
+          { usuario: 'admin', senha: 'T!$&gur001', origem: 'ALL', funcao: 'ADMIN' },
+          ...usersCarregados
+        ]);
       }
 
     } catch (e) {
@@ -281,20 +300,44 @@ export default function TrigofyApp() {
     }
   };
 
-  const cadastrarNovoUsuarioSistema = () => {
+  const cadastrarNovoUsuarioSistema = async () => {
     if (!novoUserLogin || !novoUserSenha) return alert("Preencha login e senha.");
     const existe = usuariosAutorizados.find(u => u.usuario === novoUserLogin.toLowerCase());
     if (existe) return alert("Este usuário já existe.");
 
-    const novo = { usuario: novoUserLogin.toLowerCase(), senha: novoUserSenha, origem: novoUserOrigem, funcao: novoUserFuncao };
-    setUsuariosAutorizados([...usuariosAutorizados, novo]);
-    setNovoUserLogin('');
-    setNovoUserSenha('');
-    alert("Usuário cadastrado com sucesso!");
-    setSubAbaAdmin('lista'); 
+    setCarregando(true);
+    try {
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_USUARIOS}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fields: {
+            usuario: novoUserLogin.toLowerCase(),
+            senha: novoUserSenha,
+            origem: novoUserOrigem,
+            funcao: novoUserFuncao
+          }
+        })
+      });
+
+      if (response.ok) {
+        alert("Usuário cadastrado com sucesso no Airtable!");
+        setNovoUserLogin('');
+        setNovoUserSenha('');
+        await buscarDadosAirtable();
+        setSubAbaAdmin('lista'); 
+      }
+    } catch (e) {
+      alert("Erro ao salvar usuário.");
+    }
+    setCarregando(false);
   };
 
   const adminSalvarUsuario = () => {
+    // Mantido conforme pedido
     const novos = usuariosAutorizados.map(u => {
       if (u.usuario === usuarioEmEdicao) {
         return { usuario: editNome.toLowerCase(), senha: editSenha, origem: editOrigem };
@@ -306,10 +349,26 @@ export default function TrigofyApp() {
     alert("Dados do usuário atualizados!");
   };
 
-  const adminExcluirUsuario = (user) => {
+  const adminExcluirUsuario = async (user) => {
     if (user === 'admin') return alert("Não é possível remover o acesso do administrador.");
     if (!confirm(`Excluir login de ${user}?`)) return;
-    setUsuariosAutorizados(usuariosAutorizados.filter(u => u.usuario !== user));
+
+    // Localiza o ID no Airtable
+    const uNoBanco = usuariosAutorizados.find(u => u.usuario === user);
+    if (uNoBanco && uNoBanco.id) {
+        try {
+            await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_USUARIOS}/${uNoBanco.id}`, {
+              method: 'DELETE',
+              headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
+            });
+            buscarDadosAirtable();
+        } catch (e) {
+            alert("Erro ao excluir do Airtable.");
+        }
+    } else {
+        // Fallback local caso não tenha ID (usuarios mockados)
+        setUsuariosAutorizados(usuariosAutorizados.filter(u => u.usuario !== user));
+    }
   };
 
   const alterarSenhaUsuario = () => {
@@ -376,7 +435,7 @@ export default function TrigofyApp() {
         setProdNome('');
         setProdPreco('');
         setProdImagem('');
-        await buscarDadosAirtable(); // Atualiza a lista vindo do banco
+        await buscarDadosAirtable(); 
       }
     } catch (e) {
       alert("Erro ao lançar no Airtable.");
@@ -418,7 +477,7 @@ export default function TrigofyApp() {
         },
         body: JSON.stringify({
           fields: {
-            "solicitante": usuarioInput, // SALVA O LOGIN (lucas.vieira) PARA FILTRAGEM CORRETA
+            "solicitante": usuarioInput, 
             "cpf": cpfDigitado.replace(/\D/g, ''),
             "produto": prod.nome,
             "valor": prod.preco.toString(),
