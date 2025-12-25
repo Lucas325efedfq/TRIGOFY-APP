@@ -322,7 +322,7 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
-  // NOVA FUNÇÃO: ENVIAR PEDIDO PARA RELATÓRIO (MODIFICAÇÃO SOLICITADA)
+  // REAJUSTE DA FUNÇÃO: ENVIAR PEDIDO PARA RELATÓRIO
   // ==========================================================
   const handleEnviarPedidoReal = async () => {
     if (!nomeEncontrado || !produtoSelecionado) return;
@@ -332,6 +332,9 @@ export default function TrigofyApp() {
 
     setCarregando(true);
     try {
+      // Ajuste de data para o formato aceito pelo Airtable (YYYY-MM-DD)
+      const dataISO = new Date().toISOString().split('T')[0];
+
       const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
         method: 'POST',
         headers: { 
@@ -340,12 +343,12 @@ export default function TrigofyApp() {
         },
         body: JSON.stringify({
           fields: {
-            solicitante: nomeEncontrado,
-            cpf: cpfDigitado.replace(/\D/g, ''),
-            produto: prod.nome,
-            valor: prod.preco,
-            site: siteFiltro,
-            data: new Date().toLocaleDateString('pt-BR')
+            "solicitante": nomeEncontrado,
+            "cpf": cpfDigitado.replace(/\D/g, ''),
+            "produto": prod.nome,
+            "valor": prod.preco.toString(), // Garante que vá como texto se a coluna for texto
+            "site": siteFiltro,
+            "data": dataISO
           }
         })
       });
@@ -356,7 +359,9 @@ export default function TrigofyApp() {
         setProdutoSelecionado(null);
         setActiveTab('home');
       } else {
-        alert("Erro ao enviar para o Airtable. Verifique se a tabela tblPedidos existe.");
+        const erroLog = await response.json();
+        console.error(erroLog);
+        alert("Erro no Airtable: " + (erroLog.error?.message || "Verifique a tabela tblPedidos"));
       }
     } catch (e) {
       alert("Erro de conexão.");
