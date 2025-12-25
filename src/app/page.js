@@ -608,8 +608,8 @@ export default function TrigofyApp() {
                 {meusPedidosHistorico.map(p => (
                   <div key={p.id} className={`${bgCard} p-4 rounded-2xl border shadow-sm flex flex-col gap-1`}>
                     <div className="flex justify-between items-start">
-                      <span className="text-[10px] font-black text-yellow-600 uppercase tracking-tighter bg-yellow-50 px-2 py-0.5 rounded-full">{p.site}</span>
-                      <div className="flex items-center gap-1 text-zinc-400">
+                      {/* REMOVIDO: AQUI APARECIA A INFORMAÇÃO DO SITE QUE VOCÊ MARCOU PARA RETIRAR */}
+                      <div className="flex items-center gap-1 text-zinc-400 w-full justify-end">
                         <Clock size={10}/>
                         <span className="text-[10px] font-bold">{p.data}</span>
                       </div>
