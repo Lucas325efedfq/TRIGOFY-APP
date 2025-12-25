@@ -15,7 +15,7 @@ const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
 const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios
 
 // CONFIGURAÇÃO DOS APROVADORES (WHATSAPP)
-const TELEFONE_APROVADOR = "5524999999999"; // Substitua pelo número real com DDD
+const TELEFONE_APROVADOR = "552435110169"; // Substitua pelo número real com DDD
 
 export default function TrigofyApp() {
   const [estaLogado, setEstaLogado] = useState(false);
