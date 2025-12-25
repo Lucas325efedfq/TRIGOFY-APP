@@ -14,9 +14,6 @@ const TABLE_ID = 'tblcgAQwSPe8NcvRN';
 const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
 const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios
 
-// CONFIGURAÇÃO DOS APROVADORES (WHATSAPP)
-const TELEFONE_APROVADOR = "552435110169"; // Substitua pelo número real com DDD
-
 export default function TrigofyApp() {
   const [estaLogado, setEstaLogado] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
@@ -433,10 +430,6 @@ export default function TrigofyApp() {
       });
 
       if (response.ok) {
-        // NOTIFICAÇÃO WHATSAPP COM STATUS
-        const textoWhats = `*NOVA SOLICITAÇÃO - TRIGOFY*%0A%0A*Solicitante:* ${nomeEncontrado}%0A*Produto:* ${prod.nome}%0A*Valor:* R$ ${prod.preco}%0A*Região:* ${siteFiltro}%0A*Status:* PENDENTE`;
-        window.open(`https://wa.me/${TELEFONE_APROVADOR}?text=${textoWhats}`, '_blank');
-
         alert("✅ PEDIDO REGISTRADO NO RELATÓRIO COM SUCESSO!");
         setCpfDigitado('');
         setProdutoSelecionado(null);
