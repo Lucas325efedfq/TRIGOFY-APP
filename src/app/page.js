@@ -12,6 +12,7 @@ const AIRTABLE_TOKEN = 'patSTombPP4bmw0AK.43e89e93f885283e025cc1c7636c3af9053c95
 const BASE_ID = 'appj9MPXg5rVQf3zK';
 const TABLE_ID = 'tblcgAQwSPe8NcvRN';
 const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
+const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios
 
 export default function TrigofyApp() {
   const [estaLogado, setEstaLogado] = useState(false);
@@ -321,6 +322,49 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
+  // NOVA FUNÇÃO: ENVIAR PEDIDO PARA RELATÓRIO (MODIFICAÇÃO SOLICITADA)
+  // ==========================================================
+  const handleEnviarPedidoReal = async () => {
+    if (!nomeEncontrado || !produtoSelecionado) return;
+    
+    const prod = produtosLancados.find(p => p.id === produtoSelecionado);
+    if (!prod) return;
+
+    setCarregando(true);
+    try {
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
+        method: 'POST',
+        headers: { 
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`, 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({
+          fields: {
+            solicitante: nomeEncontrado,
+            cpf: cpfDigitado.replace(/\D/g, ''),
+            produto: prod.nome,
+            valor: prod.preco,
+            site: siteFiltro,
+            data: new Date().toLocaleDateString('pt-BR')
+          }
+        })
+      });
+
+      if (response.ok) {
+        alert("✅ PEDIDO REGISTRADO NO RELATÓRIO COM SUCESSO!");
+        setCpfDigitado('');
+        setProdutoSelecionado(null);
+        setActiveTab('home');
+      } else {
+        alert("Erro ao enviar para o Airtable. Verifique se a tabela tblPedidos existe.");
+      }
+    } catch (e) {
+      alert("Erro de conexão.");
+    }
+    setCarregando(false);
+  };
+
+  // ==========================================================
   // 5. TELA DE LOGIN
   // ==========================================================
   if (!estaLogado) {
@@ -502,12 +546,13 @@ export default function TrigofyApp() {
                 </div>
               </div>
 
+              {/* BOTAÃO COM A NOVA FUNÇÃO DE ENVIO REAL */}
               <button 
-                disabled={!nomeEncontrado || !produtoSelecionado} 
-                onClick={() => alert("✅ Pedido enviado com sucesso!")}
+                disabled={!nomeEncontrado || !produtoSelecionado || carregando} 
+                onClick={handleEnviarPedidoReal}
                 className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtoSelecionado ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
               >
-                ENVIAR PEDIDO
+                {carregando ? "ENVIANDO..." : "ENVIAR PEDIDO"}
               </button>
             </div>
           </div>
