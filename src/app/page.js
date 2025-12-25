@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutGrid, Send, ChevronRight, ShoppingBag, 
-  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus, Database, Users, Package, Image as ImageIcon, CheckCircle2
+  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus, Database, Users, Package, Image as ImageIcon, CheckCircle2, Clock
 } from 'lucide-react';
 
 // ==========================================================
@@ -32,6 +32,9 @@ export default function TrigofyApp() {
 
   // Estado para controle de tema (Claro/Escuro)
   const [temaEscuro, setTemaEscuro] = useState(false);
+
+  // Estados para o Histórico de Pedidos Pessoal
+  const [meusPedidosHistorico, setMeusPedidosHistorico] = useState([]);
 
   // Estados para o Chat do Triger
   const [mensagens, setMensagens] = useState([
@@ -123,9 +126,38 @@ export default function TrigofyApp() {
     setCarregando(false);
   };
 
+  // FUNÇÃO PARA BUSCAR MEUS PEDIDOS FILTRADOS PELO LOGIN
+  const buscarMeusPedidos = async () => {
+    setCarregando(true);
+    try {
+      const formula = encodeURIComponent(`{solicitante} = '${usuarioInput}'`);
+      const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}?filterByFormula=${formula}`, {
+        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
+      });
+      const data = await res.json();
+      if (data.records) {
+        setMeusPedidosHistorico(data.records.map(r => ({
+          id: r.id,
+          produto: r.fields.produto,
+          valor: r.fields.valor,
+          data: r.fields.data,
+          site: r.fields.site
+        })));
+      }
+    } catch (e) { console.error("Erro ao carregar pedidos:", e); }
+    setCarregando(false);
+  };
+
   useEffect(() => {
     buscarDadosAirtable();
   }, []);
+
+  // Monitora a aba de pedidos
+  useEffect(() => {
+    if (activeTab === 'pedidos' && estaLogado) {
+      buscarMeusPedidos();
+    }
+  }, [activeTab]);
 
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
@@ -274,6 +306,7 @@ export default function TrigofyApp() {
     setUsuarioLogadoOrigem('');
     setCpfDigitado('');
     setProdutoSelecionado(null);
+    setMeusPedidosHistorico([]);
   };
 
   const handleLancarProduto = async () => {
@@ -332,7 +365,6 @@ export default function TrigofyApp() {
 
     setCarregando(true);
     try {
-      // Ajuste de data para o formato aceito pelo Airtable (YYYY-MM-DD)
       const dataISO = new Date().toISOString().split('T')[0];
 
       const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
@@ -343,10 +375,10 @@ export default function TrigofyApp() {
         },
         body: JSON.stringify({
           fields: {
-            "solicitante": nomeEncontrado,
+            "solicitante": usuarioInput, // SALVA O LOGIN (lucas.vieira) PARA FILTRAGEM CORRETA
             "cpf": cpfDigitado.replace(/\D/g, ''),
             "produto": prod.nome,
-            "valor": prod.preco.toString(), // Garante que vá como texto se a coluna for texto
+            "valor": prod.preco.toString(),
             "site": siteFiltro,
             "data": dataISO
           }
@@ -360,8 +392,7 @@ export default function TrigofyApp() {
         setActiveTab('home');
       } else {
         const erroLog = await response.json();
-        console.error(erroLog);
-        alert("Erro no Airtable: " + (erroLog.error?.message || "Verifique a tabela tblPedidos"));
+        alert("Erro no Airtable: " + (erroLog.error?.message || "Erro na tabela"));
       }
     } catch (e) {
       alert("Erro de conexão.");
@@ -563,14 +594,37 @@ export default function TrigofyApp() {
           </div>
         );
 
+      // ==========================================================
+      // ABA MEUS PEDIDOS (LISTAGEM REAL)
+      // ==========================================================
       case 'pedidos':
         return (
-          <div className="animate-in slide-in-from-right duration-300">
+          <div className="animate-in slide-in-from-right duration-300 pb-20">
             <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Meus Pedidos</h2>
-            <div className={`${bgCard} p-8 rounded-3xl border shadow-sm text-center space-y-3`}>
-              <ShoppingBag className="mx-auto text-zinc-200" size={48} />
-              <p className={`font-bold text-sm ${textSub}`}>Você ainda não possui pedidos realizados.</p>
-            </div>
+            {carregando ? (
+              <p className="text-center font-bold text-xs animate-pulse">Carregando histórico...</p>
+            ) : meusPedidosHistorico.length > 0 ? (
+              <div className="space-y-3">
+                {meusPedidosHistorico.map(p => (
+                  <div key={p.id} className={`${bgCard} p-4 rounded-2xl border shadow-sm flex flex-col gap-1`}>
+                    <div className="flex justify-between items-start">
+                      <span className="text-[10px] font-black text-yellow-600 uppercase tracking-tighter bg-yellow-50 px-2 py-0.5 rounded-full">{p.site}</span>
+                      <div className="flex items-center gap-1 text-zinc-400">
+                        <Clock size={10}/>
+                        <span className="text-[10px] font-bold">{p.data}</span>
+                      </div>
+                    </div>
+                    <p className={`font-black text-sm uppercase ${textMain}`}>{p.produto}</p>
+                    <p className="text-xs font-bold text-zinc-400">VALOR: R$ {p.valor}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className={`${bgCard} p-8 rounded-3xl border shadow-sm text-center space-y-3`}>
+                <ShoppingBag className="mx-auto text-zinc-200" size={48} />
+                <p className={`font-bold text-sm ${textSub}`}>Você ainda não possui pedidos realizados.</p>
+              </div>
+            )}
           </div>
         );
 
