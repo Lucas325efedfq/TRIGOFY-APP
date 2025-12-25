@@ -594,6 +594,7 @@ export default function TrigofyApp() {
       case 'aprovacoes':
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
+            <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Aprovar Pedidos</h2>
             {carregando ? (
               <p className="text-center font-bold text-xs animate-pulse">Buscando pedidos pendentes...</p>
@@ -683,6 +684,7 @@ export default function TrigofyApp() {
       case 'pedidos':
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
+            <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Meus Pedidos</h2>
             {carregando ? (
               <p className="text-center font-bold text-xs animate-pulse">Carregando histórico...</p>
@@ -719,7 +721,8 @@ export default function TrigofyApp() {
 
       case 'catalogo':
         return (
-          <div className="animate-in slide-in-from-right duration-300">
+          <div className="animate-in slide-in-from-right duration-300 pb-20">
+            <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Doações</h2>
             <div className={`${bgCard} p-8 rounded-3xl border shadow-sm text-center space-y-3`}>
               <BookOpen className="mx-auto text-zinc-200" size={48} />
@@ -730,7 +733,8 @@ export default function TrigofyApp() {
 
       case 'suporte':
         return (
-          <div className="flex flex-col h-full animate-in slide-in-from-right duration-300">
+          <div className="flex flex-col h-full animate-in slide-in-from-right duration-300 pb-20">
+            <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-4`}>← Voltar</button>
             <div className="flex-1 space-y-4 mb-4">
               {mensagens.map(m => (
                 <div key={m.id} className={`flex ${m.bot ? 'justify-start' : 'justify-end'}`}>
@@ -749,7 +753,8 @@ export default function TrigofyApp() {
 
       case 'config':
         return (
-          <div className="animate-in slide-in-from-bottom duration-300 space-y-4">
+          <div className="animate-in slide-in-from-bottom duration-300 space-y-4 pb-20">
+            <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <h2 className={`text-xl font-black uppercase italic ${textMain}`}>Configurações</h2>
             <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-6`}>
               <div className="flex items-center gap-4 border-b pb-4 border-zinc-100 dark:border-zinc-700">
