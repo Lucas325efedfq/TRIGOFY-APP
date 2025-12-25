@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutGrid, Send, ChevronRight, ShoppingBag, 
-  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus, Database, Users, Package, Image as ImageIcon, CheckCircle2, Clock, AlertCircle, XCircle
+  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus, Database, Users, Package, Image as ImageIcon, CheckCircle2, Clock, AlertCircle, XCircle, Check, X
 } from 'lucide-react';
 
 // ==========================================================
@@ -36,8 +36,9 @@ export default function TrigofyApp() {
   // Estado para controle de tema (Claro/Escuro)
   const [temaEscuro, setTemaEscuro] = useState(false);
 
-  // Estados para o Histórico de Pedidos Pessoal
+  // Estados para o Histórico de Pedidos Pessoal e Pedidos para Aprovar
   const [meusPedidosHistorico, setMeusPedidosHistorico] = useState([]);
+  const [pedidosParaAprovar, setPedidosParaAprovar] = useState([]);
 
   // Estados para o Chat do Triger
   const [mensagens, setMensagens] = useState([
@@ -46,12 +47,12 @@ export default function TrigofyApp() {
   const [inputChat, setInputChat] = useState('');
 
   // ==========================================================
-  // 2. CADASTRO DE USUÁRIOS E PRODUTOS
+  // 2. CADASTRO DE USUÁRIOS E PRODUTOS (AGORA COM FUNÇÃO)
   // ==========================================================
   const [usuariosAutorizados, setUsuariosAutorizados] = useState([
-    { usuario: 'admin', senha: 'T!$&gur001', origem: 'ALL' },
-    { usuario: 'lucas.vieira', senha: '123', origem: 'VR' },
-    { usuario: 'lucas.lopes', senha: '456', origem: 'VR' },
+    { usuario: 'admin', senha: 'T!$&gur001', origem: 'ALL', funcao: 'ADMIN' },
+    { usuario: 'lucas.vieira', senha: '123', origem: 'VR', funcao: 'USER' },
+    { usuario: 'lucas.lopes', senha: '456', origem: 'VR', funcao: 'USER' },
   ]);
 
   const [produtosLancados, setProdutosLancados] = useState([]);
@@ -65,6 +66,7 @@ export default function TrigofyApp() {
   const [novoUserLogin, setNovoUserLogin] = useState('');
   const [novoUserSenha, setNovoUserSenha] = useState('');
   const [novoUserOrigem, setNovoUserOrigem] = useState('VR');
+  const [novoUserFuncao, setNovoUserFuncao] = useState('USER'); // Nova Função
 
   // Estados para Edição de Usuário Existente
   const [usuarioEmEdicao, setUsuarioEmEdicao] = useState(null);
@@ -152,15 +154,54 @@ export default function TrigofyApp() {
     setCarregando(false);
   };
 
+  // FUNÇÃO PARA BUSCAR PEDIDOS PENDENTES (PARA APROVADORES)
+  const buscarPedidosPendentes = async () => {
+    setCarregando(true);
+    try {
+      const formula = encodeURIComponent(`{status} = 'PENDENTE'`);
+      const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}?filterByFormula=${formula}`, {
+        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
+      });
+      const data = await res.json();
+      if (data.records) {
+        setPedidosParaAprovar(data.records.map(r => ({
+          id: r.id,
+          solicitante: r.fields.solicitante,
+          produto: r.fields.produto,
+          valor: r.fields.valor,
+          data: r.fields.data,
+          site: r.fields.site
+        })));
+      }
+    } catch (e) { console.error("Erro ao buscar pendentes:", e); }
+    setCarregando(false);
+  };
+
+  // FUNÇÃO PARA ATUALIZAR STATUS (APROVAR/REPROVAR)
+  const atualizarStatusPedido = async (id, novoStatus) => {
+    setCarregando(true);
+    try {
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}/${id}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { status: novoStatus } })
+      });
+      if (response.ok) {
+        alert(`Pedido ${novoStatus} com sucesso!`);
+        buscarPedidosPendentes();
+      }
+    } catch (e) { alert("Erro ao atualizar status."); }
+    setCarregando(false);
+  };
+
   useEffect(() => {
     buscarDadosAirtable();
   }, []);
 
-  // Monitora a aba de pedidos
+  // Monitora abas de pedidos e aprovações
   useEffect(() => {
-    if (activeTab === 'pedidos' && estaLogado) {
-      buscarMeusPedidos();
-    }
+    if (activeTab === 'pedidos' && estaLogado) buscarMeusPedidos();
+    if (activeTab === 'aprovacoes' && estaLogado) buscarPedidosPendentes();
   }, [activeTab]);
 
   const [novoCpf, setNovoCpf] = useState('');
@@ -248,7 +289,7 @@ export default function TrigofyApp() {
     const existe = usuariosAutorizados.find(u => u.usuario === novoUserLogin.toLowerCase());
     if (existe) return alert("Este usuário já existe.");
 
-    const novo = { usuario: novoUserLogin.toLowerCase(), senha: novoUserSenha, origem: novoUserOrigem };
+    const novo = { usuario: novoUserLogin.toLowerCase(), senha: novoUserSenha, origem: novoUserOrigem, funcao: novoUserFuncao };
     setUsuariosAutorizados([...usuariosAutorizados, novo]);
     setNovoUserLogin('');
     setNovoUserSenha('');
@@ -311,6 +352,7 @@ export default function TrigofyApp() {
     setCpfDigitado('');
     setProdutoSelecionado(null);
     setMeusPedidosHistorico([]);
+    setPedidosParaAprovar([]);
   };
 
   const handleLancarProduto = async () => {
@@ -434,7 +476,10 @@ export default function TrigofyApp() {
   // 6. CONTEÚDO PRINCIPAL (RENDERIZAÇÃO DE ABAS)
   // ==========================================================
   const renderContent = () => {
-    const isAdmin = usuarioInput.toLowerCase() === 'admin';
+    const dadosUserLogado = usuariosAutorizados.find(u => u.usuario === usuarioInput.toLowerCase());
+    const isAdmin = dadosUserLogado?.funcao === 'ADMIN';
+    const isAprovador = dadosUserLogado?.funcao === 'APROVADOR' || isAdmin;
+
     const bgCard = temaEscuro ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-zinc-200';
     const textMain = temaEscuro ? 'text-white' : 'text-zinc-900';
     const textSub = temaEscuro ? 'text-zinc-400' : 'text-zinc-500';
@@ -455,9 +500,17 @@ export default function TrigofyApp() {
             </div>
 
             <h3 className={`font-extrabold text-lg px-2 mt-6 uppercase italic tracking-tighter ${textMain}`}>
-              {isAdmin ? 'Controle Admin' : 'Ações Rápidas'}
+              Ações Rápidas
             </h3>
             <div className="space-y-3">
+              {isAprovador && (
+                <div onClick={() => setActiveTab('aprovacoes')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm border border-zinc-800 flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
+                  <div className="bg-yellow-500 p-3 rounded-full text-zinc-900"><CheckCircle2 size={20} /></div>
+                  <div className="flex-1 font-bold uppercase text-sm text-yellow-500 tracking-tighter">Painel de Aprovações</div>
+                  <ChevronRight className="text-yellow-500" size={20} />
+                </div>
+              )}
+
               {isAdmin ? (
                 <>
                   <div onClick={() => { setSubAbaAdmin('nuvem'); setActiveTab('admin-painel'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer active:scale-95 transition-all`}>
@@ -545,6 +598,40 @@ export default function TrigofyApp() {
           </div>
         );
 
+      case 'aprovacoes':
+        return (
+          <div className="animate-in slide-in-from-right duration-300 pb-20">
+            <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Aprovar Pedidos</h2>
+            {carregando ? (
+              <p className="text-center font-bold text-xs animate-pulse">Buscando pedidos pendentes...</p>
+            ) : pedidosParaAprovar.length > 0 ? (
+              <div className="space-y-3">
+                {pedidosParaAprovar.map(p => (
+                  <div key={p.id} className={`${bgCard} p-4 rounded-2xl border shadow-sm space-y-3`}>
+                    <div>
+                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">Solicitante: {p.solicitante}</p>
+                      <p className={`font-black text-sm uppercase ${textMain}`}>{p.produto}</p>
+                      <p className="text-xs font-bold text-yellow-600">R$ {p.valor} | {p.site}</p>
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <button onClick={() => atualizarStatusPedido(p.id, 'APROVADO')} className="flex-1 bg-green-500 text-white py-2 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 active:scale-95 transition-all">
+                        <Check size={14}/> Aprovar
+                      </button>
+                      <button onClick={() => atualizarStatusPedido(p.id, 'REPROVADO')} className="flex-1 bg-red-500 text-white py-2 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 active:scale-95 transition-all">
+                        <X size={14}/> Reprovar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className={`${bgCard} p-8 rounded-3xl border shadow-sm text-center`}>
+                <p className={`font-bold text-sm ${textSub}`}>Nenhum pedido pendente para aprovação.</p>
+              </div>
+            )}
+          </div>
+        );
+
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
@@ -554,7 +641,6 @@ export default function TrigofyApp() {
                 {siteFiltro === 'RIO/SP' ? 'Compras RIO/SP' : 'Compras Volta Redonda'}
               </h2>
 
-              {/* IDENTIFICAÇÃO NO TOPO (CONFORME PEDIDO) */}
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Digite o CPF</label>
                 <input type="text" placeholder="Apenas números" maxLength={11} className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={cpfDigitado} onChange={(e) => setCpfDigitado(e.target.value)} />
@@ -564,7 +650,6 @@ export default function TrigofyApp() {
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
 
-              {/* PRODUTOS ABAIXO (CONFORME PEDIDO) */}
               <div className="animate-in fade-in duration-500 space-y-3 border-t pt-4">
                 <label className="text-[10px] font-black text-zinc-400 uppercase italic">Selecione o Produto:</label>
                 <div className="grid grid-cols-1 gap-2">
@@ -591,7 +676,6 @@ export default function TrigofyApp() {
                 </div>
               </div>
 
-              {/* BOTAÃO COM A NOVA FUNÇÃO DE ENVIO REAL */}
               <button 
                 disabled={!nomeEncontrado || !produtoSelecionado || carregando} 
                 onClick={handleEnviarPedidoReal}
@@ -603,9 +687,6 @@ export default function TrigofyApp() {
           </div>
         );
 
-      // ==========================================================
-      // ABA MEUS PEDIDOS (LISTAGEM REAL)
-      // ==========================================================
       case 'pedidos':
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
@@ -617,7 +698,6 @@ export default function TrigofyApp() {
                 {meusPedidosHistorico.map(p => (
                   <div key={p.id} className={`${bgCard} p-4 rounded-2xl border shadow-sm flex flex-col gap-1`}>
                     <div className="flex justify-between items-start">
-                      {/* STATUS DINÂMICO */}
                       <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest ${
                         p.status === 'APROVADO' ? 'bg-green-100 text-green-700' : 
                         p.status === 'REPROVADO' ? 'bg-red-100 text-red-700' : 
@@ -751,6 +831,11 @@ export default function TrigofyApp() {
                   <option value="SP">São Paulo (SP)</option>
                   <option value="ALL">Administrador (ALL)</option>
                 </select>
+                <select className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={novoUserFuncao} onChange={(e) => setNovoUserFuncao(e.target.value)}>
+                  <option value="USER">USUÁRIO COMUM</option>
+                  <option value="APROVADOR">APROVADOR</option>
+                  <option value="ADMIN">ADMINISTRADOR TOTAL</option>
+                </select>
                 <button onClick={cadastrarNovoUsuarioSistema} className="w-full bg-zinc-900 text-yellow-400 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">CADASTRAR ACESSO</button>
               </div>
             )}
@@ -763,7 +848,7 @@ export default function TrigofyApp() {
                     <div key={u.usuario} className={`flex justify-between items-center p-4 rounded-2xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-100'}`}>
                       <div>
                         <p className={`font-black uppercase text-xs ${textMain}`}>{u.usuario}</p>
-                        <p className="text-[9px] text-zinc-400 uppercase font-bold">Senha: {u.senha} | Origem: {u.origem}</p>
+                        <p className="text-[9px] text-zinc-400 uppercase font-bold">Função: {u.funcao} | Origem: {u.origem}</p>
                       </div>
                       <div className="flex gap-1">
                         <button onClick={() => adminExcluirUsuario(u.usuario)} className="p-2 text-zinc-400 hover:text-red-500"><Trash2 size={16}/></button>
