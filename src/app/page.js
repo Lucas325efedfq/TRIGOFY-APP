@@ -98,7 +98,7 @@ export default function TrigofyApp() {
         setPessoasCadastradas(formatado);
       }
 
-      // BUSCA PRODUTOS (NOVA INTEGRAÇÃO)
+      // BUSCA PRODUTOS (INTEGRAÇÃO TABELA tblProdutos)
       const resProdutos = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PRODUTOS}`, {
         headers: { 
           Authorization: `Bearer ${AIRTABLE_TOKEN}`,
@@ -299,7 +299,7 @@ export default function TrigofyApp() {
         setProdNome('');
         setProdPreco('');
         setProdImagem('');
-        await buscarDadosAirtable();
+        await buscarDadosAirtable(); // Atualiza a lista vindo do banco
       }
     } catch (e) {
       alert("Erro ao lançar no Airtable.");
@@ -673,7 +673,9 @@ export default function TrigofyApp() {
                       </div>
                     </div>
                   </div>
-                  <button onClick={handleLancarProduto} className="w-full bg-zinc-900 text-yellow-400 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">LANÇAR NO AIRTABLE</button>
+                  <button onClick={handleLancarProduto} className="w-full bg-zinc-900 text-yellow-400 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">
+                    {carregando ? "Lançando..." : "LANÇAR NO AIRTABLE"}
+                  </button>
                   
                   <div className="pt-4 border-t space-y-2 max-h-[200px] overflow-y-auto">
                     <p className="text-[10px] font-black text-zinc-400 uppercase italic">Produtos em Estoque:</p>
