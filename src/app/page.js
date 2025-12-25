@@ -38,6 +38,14 @@ export default function TrigofyApp() {
   const [meusPedidosHistorico, setMeusPedidosHistorico] = useState([]);
   const [pedidosParaAprovar, setPedidosParaAprovar] = useState([]);
 
+  // SISTEMA DE NOTIFICAÇÃO (TOAST)
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
+  };
+
   // Estados para o Chat do Triger
   const [mensagens, setMensagens] = useState([
     { id: 1, texto: "Olá! Eu sou o Triger, seu suporte inteligente. Como posso te ajudar hoje?", bot: true }
@@ -203,10 +211,10 @@ export default function TrigofyApp() {
         body: JSON.stringify({ fields: { status: novoStatus } })
       });
       if (response.ok) {
-        alert(`Pedido ${novoStatus} com sucesso!`);
+        showToast(`Pedido ${novoStatus} com sucesso!`, 'success');
         buscarPedidosPendentes();
       }
-    } catch (e) { alert("Erro ao atualizar status."); }
+    } catch (e) { showToast("Erro ao atualizar status.", "error"); }
     setCarregando(false);
   };
 
@@ -225,7 +233,7 @@ export default function TrigofyApp() {
 
   const salvarNoAirtable = async () => {
     if (!novoCpf || !novoNome) {
-      alert("Por favor, preencha CPF e Nome.");
+      showToast("Por favor, preencha CPF e Nome.", "error");
       return;
     }
     setCarregando(true);
@@ -247,10 +255,10 @@ export default function TrigofyApp() {
         setNovoCpf('');
         setNovoNome('');
         await buscarDadosAirtable();
-        alert("✅ Cadastrado com sucesso!");
+        showToast("✅ Cadastrado com sucesso!", "success");
       }
     } catch (e) {
-      alert("Erro ao salvar.");
+      showToast("Erro ao salvar.", "error");
     }
     setCarregando(false);
   };
@@ -262,9 +270,10 @@ export default function TrigofyApp() {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
       });
+      showToast("Removido com sucesso!", "success");
       buscarDadosAirtable();
     } catch (e) {
-      alert("Erro ao excluir.");
+      showToast("Erro ao excluir.", "error");
     }
   };
 
@@ -295,15 +304,17 @@ export default function TrigofyApp() {
       setEstaLogado(true);
       setUsuarioLogadoOrigem(encontrou.origem); 
       setErro('');
+      showToast(`Bem-vindo, ${usuarioInput}!`, "success");
     } else {
       setErro('Usuário ou senha incorretos.');
+      showToast("Usuário ou senha incorretos.", "error");
     }
   };
 
   const cadastrarNovoUsuarioSistema = async () => {
-    if (!novoUserLogin || !novoUserSenha) return alert("Preencha login e senha.");
+    if (!novoUserLogin || !novoUserSenha) return showToast("Preencha login e senha.", "error");
     const existe = usuariosAutorizados.find(u => u.usuario === novoUserLogin.toLowerCase());
-    if (existe) return alert("Este usuário já existe.");
+    if (existe) return showToast("Este usuário já existe.", "error");
 
     setCarregando(true);
     try {
@@ -324,14 +335,14 @@ export default function TrigofyApp() {
       });
 
       if (response.ok) {
-        alert("Usuário cadastrado com sucesso no Airtable!");
+        showToast("Usuário cadastrado com sucesso!", "success");
         setNovoUserLogin('');
         setNovoUserSenha('');
         await buscarDadosAirtable();
         setSubAbaAdmin('lista'); 
       }
     } catch (e) {
-      alert("Erro ao salvar usuário.");
+      showToast("Erro ao salvar usuário.", "error");
     }
     setCarregando(false);
   };
@@ -346,11 +357,11 @@ export default function TrigofyApp() {
     });
     setUsuariosAutorizados(novos);
     setUsuarioEmEdicao(null);
-    alert("Dados do usuário atualizados!");
+    showToast("Dados do usuário atualizados!", "success");
   };
 
   const adminExcluirUsuario = async (user) => {
-    if (user === 'admin') return alert("Não é possível remover o acesso do administrador.");
+    if (user === 'admin') return showToast("Não é possível remover o administrador.", "error");
     if (!confirm(`Excluir login de ${user}?`)) return;
 
     // Localiza o ID no Airtable
@@ -361,19 +372,21 @@ export default function TrigofyApp() {
               method: 'DELETE',
               headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
             });
+            showToast("Usuário excluído!", "success");
             buscarDadosAirtable();
         } catch (e) {
-            alert("Erro ao excluir do Airtable.");
+            showToast("Erro ao excluir do Airtable.", "error");
         }
     } else {
         // Fallback local caso não tenha ID (usuarios mockados)
         setUsuariosAutorizados(usuariosAutorizados.filter(u => u.usuario !== user));
+        showToast("Removido da lista temporária.", "success");
     }
   };
 
   const alterarSenhaUsuario = () => {
     if (!novaSenhaInput) {
-      alert("Digite a nova senha.");
+      showToast("Digite a nova senha.", "error");
       return;
     }
     const novosUsuarios = usuariosAutorizados.map(u => {
@@ -384,7 +397,7 @@ export default function TrigofyApp() {
     });
     setUsuariosAutorizados(novosUsuarios);
     setNovaSenhaInput('');
-    alert("Senha alterada com sucesso!");
+    showToast("Senha alterada com sucesso!", "success");
   };
 
   const enviarMensagemChat = (e) => {
@@ -409,10 +422,11 @@ export default function TrigofyApp() {
     setProdutoSelecionado(null);
     setMeusPedidosHistorico([]);
     setPedidosParaAprovar([]);
+    showToast("Logout realizado.", "success");
   };
 
   const handleLancarProduto = async () => {
-    if(!prodNome || !prodPreco) return alert("Preencha o nome e o preço.");
+    if(!prodNome || !prodPreco) return showToast("Preencha o nome e o preço.", "error");
     setCarregando(true);
     try {
       const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PRODUTOS}`, {
@@ -431,14 +445,14 @@ export default function TrigofyApp() {
         })
       });
       if (response.ok) {
-        alert(`Produto ${prodNome} lançado no Airtable com sucesso!`);
+        showToast(`Produto ${prodNome} lançado com sucesso!`, "success");
         setProdNome('');
         setProdPreco('');
         setProdImagem('');
         await buscarDadosAirtable(); 
       }
     } catch (e) {
-      alert("Erro ao lançar no Airtable.");
+      showToast("Erro ao lançar no Airtable.", "error");
     }
     setCarregando(false);
   };
@@ -450,9 +464,10 @@ export default function TrigofyApp() {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
       });
+      showToast("Produto excluído!", "success");
       buscarDadosAirtable();
     } catch (e) {
-      alert("Erro ao excluir.");
+      showToast("Erro ao excluir.", "error");
     }
   };
 
@@ -489,16 +504,16 @@ export default function TrigofyApp() {
       });
 
       if (response.ok) {
-        alert("✅ PEDIDO REGISTRADO NO RELATÓRIO COM SUCESSO!");
+        showToast("✅ PEDIDO REGISTRADO COM SUCESSO!", "success");
         setCpfDigitado('');
         setProdutoSelecionado(null);
         setActiveTab('home');
       } else {
         const erroLog = await response.json();
-        alert("Erro no Airtable: " + (erroLog.error?.message || "Erro na tabela"));
+        showToast("Erro no Airtable: " + (erroLog.error?.message || "Erro"), "error");
       }
     } catch (e) {
-      alert("Erro de conexão.");
+      showToast("Erro de conexão.", "error");
     }
     setCarregando(false);
   };
@@ -510,6 +525,15 @@ export default function TrigofyApp() {
     return (
       <div className="flex justify-center bg-zinc-200 min-h-screen sm:py-6 font-sans text-zinc-900">
         <div className="w-full max-w-[390px] bg-white h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 p-8 justify-center">
+          
+          {/* NOTIFICAÇÃO NO LOGIN */}
+          {toast.show && (
+            <div className={`absolute top-10 left-6 right-6 p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top duration-300 z-50 border ${toast.type === 'success' ? 'bg-zinc-900 border-yellow-500 text-yellow-500' : 'bg-red-500 border-red-400 text-white'}`}>
+              {toast.type === 'success' ? <CheckCircle2 size={20}/> : <AlertCircle size={20}/>}
+              <span className="font-black text-[11px] uppercase tracking-tighter flex-1">{toast.message}</span>
+            </div>
+          )}
+
           <div className="text-center mb-10">
             <h1 className="text-4xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           </div>
@@ -608,7 +632,7 @@ export default function TrigofyApp() {
                   <div 
                     onClick={() => {
                       if (usuarioLogadoOrigem === 'VR') {
-                        alert("Acesso negado. Seu perfil de Volta Redonda não tem permissão para compras RIO/SP.");
+                        showToast("Acesso negado para RIO/SP.", "error");
                       } else {
                         setSiteFiltro('RIO/SP'); setActiveTab('novo');
                       }
@@ -625,7 +649,7 @@ export default function TrigofyApp() {
                   <div 
                     onClick={() => {
                       if (usuarioLogadoOrigem === 'RIO' || usuarioLogadoOrigem === 'SP') {
-                        alert("Acesso negado. Seu perfil de RIO/SP não tem permissão para compras de Volta Redonda.");
+                        showToast("Acesso negado para Volta Redonda.", "error");
                       } else {
                         setSiteFiltro('VR'); setActiveTab('novo');
                       }
@@ -967,6 +991,16 @@ export default function TrigofyApp() {
   return (
     <div className={`flex justify-center min-h-screen font-sans transition-colors duration-300 ${temaEscuro ? 'bg-zinc-950 text-white' : 'bg-zinc-200 text-zinc-900'}`}>
       <div className={`w-full max-w-[390px] h-[844px] shadow-2xl overflow-hidden flex flex-col relative sm:rounded-[55px] border-[10px] border-zinc-900 transition-colors ${temaEscuro ? 'bg-zinc-900' : 'bg-zinc-50'}`}>
+        
+        {/* TOAST NOTIFICATION COMPONENT */}
+        {toast.show && (
+          <div className={`absolute top-20 left-4 right-4 p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top duration-300 z-50 border ${toast.type === 'success' ? (temaEscuro ? 'bg-zinc-900 border-yellow-500 text-yellow-500' : 'bg-zinc-900 border-zinc-800 text-yellow-400') : 'bg-red-500 border-red-400 text-white'}`}>
+            {toast.type === 'success' ? <CheckCircle2 size={20}/> : <AlertCircle size={20}/>}
+            <span className="font-black text-[11px] uppercase tracking-tighter flex-1">{toast.message}</span>
+            <button onClick={() => setToast({ ...toast, show: false })} className="opacity-50"><X size={16}/></button>
+          </div>
+        )}
+
         <header className={`p-6 flex justify-between items-center border-b transition-colors ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'}`}>
           <h1 className="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           <button onClick={fazerLogoff} className="text-zinc-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
