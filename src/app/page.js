@@ -803,13 +803,30 @@ export default function TrigofyApp() {
         );
 
       case 'catalogo':
+        // LÓGICA DE DOAÇÕES ATUALIZADA
+        const pessoaLogada = pessoasCadastradas.find(p => p.cpf === cpfDigitado.replace(/\D/g, '')) || 
+                             pessoasCadastradas.find(p => p.nome.toLowerCase().includes(usuarioInput.split('.')[0]));
+        
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
             <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Doações</h2>
-            <div className={`${bgCard} p-8 rounded-3xl border shadow-sm text-center space-y-3`}>
-              <BookOpen className="mx-auto text-zinc-200" size={48} />
-              <p className={`font-bold text-sm ${textSub}`}>Catálogo de doações indisponível no momento.</p>
+            
+            <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
+              <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 flex items-center gap-3">
+                <div className="bg-yellow-400 p-2 rounded-xl text-zinc-900"><User size={20}/></div>
+                <div>
+                  <label className="text-[10px] font-black text-yellow-700 uppercase">Doador Identificado</label>
+                  <p className="text-sm font-black text-zinc-900 uppercase">
+                    {pessoaLogada ? pessoaLogada.nome : "IDENTIFICANDO USUÁRIO..."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-center py-6 space-y-3">
+                <BookOpen className="mx-auto text-zinc-200" size={48} />
+                <p className={`font-bold text-sm ${textSub}`}>O catálogo de doações está sendo preparado para você.</p>
+              </div>
             </div>
           </div>
         );
