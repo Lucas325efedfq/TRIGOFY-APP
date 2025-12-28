@@ -803,11 +803,13 @@ export default function TrigofyApp() {
         );
 
       case 'catalogo':
-        // BUSCA O NOME COMPLETO BASEADO NO LOGIN
-        const nomeCompletoUsuario = pessoasCadastradas.find(p => 
-          p.nome.toLowerCase().split(' ')[0] === usuarioInput.toLowerCase().split('.')[0]
-        )?.nome || usuarioInput.toUpperCase();
-        
+        // LÓGICA DE IDENTIFICAÇÃO: BUSCA O NOME COMPLETO NA NUVEM DE ACORDO COM O LOGIN DO USUÁRIO
+        const nomeCompletoUsuarioLogado = pessoasCadastradas.find(p => {
+            const loginNormalizado = usuarioInput.toLowerCase().replace('.', '');
+            const nomeNormalizado = p.nome.toLowerCase().split(' ').join('');
+            return nomeNormalizado.includes(loginNormalizado) || p.nome.toLowerCase().startsWith(usuarioInput.split('.')[0].toLowerCase());
+        })?.nome || usuarioInput.toUpperCase();
+
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
             <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
@@ -820,7 +822,7 @@ export default function TrigofyApp() {
                   <div className="bg-yellow-400 p-2 rounded-xl text-zinc-900"><User size={20}/></div>
                   <div className="flex-1">
                     <p className="text-sm font-black text-zinc-900 uppercase">
-                      {nomeCompletoUsuario}
+                      {nomeCompletoUsuarioLogado}
                     </p>
                   </div>
                 </div>
