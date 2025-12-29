@@ -44,6 +44,7 @@ export default function TrigofyApp() {
   // NOVO: Estados para a aba de Doações
   const [areaSolicitante, setAreaSolicitante] = useState('');
   const [motivoDoacao, setMotivoDoacao] = useState('');
+  const [areaProdutoDoado, setAreaProdutoDoado] = useState(''); // ADICIONADO
 
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
@@ -429,6 +430,7 @@ export default function TrigofyApp() {
     setPedidosParaAprovar([]);
     setAreaSolicitante(''); // Limpa a área ao sair
     setMotivoDoacao(''); // Limpa o motivo ao sair
+    setAreaProdutoDoado(''); // Limpa a nova área ao sair
     showToast("Logout realizado.", "success");
   };
 
@@ -855,6 +857,18 @@ export default function TrigofyApp() {
                   className={`w-full p-4 rounded-2xl border outline-none font-bold resize-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
                   value={motivoDoacao}
                   onChange={(e) => setMotivoDoacao(e.target.value)}
+                />
+              </div>
+
+              {/* NOVO CAMPO: Área do produto a ser doado */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Área do produto a ser doado</label>
+                <input 
+                  type="text" 
+                  placeholder="Ex: Cozinha, TI, Logística..." 
+                  className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
+                  value={areaProdutoDoado}
+                  onChange={(e) => setAreaProdutoDoado(e.target.value)}
                 />
               </div>
 
