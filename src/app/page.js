@@ -41,6 +41,9 @@ export default function TrigofyApp() {
   // SISTEMA DE NOTIFICAÇÃO (TOAST)
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
+  // NOVO: Estado para a Área na aba de Doações
+  const [areaSolicitante, setAreaSolicitante] = useState('');
+
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
@@ -423,6 +426,7 @@ export default function TrigofyApp() {
     setProdutoSelecionado(null);
     setMeusPedidosHistorico([]);
     setPedidosParaAprovar([]);
+    setAreaSolicitante(''); // Limpa a área ao sair
     showToast("Logout realizado.", "success");
   };
 
@@ -582,7 +586,7 @@ export default function TrigofyApp() {
             <div className="space-y-3">
               {isAprovador && (
                 <div onClick={() => setActiveTab('aprovacoes')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm border border-zinc-800 flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
-                  <div className="bg-yellow-500 p-3 rounded-full text-zinc-900"><CheckCircle2 size={20} /></div>
+                  <div className="bg-yellow-50 p-3 rounded-full text-zinc-900"><CheckCircle2 size={20} /></div>
                   <div className="flex-1 font-bold uppercase text-sm text-yellow-500 tracking-tighter">Painel de Aprovações</div>
                   <ChevronRight className="text-yellow-500" size={20} />
                 </div>
@@ -815,6 +819,7 @@ export default function TrigofyApp() {
             <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Doações</h2>
             
             <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
+              {/* Parte do Nome do Solicitante (Travado) */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Nome do Solicitante</label>
                 <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 flex items-center gap-3">
@@ -825,6 +830,18 @@ export default function TrigofyApp() {
                     </p>
                   </div>
                 </div>
+              </div>
+
+              {/* NOVA PARTE: Campo para digitar a Área manualmente */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Qual a sua Área?</label>
+                <input 
+                  type="text" 
+                  placeholder="Digite sua área/setor" 
+                  className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
+                  value={areaSolicitante}
+                  onChange={(e) => setAreaSolicitante(e.target.value)}
+                />
               </div>
 
               <div className="text-center py-6 space-y-3 border-t border-dashed">
