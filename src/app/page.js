@@ -41,8 +41,9 @@ export default function TrigofyApp() {
   // SISTEMA DE NOTIFICAÇÃO (TOAST)
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
-  // NOVO: Estado para a Área na aba de Doações
+  // NOVO: Estados para a aba de Doações
   const [areaSolicitante, setAreaSolicitante] = useState('');
+  const [motivoDoacao, setMotivoDoacao] = useState('');
 
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
@@ -427,6 +428,7 @@ export default function TrigofyApp() {
     setMeusPedidosHistorico([]);
     setPedidosParaAprovar([]);
     setAreaSolicitante(''); // Limpa a área ao sair
+    setMotivoDoacao(''); // Limpa o motivo ao sair
     showToast("Logout realizado.", "success");
   };
 
@@ -832,7 +834,7 @@ export default function TrigofyApp() {
                 </div>
               </div>
 
-              {/* NOVA PARTE: Campo para digitar a Área manualmente */}
+              {/* Campo para digitar a Área manualmente */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Qual a sua Área?</label>
                 <input 
@@ -841,6 +843,18 @@ export default function TrigofyApp() {
                   className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
                   value={areaSolicitante}
                   onChange={(e) => setAreaSolicitante(e.target.value)}
+                />
+              </div>
+
+              {/* NOVA PARTE: Campo para digitar o Motivo da Doação manualmente */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Motivo da Doação</label>
+                <textarea 
+                  placeholder="Descreva o motivo da sua solicitação..." 
+                  rows={3}
+                  className={`w-full p-4 rounded-2xl border outline-none font-bold resize-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
+                  value={motivoDoacao}
+                  onChange={(e) => setMotivoDoacao(e.target.value)}
                 />
               </div>
 
