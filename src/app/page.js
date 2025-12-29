@@ -44,7 +44,9 @@ export default function TrigofyApp() {
   // NOVO: Estados para a aba de Doações
   const [areaSolicitante, setAreaSolicitante] = useState('');
   const [motivoDoacao, setMotivoDoacao] = useState('');
-  const [areaProdutoDoado, setAreaProdutoDoado] = useState(''); // ADICIONADO
+  const [areaProdutoDoado, setAreaProdutoDoado] = useState(''); 
+  const [dataVencimento, setDataVencimento] = useState(''); // ADICIONADO
+  const [origemProduto, setOrigemProduto] = useState(''); // ADICIONADO
 
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
@@ -431,6 +433,8 @@ export default function TrigofyApp() {
     setAreaSolicitante(''); // Limpa a área ao sair
     setMotivoDoacao(''); // Limpa o motivo ao sair
     setAreaProdutoDoado(''); // Limpa a nova área ao sair
+    setDataVencimento(''); // Limpa a data ao sair
+    setOrigemProduto(''); // Limpa a origem ao sair
     showToast("Logout realizado.", "success");
   };
 
@@ -812,7 +816,6 @@ export default function TrigofyApp() {
         );
 
       case 'catalogo':
-        // CORREÇÃO: BUSCA O NOME COMPLETO NA NUVEM COMPARANDO O LOGIN EXATO
         const nomeCompletoUsuarioLogado = pessoasCadastradas.find(p => 
           p.usuarioAirtable === usuarioInput.toLowerCase()
         )?.nome || usuarioInput.toUpperCase();
@@ -823,7 +826,6 @@ export default function TrigofyApp() {
             <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Doações</h2>
             
             <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
-              {/* Parte do Nome do Solicitante (Travado) */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Nome do Solicitante</label>
                 <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 flex items-center gap-3">
@@ -836,7 +838,6 @@ export default function TrigofyApp() {
                 </div>
               </div>
 
-              {/* Campo para digitar a Área manualmente */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Qual a sua Área?</label>
                 <input 
@@ -848,7 +849,6 @@ export default function TrigofyApp() {
                 />
               </div>
 
-              {/* NOVA PARTE: Campo para digitar o Motivo da Doação manualmente */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Motivo da Doação</label>
                 <textarea 
@@ -860,7 +860,6 @@ export default function TrigofyApp() {
                 />
               </div>
 
-              {/* NOVO CAMPO: Área do produto a ser doado */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Área do produto a ser doado</label>
                 <input 
@@ -869,6 +868,29 @@ export default function TrigofyApp() {
                   className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
                   value={areaProdutoDoado}
                   onChange={(e) => setAreaProdutoDoado(e.target.value)}
+                />
+              </div>
+
+              {/* NOVO CAMPO: Data de Vencimento do Produto */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Data de Vencimento do Produto</label>
+                <input 
+                  type="date" 
+                  className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
+                  value={dataVencimento}
+                  onChange={(e) => setDataVencimento(e.target.value)}
+                />
+              </div>
+
+              {/* NOVO CAMPO: Origem do Produto */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Origem do Produto</label>
+                <input 
+                  type="text" 
+                  placeholder="De onde vem o produto?" 
+                  className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
+                  value={origemProduto}
+                  onChange={(e) => setOrigemProduto(e.target.value)}
                 />
               </div>
 
