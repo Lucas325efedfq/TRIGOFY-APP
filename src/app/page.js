@@ -106,6 +106,7 @@ export default function TrigofyApp() {
           id: reg.id,
           cpf: reg.fields.cpf || '',
           nome: reg.fields.nome || '',
+          usuarioAirtable: reg.fields.usuario || '', // Mapeando campo de login da tabela de pessoas
           site: (reg.fields.site || '').toUpperCase()
         }));
         setPessoasCadastradas(formatado);
@@ -803,12 +804,10 @@ export default function TrigofyApp() {
         );
 
       case 'catalogo':
-        // LÓGICA DE IDENTIFICAÇÃO: BUSCA O NOME COMPLETO NA NUVEM DE ACORDO COM O LOGIN DO USUÁRIO
-        const nomeCompletoUsuarioLogado = pessoasCadastradas.find(p => {
-            const loginNormalizado = usuarioInput.toLowerCase().replace('.', '');
-            const nomeNormalizado = p.nome.toLowerCase().split(' ').join('');
-            return nomeNormalizado.includes(loginNormalizado) || p.nome.toLowerCase().startsWith(usuarioInput.split('.')[0].toLowerCase());
-        })?.nome || usuarioInput.toUpperCase();
+        // CORREÇÃO: BUSCA O NOME COMPLETO NA NUVEM COMPARANDO O LOGIN EXATO
+        const nomeCompletoUsuarioLogado = pessoasCadastradas.find(p => 
+          p.usuarioAirtable === usuarioInput.toLowerCase()
+        )?.nome || usuarioInput.toUpperCase();
 
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
