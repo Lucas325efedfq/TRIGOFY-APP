@@ -580,7 +580,7 @@ export default function TrigofyApp() {
           <div className="space-y-4 animate-in fade-in duration-500 pb-10">
             <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 p-6 rounded-3xl text-zinc-900 shadow-lg flex items-center gap-4 border border-yellow-300">
               <div className="bg-white p-2 rounded-2xl shadow-inner w-16 h-16 flex items-center justify-center overflow-hidden">
-                <img src="santos.png" alt="Logo" className="w-full h-full object-contain scale-125" />
+                <LayoutGrid size={32} className="text-zinc-900" />
               </div>
               <div>
                 <h2 className="text-xl font-black tracking-tight text-zinc-900">Grupo Trigo</h2>
@@ -636,7 +636,7 @@ export default function TrigofyApp() {
 
                   <div onClick={() => setActiveTab('catalogo')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
-                      <img src="/doacao.png" alt="Doação" className="w-full h-full object-contain" />
+                      <BookOpen size={20} className="text-zinc-900" />
                     </div>
                     <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Solicitações de doações</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
@@ -653,7 +653,7 @@ export default function TrigofyApp() {
                     className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${usuarioLogadoOrigem === 'VR' ? 'opacity-30' : ''}`}
                   >
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
-                      <img src="/cesta.png" alt="Cesta" className="w-full h-full object-contain" />
+                      <ShoppingBag size={20} className="text-zinc-900" />
                     </div>
                     <div className={`flex-1 font-bold uppercase text-sm leading-tight ${textMain}`}>Produtos disponíveis para compra RIO/SP</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
@@ -670,7 +670,7 @@ export default function TrigofyApp() {
                     className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${(usuarioLogadoOrigem === 'RIO' || usuarioLogadoOrigem === 'SP') ? 'opacity-30' : ''}`}
                   >
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
-                      <img src="/pizza.png" alt="Novo" className="w-full h-full object-contain" />
+                      <Package size={20} className="text-zinc-900" />
                     </div>
                     <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Produtos Disponíveis para compras Volta Redonda</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
@@ -829,7 +829,7 @@ export default function TrigofyApp() {
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Nome do Solicitante</label>
                 <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 flex items-center gap-3">
                   <div className="bg-yellow-400 w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center">
-                    <img src="santos.png" alt="Perfil" className="w-full h-full object-cover" />
+                    <User size={20} className="text-zinc-900" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-black text-zinc-900 uppercase">
@@ -931,7 +931,7 @@ export default function TrigofyApp() {
             <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-6`}>
               <div className="flex items-center gap-4 border-b pb-4 border-zinc-100 dark:border-zinc-700">
                 <div className="bg-yellow-400 w-12 h-12 rounded-full overflow-hidden flex items-center justify-center">
-                  <img src="santos.png" alt="Perfil" className="w-full h-full object-cover" />
+                  <User size={24} className="text-zinc-900" />
                 </div>
                 <div>
                   <p className={`font-black uppercase text-sm ${textMain}`}>{usuarioInput}</p>
