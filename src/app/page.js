@@ -580,11 +580,7 @@ export default function TrigofyApp() {
           <div className="space-y-4 animate-in fade-in duration-500 pb-10">
             <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 p-6 rounded-3xl text-zinc-900 shadow-lg flex items-center gap-4 border border-yellow-300">
               <div className="bg-white p-2 rounded-2xl shadow-inner w-16 h-16 flex items-center justify-center overflow-hidden">
-<<<<<<< HEAD
                 <img src="/favicon.ico" alt="Logo" className="w-full h-full object-contain scale-125" />
-=======
-                <LayoutGrid size={32} className="text-zinc-900" />
->>>>>>> 5dd74eb6aa53e8f70ed598bf203798209055928f
               </div>
               <div>
                 <h2 className="text-xl font-black tracking-tight text-zinc-900">Grupo Trigo</h2>
@@ -832,13 +828,9 @@ export default function TrigofyApp() {
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Nome do Solicitante</label>
                 <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 flex items-center gap-3">
-<<<<<<< HEAD
-                  <div className="bg-yellow-400 p-2 rounded-xl text-zinc-900"><User size={20} /></div>
-=======
                   <div className="bg-yellow-400 w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center">
                     <User size={20} className="text-zinc-900" />
                   </div>
->>>>>>> 5dd74eb6aa53e8f70ed598bf203798209055928f
                   <div className="flex-1">
                     <p className="text-sm font-black text-zinc-900 uppercase">
                       {nomeCompletoUsuarioLogado}
@@ -938,13 +930,9 @@ export default function TrigofyApp() {
             <h2 className={`text-xl font-black uppercase italic ${textMain}`}>Configurações</h2>
             <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-6`}>
               <div className="flex items-center gap-4 border-b pb-4 border-zinc-100 dark:border-zinc-700">
-<<<<<<< HEAD
-                <div className="bg-yellow-400 p-3 rounded-full"><User className="text-zinc-900" size={24} /></div>
-=======
                 <div className="bg-yellow-400 w-12 h-12 rounded-full overflow-hidden flex items-center justify-center">
                   <User size={24} className="text-zinc-900" />
                 </div>
->>>>>>> 5dd74eb6aa53e8f70ed598bf203798209055928f
                 <div>
                   <p className={`font-black uppercase text-sm ${textMain}`}>{usuarioInput}</p>
                   <p className="text-[10px] text-zinc-400 uppercase">Usuário Ativo</p>
