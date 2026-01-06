@@ -286,7 +286,7 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
-  // 4. LÓGICA DE FORMULÁRIOS, LOGIN
+  // 4. LÓGICA DE FORMULÁRIOS, LOGIN E CHAT
   // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
