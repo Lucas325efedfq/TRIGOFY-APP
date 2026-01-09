@@ -48,6 +48,9 @@ export default function TrigofyApp() {
   const [dataVencimento, setDataVencimento] = useState(''); 
   const [origemProduto, setOrigemProduto] = useState(''); 
 
+  // NOVO: Estado para Telefone na compra
+  const [telefone, setTelefone] = useState('');
+
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
@@ -437,6 +440,7 @@ export default function TrigofyApp() {
     setAreaProdutoDoado(''); // Limpa a nova área ao sair
     setDataVencimento(''); // Limpa a data ao sair
     setOrigemProduto(''); // Limpa a origem ao sair
+    setTelefone(''); // Limpa o telefone
     showToast("Logout realizado.", "success");
   };
 
@@ -517,7 +521,8 @@ export default function TrigofyApp() {
             "valor": prod.preco.toString(),
             "site": siteFiltro,
             "data": dataISO,
-            "status": "PENDENTE"
+            "status": "PENDENTE",
+            "telefone": telefone // ADICIONADO: Envia o telefone para o Airtable
           }
         })
       });
@@ -526,6 +531,7 @@ export default function TrigofyApp() {
         showToast("✅ PEDIDO REGISTRADO COM SUCESSO!", "success");
         setCpfDigitado('');
         setProdutoSelecionado(null);
+        setTelefone(''); // Limpa o telefone após o envio
         setActiveTab('home');
       } else {
         const erroLog = await response.json();
@@ -735,7 +741,7 @@ export default function TrigofyApp() {
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
-            <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); setProdutoSelecionado(null); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
+            <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); setTelefone(''); setProdutoSelecionado(null); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <div className={`${bgCard} p-6 rounded-3xl shadow-sm border space-y-5`}>
               <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
                 {siteFiltro === 'RIO/SP' ? 'Compras RIO/SP' : 'Compras Volta Redonda'}
@@ -748,6 +754,18 @@ export default function TrigofyApp() {
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Nome do Solicitante</label>
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeEncontrado || "Aguardando CPF..."} />
+              </div>
+              
+              {/* ADICIONADO: Campo de Telefone */}
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Seu Telefone / WhatsApp</label>
+                <input 
+                  type="text" 
+                  placeholder="(XX) 9XXXX-XXXX" 
+                  className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} 
+                  value={telefone} 
+                  onChange={(e) => setTelefone(e.target.value)} 
+                />
               </div>
 
               <div className="animate-in fade-in duration-500 space-y-3 border-t pt-4">
@@ -779,9 +797,9 @@ export default function TrigofyApp() {
               </div>
 
               <button 
-                disabled={!nomeEncontrado || !produtoSelecionado || carregando} 
+                disabled={!nomeEncontrado || !produtoSelecionado || carregando || !telefone} 
                 onClick={handleEnviarPedidoReal}
-                className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtoSelecionado ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
+                className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtoSelecionado && telefone ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
               >
                 {carregando ? "ENVIANDO..." : "ENVIAR PEDIDO"}
               </button>
