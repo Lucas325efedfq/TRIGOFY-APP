@@ -45,8 +45,8 @@ export default function TrigofyApp() {
   const [areaSolicitante, setAreaSolicitante] = useState('');
   const [motivoDoacao, setMotivoDoacao] = useState('');
   const [areaProdutoDoado, setAreaProdutoDoado] = useState(''); 
-  const [dataVencimento, setDataVencimento] = useState(''); // ADICIONADO
-  const [origemProduto, setOrigemProduto] = useState(''); // ADICIONADO
+  const [dataVencimento, setDataVencimento] = useState(''); 
+  const [origemProduto, setOrigemProduto] = useState(''); 
 
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
@@ -77,7 +77,7 @@ export default function TrigofyApp() {
   const [novoUserLogin, setNovoUserLogin] = useState('');
   const [novoUserSenha, setNovoUserSenha] = useState('');
   const [novoUserOrigem, setNovoUserOrigem] = useState('VR');
-  const [novoUserFuncao, setNovoUserFuncao] = useState('USER'); // Nova Função
+  const [novoUserFuncao, setNovoUserFuncao] = useState('USER'); 
 
   // Estados para Edição de Usuário Existente
   const [usuarioEmEdicao, setUsuarioEmEdicao] = useState(null);
@@ -90,6 +90,7 @@ export default function TrigofyApp() {
   const [prodPreco, setProdPreco] = useState('');
   const [prodSite, setProdSite] = useState('VR');
   const [prodImagem, setProdImagem] = useState('');
+  const [prodVencimento, setProdVencimento] = useState(''); // NOVO: Estado para data de vencimento
 
   // Estados de Compra do Usuário
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
@@ -113,7 +114,7 @@ export default function TrigofyApp() {
           id: reg.id,
           cpf: reg.fields.cpf || '',
           nome: reg.fields.nome || '',
-          usuarioAirtable: reg.fields.usuario || '', // Mapeando campo de login da tabela de pessoas
+          usuarioAirtable: reg.fields.usuario || '', 
           site: (reg.fields.site || '').toUpperCase()
         }));
         setPessoasCadastradas(formatado);
@@ -133,7 +134,8 @@ export default function TrigofyApp() {
           nome: reg.fields.nome || '',
           preco: reg.fields.preco || '',
           site: reg.fields.site || '',
-          imagem: reg.fields.imagem || ''
+          imagem: reg.fields.imagem || '',
+          vencimento: reg.fields.vencimento || '' // Carregando vencimento se existir
         })));
       }
 
@@ -453,7 +455,8 @@ export default function TrigofyApp() {
             nome: prodNome.toUpperCase(),
             preco: prodPreco,
             site: prodSite,
-            imagem: prodImagem
+            imagem: prodImagem,
+            vencimento: prodVencimento // ADICIONADO: Envia a data para o Airtable
           }
         })
       });
@@ -462,6 +465,7 @@ export default function TrigofyApp() {
         setProdNome('');
         setProdPreco('');
         setProdImagem('');
+        setProdVencimento(''); // ADICIONADO: Limpa o campo após salvar
         await buscarDadosAirtable(); 
       }
     } catch (e) {
@@ -1042,6 +1046,18 @@ export default function TrigofyApp() {
                     <option value="VR">Volta Redonda (VR)</option>
                     <option value="RIO/SP">Rio de Janeiro / São Paulo</option>
                   </select>
+
+                  {/* NOVO CAMPO DE VENCIMENTO ADICIONADO AQUI */}
+                  <div className="space-y-1">
+                     <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Data de Vencimento (Opcional)</label>
+                     <input 
+                       type="date" 
+                       className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} 
+                       value={prodVencimento} 
+                       onChange={(e) => setProdVencimento(e.target.value)} 
+                     />
+                  </div>
+
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-zinc-400 uppercase px-1">URL da Imagem do Produto</label>
                     <div className="flex gap-2">

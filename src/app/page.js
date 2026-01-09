@@ -441,7 +441,9 @@ export default function TrigofyApp() {
   };
 
   const handleLancarProduto = async () => {
-    if(!prodNome || !prodPreco) return showToast("Preencha o nome e o preço.", "error");
+    // ALTERAÇÃO AQUI: Vencimento agora é obrigatório
+    if(!prodNome || !prodPreco || !prodVencimento) return showToast("Preencha nome, preço e data de vencimento.", "error");
+    
     setCarregando(true);
     try {
       const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PRODUTOS}`, {
@@ -456,7 +458,7 @@ export default function TrigofyApp() {
             preco: prodPreco,
             site: prodSite,
             imagem: prodImagem,
-            vencimento: prodVencimento // ADICIONADO: Envia a data para o Airtable
+            vencimento: prodVencimento // Envia a data para o Airtable
           }
         })
       });
@@ -465,7 +467,7 @@ export default function TrigofyApp() {
         setProdNome('');
         setProdPreco('');
         setProdImagem('');
-        setProdVencimento(''); // ADICIONADO: Limpa o campo após salvar
+        setProdVencimento(''); // Limpa o campo após salvar
         await buscarDadosAirtable(); 
       }
     } catch (e) {
@@ -764,6 +766,8 @@ export default function TrigofyApp() {
                               <div className="flex-1">
                                   <p className="text-xs font-black uppercase tracking-tight">{p.nome}</p>
                                   <p className="text-[10px] font-bold text-yellow-600 italic">R$ {p.preco}</p>
+                                  {/* ALTERAÇÃO AQUI: EXIBINDO O VENCIMENTO NO CARD DE COMPRA DO USUÁRIO */}
+                                  <p className="text-[10px] font-bold text-zinc-400">Venc: {p.vencimento ? p.vencimento.split('-').reverse().join('/') : 'N/A'}</p>
                               </div>
                               {produtoSelecionado === p.id && <CheckCircle2 className="text-yellow-500" size={18}/>}
                           </div>
@@ -1047,15 +1051,14 @@ export default function TrigofyApp() {
                     <option value="RIO/SP">Rio de Janeiro / São Paulo</option>
                   </select>
 
-                  {/* NOVO CAMPO DE VENCIMENTO ADICIONADO AQUI */}
                   <div className="space-y-1">
-                     <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Data de Vencimento (Opcional)</label>
-                     <input 
-                       type="date" 
-                       className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} 
-                       value={prodVencimento} 
-                       onChange={(e) => setProdVencimento(e.target.value)} 
-                     />
+                      <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Data de Vencimento (Obrigatório)</label>
+                      <input 
+                        type="date" 
+                        className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} 
+                        value={prodVencimento} 
+                        onChange={(e) => setProdVencimento(e.target.value)} 
+                      />
                   </div>
 
                   <div className="space-y-1">
@@ -1079,7 +1082,11 @@ export default function TrigofyApp() {
                                 <div className="w-8 h-8 rounded-lg bg-white border flex items-center justify-center overflow-hidden">
                                     {p.imagem ? <img src={p.imagem} className="w-full h-full object-cover"/> : <Package size={14}/>}
                                 </div>
-                                <span className="text-[10px] font-bold uppercase">{p.nome} ({p.site})</span>
+                                <div>
+                                    <span className="text-[10px] font-bold uppercase block">{p.nome} ({p.site})</span>
+                                    {/* ALTERAÇÃO AQUI: EXIBINDO VENCIMENTO NA LISTA DE PRODUTOS DO ADMIN */}
+                                    <span className="text-[9px] text-zinc-400 block">Venc: {p.vencimento ? p.vencimento.split('-').reverse().join('/') : '-'}</span>
+                                </div>
                             </div>
                             <button onClick={() => excluirProduto(p.id)} className="text-red-400 p-1"><Trash2 size={14}/></button>
                         </div>
