@@ -105,7 +105,7 @@ export default function TrigofyApp() {
   const [prodVencimento, setProdVencimento] = useState(''); 
 
   // Estados de Compra do Usuário
-  // ALTERAÇÃO: Agora é um array para suportar até 2 produtos
+  // ALTERAÇÃO: Agora é um array para suportar até 5 produtos
   const [produtosSelecionados, setProdutosSelecionados] = useState([]);
 
   // ==========================================================
@@ -504,17 +504,17 @@ export default function TrigofyApp() {
     }
   };
 
-  // FUNÇÃO AUXILIAR PARA SELECIONAR ATÉ 2 PRODUTOS
+  // FUNÇÃO AUXILIAR PARA SELECIONAR ATÉ 5 PRODUTOS
   const toggleProduto = (id) => {
     if (produtosSelecionados.includes(id)) {
       // Se já estiver, remove
       setProdutosSelecionados(prev => prev.filter(pid => pid !== id));
     } else {
-      // Se não estiver, verifica se já tem 2
-      if (produtosSelecionados.length < 2) {
+      // Se não estiver, verifica se já tem 5
+      if (produtosSelecionados.length < 5) {
         setProdutosSelecionados(prev => [...prev, id]);
       } else {
-        showToast("Máximo de 2 produtos por compra!", "error");
+        showToast("Máximo de 5 produtos por compra!", "error");
       }
     }
   };
@@ -817,7 +817,7 @@ export default function TrigofyApp() {
 
               <div className="animate-in fade-in duration-500 space-y-3 border-t pt-4">
                 <label className="text-[10px] font-black text-zinc-400 uppercase italic">
-                  Selecione os Produtos (Máx: 2):
+                  Selecione os Produtos (Máx: 5):
                 </label>
                 <div className="grid grid-cols-1 gap-2">
                   {produtosLancados.filter(p => p.site === siteFiltro).length > 0 ? (
