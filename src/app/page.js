@@ -15,6 +15,13 @@ const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
 const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios
 const TABLE_ID_USUARIOS = 'tblUsuarios'; // Tabela de Usuários
 
+// LISTA DE ÁREAS SOLICITADA
+const AREAS_EMPRESA = [
+  "Lasagna", "Pesagem", "Cozinha Central", "Pane", "Massa", "Molho", 
+  "Qualidade", "P&D", "Estoque", "Manutenção", "Suprimentos", "TI", 
+  "Higienização", "G&G", "Meio Ambiente", "Apontamento", "Produção"
+];
+
 export default function TrigofyApp() {
   const [estaLogado, setEstaLogado] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
@@ -50,6 +57,8 @@ export default function TrigofyApp() {
 
   // NOVO: Estado para Telefone na compra
   const [telefone, setTelefone] = useState('');
+  // NOVO: Estado para Área do Funcionário na compra
+  const [areaFuncionarioCompra, setAreaFuncionarioCompra] = useState('');
 
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
@@ -93,10 +102,11 @@ export default function TrigofyApp() {
   const [prodPreco, setProdPreco] = useState('');
   const [prodSite, setProdSite] = useState('VR');
   const [prodImagem, setProdImagem] = useState('');
-  const [prodVencimento, setProdVencimento] = useState(''); // NOVO: Estado para data de vencimento
+  const [prodVencimento, setProdVencimento] = useState(''); 
 
   // Estados de Compra do Usuário
-  const [produtoSelecionado, setProdutoSelecionado] = useState(null);
+  // ALTERAÇÃO: Agora é um array para suportar até 2 produtos
+  const [produtosSelecionados, setProdutosSelecionados] = useState([]);
 
   // ==========================================================
   // 3. FUNÇÕES DE BANCO DE DADOS (AIRTABLE)
@@ -432,20 +442,20 @@ export default function TrigofyApp() {
     setSenha('');
     setUsuarioLogadoOrigem('');
     setCpfDigitado('');
-    setProdutoSelecionado(null);
+    setProdutosSelecionados([]); // Limpa array
     setMeusPedidosHistorico([]);
     setPedidosParaAprovar([]);
-    setAreaSolicitante(''); // Limpa a área ao sair
-    setMotivoDoacao(''); // Limpa o motivo ao sair
-    setAreaProdutoDoado(''); // Limpa a nova área ao sair
-    setDataVencimento(''); // Limpa a data ao sair
-    setOrigemProduto(''); // Limpa a origem ao sair
-    setTelefone(''); // Limpa o telefone
+    setAreaSolicitante(''); 
+    setMotivoDoacao(''); 
+    setAreaProdutoDoado(''); 
+    setDataVencimento(''); 
+    setOrigemProduto(''); 
+    setTelefone('');
+    setAreaFuncionarioCompra(''); // Limpa area da compra
     showToast("Logout realizado.", "success");
   };
 
   const handleLancarProduto = async () => {
-    // ALTERAÇÃO AQUI: Vencimento agora é obrigatório
     if(!prodNome || !prodPreco || !prodVencimento) return showToast("Preencha nome, preço e data de vencimento.", "error");
     
     setCarregando(true);
@@ -462,7 +472,7 @@ export default function TrigofyApp() {
             preco: prodPreco,
             site: prodSite,
             imagem: prodImagem,
-            vencimento: prodVencimento // Envia a data para o Airtable
+            vencimento: prodVencimento
           }
         })
       });
@@ -471,7 +481,7 @@ export default function TrigofyApp() {
         setProdNome('');
         setProdPreco('');
         setProdImagem('');
-        setProdVencimento(''); // Limpa o campo após salvar
+        setProdVencimento('');
         await buscarDadosAirtable(); 
       }
     } catch (e) {
@@ -494,48 +504,70 @@ export default function TrigofyApp() {
     }
   };
 
+  // FUNÇÃO AUXILIAR PARA SELECIONAR ATÉ 2 PRODUTOS
+  const toggleProduto = (id) => {
+    if (produtosSelecionados.includes(id)) {
+      // Se já estiver, remove
+      setProdutosSelecionados(prev => prev.filter(pid => pid !== id));
+    } else {
+      // Se não estiver, verifica se já tem 2
+      if (produtosSelecionados.length < 2) {
+        setProdutosSelecionados(prev => [...prev, id]);
+      } else {
+        showToast("Máximo de 2 produtos por compra!", "error");
+      }
+    }
+  };
+
   // ==========================================================
-  // REAJUSTE DA FUNÇÃO: ENVIAR PEDIDO PARA RELATÓRIO
+  // REAJUSTE DA FUNÇÃO: ENVIAR PEDIDO PARA RELATÓRIO (MÚLTIPLOS)
   // ==========================================================
   const handleEnviarPedidoReal = async () => {
-    if (!nomeEncontrado || !produtoSelecionado) return;
+    if (!nomeEncontrado || produtosSelecionados.length === 0 || !areaFuncionarioCompra) return;
     
-    const prod = produtosLancados.find(p => p.id === produtoSelecionado);
-    if (!prod) return;
-
     setCarregando(true);
     try {
       const dataISO = new Date().toISOString().split('T')[0];
+      
+      // Itera sobre os produtos selecionados para enviar um a um
+      const promises = produtosSelecionados.map(async (prodId) => {
+        const prod = produtosLancados.find(p => p.id === prodId);
+        if (!prod) return null;
 
-      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
-        method: 'POST',
-        headers: { 
-          Authorization: `Bearer ${AIRTABLE_TOKEN}`, 
-          'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify({
-          fields: {
-            "solicitante": usuarioInput, 
-            "cpf": cpfDigitado.replace(/\D/g, ''),
-            "produto": prod.nome,
-            "valor": prod.preco.toString(),
-            "site": siteFiltro,
-            "data": dataISO,
-            "status": "PENDENTE",
-            "telefone": telefone // ADICIONADO: Envia o telefone para o Airtable
-          }
-        })
+        return fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
+          method: 'POST',
+          headers: { 
+            Authorization: `Bearer ${AIRTABLE_TOKEN}`, 
+            'Content-Type': 'application/json' 
+          },
+          body: JSON.stringify({
+            fields: {
+              "solicitante": usuarioInput, 
+              "cpf": cpfDigitado.replace(/\D/g, ''),
+              "produto": prod.nome,
+              "valor": prod.preco.toString(),
+              "site": siteFiltro,
+              "data": dataISO,
+              "status": "PENDENTE",
+              "telefone": telefone,
+              "area": areaFuncionarioCompra // Adicionado campo de Área
+            }
+          })
+        });
       });
 
-      if (response.ok) {
-        showToast("✅ PEDIDO REGISTRADO COM SUCESSO!", "success");
+      const responses = await Promise.all(promises);
+      const allOk = responses.every(r => r && r.ok);
+
+      if (allOk) {
+        showToast("✅ PEDIDOS REGISTRADOS COM SUCESSO!", "success");
         setCpfDigitado('');
-        setProdutoSelecionado(null);
-        setTelefone(''); // Limpa o telefone após o envio
+        setProdutosSelecionados([]);
+        setTelefone('');
+        setAreaFuncionarioCompra('');
         setActiveTab('home');
       } else {
-        const erroLog = await response.json();
-        showToast("Erro no Airtable: " + (erroLog.error?.message || "Erro"), "error");
+        showToast("Erro ao registrar um ou mais produtos.", "error");
       }
     } catch (e) {
       showToast("Erro de conexão.", "error");
@@ -741,7 +773,7 @@ export default function TrigofyApp() {
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
-            <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); setTelefone(''); setProdutoSelecionado(null); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
+            <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); setTelefone(''); setProdutosSelecionados([]); setAreaFuncionarioCompra(''); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <div className={`${bgCard} p-6 rounded-3xl shadow-sm border space-y-5`}>
               <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
                 {siteFiltro === 'RIO/SP' ? 'Compras RIO/SP' : 'Compras Volta Redonda'}
@@ -756,7 +788,7 @@ export default function TrigofyApp() {
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
               
-              {/* ADICIONADO: Campo de Telefone */}
+              {/* Campo de Telefone */}
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Seu Telefone / WhatsApp</label>
                 <input 
@@ -768,28 +800,47 @@ export default function TrigofyApp() {
                 />
               </div>
 
+              {/* NOVO: Campo de Área do Funcionário (Dropdown) */}
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área (Setor)</label>
+                <select 
+                  className={`w-full p-4 rounded-2xl outline-none border font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`}
+                  value={areaFuncionarioCompra}
+                  onChange={(e) => setAreaFuncionarioCompra(e.target.value)}
+                >
+                  <option value="">Selecione sua área...</option>
+                  {AREAS_EMPRESA.map(area => (
+                    <option key={area} value={area}>{area}</option>
+                  ))}
+                </select>
+              </div>
+
               <div className="animate-in fade-in duration-500 space-y-3 border-t pt-4">
-                <label className="text-[10px] font-black text-zinc-400 uppercase italic">Selecione o Produto:</label>
+                <label className="text-[10px] font-black text-zinc-400 uppercase italic">
+                  Selecione os Produtos (Máx: 2):
+                </label>
                 <div className="grid grid-cols-1 gap-2">
                   {produtosLancados.filter(p => p.site === siteFiltro).length > 0 ? (
-                      produtosLancados.filter(p => p.site === siteFiltro).map(p => (
-                          <div 
-                              key={p.id} 
-                              onClick={() => setProdutoSelecionado(p.id)}
-                              className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${produtoSelecionado === p.id ? 'border-yellow-500 bg-yellow-50' : 'border-zinc-100'}`}
-                          >
-                              <div className="w-12 h-12 rounded-lg bg-zinc-100 overflow-hidden flex items-center justify-center border">
-                                  {p.imagem ? <img src={p.imagem} className="w-full h-full object-cover"/> : <Package size={20} className="text-zinc-300"/>}
+                      produtosLancados.filter(p => p.site === siteFiltro).map(p => {
+                          const isSelected = produtosSelecionados.includes(p.id);
+                          return (
+                              <div 
+                                  key={p.id} 
+                                  onClick={() => toggleProduto(p.id)}
+                                  className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${isSelected ? 'border-yellow-500 bg-yellow-50' : 'border-zinc-100'}`}
+                              >
+                                  <div className="w-12 h-12 rounded-lg bg-zinc-100 overflow-hidden flex items-center justify-center border">
+                                      {p.imagem ? <img src={p.imagem} className="w-full h-full object-cover"/> : <Package size={20} className="text-zinc-300"/>}
+                                  </div>
+                                  <div className="flex-1">
+                                      <p className="text-xs font-black uppercase tracking-tight">{p.nome}</p>
+                                      <p className="text-[10px] font-bold text-yellow-600 italic">R$ {p.preco}</p>
+                                      <p className="text-[10px] font-bold text-zinc-400">Venc: {p.vencimento ? p.vencimento.split('-').reverse().join('/') : 'N/A'}</p>
+                                  </div>
+                                  {isSelected && <CheckCircle2 className="text-yellow-500" size={18}/>}
                               </div>
-                              <div className="flex-1">
-                                  <p className="text-xs font-black uppercase tracking-tight">{p.nome}</p>
-                                  <p className="text-[10px] font-bold text-yellow-600 italic">R$ {p.preco}</p>
-                                  {/* ALTERAÇÃO AQUI: EXIBINDO O VENCIMENTO NO CARD DE COMPRA DO USUÁRIO */}
-                                  <p className="text-[10px] font-bold text-zinc-400">Venc: {p.vencimento ? p.vencimento.split('-').reverse().join('/') : 'N/A'}</p>
-                              </div>
-                              {produtoSelecionado === p.id && <CheckCircle2 className="text-yellow-500" size={18}/>}
-                          </div>
-                      ))
+                          );
+                      })
                   ) : (
                       <p className="text-center text-[10px] text-zinc-400 font-bold uppercase italic p-4 border rounded-2xl border-dashed">Nenhum produto disponível nesta região</p>
                   )}
@@ -797,11 +848,11 @@ export default function TrigofyApp() {
               </div>
 
               <button 
-                disabled={!nomeEncontrado || !produtoSelecionado || carregando || !telefone} 
+                disabled={!nomeEncontrado || produtosSelecionados.length === 0 || carregando || !telefone || !areaFuncionarioCompra} 
                 onClick={handleEnviarPedidoReal}
-                className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtoSelecionado && telefone ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
+                className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtosSelecionados.length > 0 && telefone && areaFuncionarioCompra ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
               >
-                {carregando ? "ENVIANDO..." : "ENVIAR PEDIDO"}
+                {carregando ? "ENVIANDO..." : `ENVIAR PEDIDO (${produtosSelecionados.length})`}
               </button>
             </div>
           </div>
@@ -1102,7 +1153,6 @@ export default function TrigofyApp() {
                                 </div>
                                 <div>
                                     <span className="text-[10px] font-bold uppercase block">{p.nome} ({p.site})</span>
-                                    {/* ALTERAÇÃO AQUI: EXIBINDO VENCIMENTO NA LISTA DE PRODUTOS DO ADMIN */}
                                     <span className="text-[9px] text-zinc-400 block">Venc: {p.vencimento ? p.vencimento.split('-').reverse().join('/') : '-'}</span>
                                 </div>
                             </div>
