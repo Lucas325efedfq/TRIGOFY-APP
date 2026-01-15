@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { 
-  LayoutGrid, Send, ChevronRight, ShoppingBag, 
+import {
+  LayoutGrid, Send, ChevronRight, ShoppingBag,
   LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus, Database, Users, Package, Image as ImageIcon, CheckCircle2, Clock, AlertCircle, XCircle, Check, X
 } from 'lucide-react';
 
@@ -17,8 +17,8 @@ const TABLE_ID_USUARIOS = 'tblUsuarios'; // Tabela de Usuários
 
 // LISTA DE ÁREAS SOLICITADA
 const AREAS_EMPRESA = [
-  "Lasagna", "Pesagem", "Cozinha Central", "Pane", "Massa", "Molho", 
-  "Qualidade", "P&D", "Estoque", "Manutenção", "Suprimentos", "TI", 
+  "Lasagna", "Pesagem", "Cozinha Central", "Pane", "Massa", "Molho",
+  "Qualidade", "P&D", "Estoque", "Manutenção", "Suprimentos", "TI",
   "Higienização", "G&G", "Meio Ambiente", "Apontamento", "Produção"
 ];
 
@@ -30,11 +30,11 @@ export default function TrigofyApp() {
   const [erro, setErro] = useState('');
   const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
   const [carregando, setCarregando] = useState(true);
-  
+
   // Controles de Site e Filtro
-  const [siteFiltro, setSiteFiltro] = useState(''); 
+  const [siteFiltro, setSiteFiltro] = useState('');
   const [siteUsuarioIdentificado, setSiteUsuarioIdentificado] = useState('');
-  
+
   // Estado para armazenar a origem do usuário que fez login
   const [usuarioLogadoOrigem, setUsuarioLogadoOrigem] = useState('');
 
@@ -51,9 +51,9 @@ export default function TrigofyApp() {
   // NOVO: Estados para a aba de Doações
   const [areaSolicitante, setAreaSolicitante] = useState('');
   const [motivoDoacao, setMotivoDoacao] = useState('');
-  const [areaProdutoDoado, setAreaProdutoDoado] = useState(''); 
-  const [dataVencimento, setDataVencimento] = useState(''); 
-  const [origemProduto, setOrigemProduto] = useState(''); 
+  const [areaProdutoDoado, setAreaProdutoDoado] = useState('');
+  const [dataVencimento, setDataVencimento] = useState('');
+  const [origemProduto, setOrigemProduto] = useState('');
 
   // NOVO: Estado para Telefone na compra
   const [telefone, setTelefone] = useState('');
@@ -83,13 +83,13 @@ export default function TrigofyApp() {
   const [novaSenhaInput, setNovaSenhaInput] = useState('');
 
   // Controle de sub-telas do Admin
-  const [subAbaAdmin, setSubAbaAdmin] = useState('menu'); 
+  const [subAbaAdmin, setSubAbaAdmin] = useState('menu');
 
   // Estados para Cadastro de Novo Usuário (Admin)
   const [novoUserLogin, setNovoUserLogin] = useState('');
   const [novoUserSenha, setNovoUserSenha] = useState('');
   const [novoUserOrigem, setNovoUserOrigem] = useState('VR');
-  const [novoUserFuncao, setNovoUserFuncao] = useState('USER'); 
+  const [novoUserFuncao, setNovoUserFuncao] = useState('USER');
 
   // Estados para Edição de Usuário Existente
   const [usuarioEmEdicao, setUsuarioEmEdicao] = useState(null);
@@ -102,7 +102,7 @@ export default function TrigofyApp() {
   const [prodPreco, setProdPreco] = useState('');
   const [prodSite, setProdSite] = useState('VR');
   const [prodImagem, setProdImagem] = useState('');
-  const [prodVencimento, setProdVencimento] = useState(''); 
+  const [prodVencimento, setProdVencimento] = useState('');
 
   // Estados de Compra do Usuário
   // ALTERAÇÃO: Agora é um array para suportar até 5 produtos
@@ -116,7 +116,7 @@ export default function TrigofyApp() {
     try {
       // BUSCA PESSOAS
       const resPessoas = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
-        headers: { 
+        headers: {
           Authorization: `Bearer ${AIRTABLE_TOKEN}`,
           "Content-Type": "application/json"
         }
@@ -127,7 +127,7 @@ export default function TrigofyApp() {
           id: reg.id,
           cpf: reg.fields.cpf || '',
           nome: reg.fields.nome || '',
-          usuarioAirtable: reg.fields.usuario || '', 
+          usuarioAirtable: reg.fields.usuario || '',
           site: (reg.fields.site || '').toUpperCase()
         }));
         setPessoasCadastradas(formatado);
@@ -135,7 +135,7 @@ export default function TrigofyApp() {
 
       // BUSCA PRODUTOS (INTEGRAÇÃO TABELA tblProdutos)
       const resProdutos = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PRODUTOS}`, {
-        headers: { 
+        headers: {
           Authorization: `Bearer ${AIRTABLE_TOKEN}`,
           "Content-Type": "application/json"
         }
@@ -325,7 +325,7 @@ export default function TrigofyApp() {
 
     if (encontrou) {
       setEstaLogado(true);
-      setUsuarioLogadoOrigem(encontrou.origem); 
+      setUsuarioLogadoOrigem(encontrou.origem);
       setErro('');
       showToast(`Bem-vindo, ${usuarioInput}!`, "success");
     } else {
@@ -362,7 +362,7 @@ export default function TrigofyApp() {
         setNovoUserLogin('');
         setNovoUserSenha('');
         await buscarDadosAirtable();
-        setSubAbaAdmin('lista'); 
+        setSubAbaAdmin('lista');
       }
     } catch (e) {
       showToast("Erro ao salvar usuário.", "error");
@@ -390,20 +390,20 @@ export default function TrigofyApp() {
     // Localiza o ID no Airtable
     const uNoBanco = usuariosAutorizados.find(u => u.usuario === user);
     if (uNoBanco && uNoBanco.id) {
-        try {
-            await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_USUARIOS}/${uNoBanco.id}`, {
-              method: 'DELETE',
-              headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
-            });
-            showToast("Usuário excluído!", "success");
-            buscarDadosAirtable();
-        } catch (e) {
-            showToast("Erro ao excluir do Airtable.", "error");
-        }
+      try {
+        await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_USUARIOS}/${uNoBanco.id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
+        });
+        showToast("Usuário excluído!", "success");
+        buscarDadosAirtable();
+      } catch (e) {
+        showToast("Erro ao excluir do Airtable.", "error");
+      }
     } else {
-        // Fallback local caso não tenha ID (usuarios mockados)
-        setUsuariosAutorizados(usuariosAutorizados.filter(u => u.usuario !== user));
-        showToast("Removido da lista temporária.", "success");
+      // Fallback local caso não tenha ID (usuarios mockados)
+      setUsuariosAutorizados(usuariosAutorizados.filter(u => u.usuario !== user));
+      showToast("Removido da lista temporária.", "success");
     }
   };
 
@@ -445,19 +445,19 @@ export default function TrigofyApp() {
     setProdutosSelecionados([]); // Limpa array
     setMeusPedidosHistorico([]);
     setPedidosParaAprovar([]);
-    setAreaSolicitante(''); 
-    setMotivoDoacao(''); 
-    setAreaProdutoDoado(''); 
-    setDataVencimento(''); 
-    setOrigemProduto(''); 
+    setAreaSolicitante('');
+    setMotivoDoacao('');
+    setAreaProdutoDoado('');
+    setDataVencimento('');
+    setOrigemProduto('');
     setTelefone('');
     setAreaFuncionarioCompra(''); // Limpa area da compra
     showToast("Logout realizado.", "success");
   };
 
   const handleLancarProduto = async () => {
-    if(!prodNome || !prodPreco || !prodVencimento) return showToast("Preencha nome, preço e data de vencimento.", "error");
-    
+    if (!prodNome || !prodPreco || !prodVencimento) return showToast("Preencha nome, preço e data de vencimento.", "error");
+
     setCarregando(true);
     try {
       const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PRODUTOS}`, {
@@ -482,7 +482,7 @@ export default function TrigofyApp() {
         setProdPreco('');
         setProdImagem('');
         setProdVencimento('');
-        await buscarDadosAirtable(); 
+        await buscarDadosAirtable();
       }
     } catch (e) {
       showToast("Erro ao lançar no Airtable.", "error");
@@ -524,11 +524,11 @@ export default function TrigofyApp() {
   // ==========================================================
   const handleEnviarPedidoReal = async () => {
     if (!nomeEncontrado || produtosSelecionados.length === 0 || !areaFuncionarioCompra) return;
-    
+
     setCarregando(true);
     try {
       const dataISO = new Date().toISOString().split('T')[0];
-      
+
       // Itera sobre os produtos selecionados para enviar um a um
       const promises = produtosSelecionados.map(async (prodId) => {
         const prod = produtosLancados.find(p => p.id === prodId);
@@ -536,13 +536,13 @@ export default function TrigofyApp() {
 
         return fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
           method: 'POST',
-          headers: { 
-            Authorization: `Bearer ${AIRTABLE_TOKEN}`, 
-            'Content-Type': 'application/json' 
+          headers: {
+            Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             fields: {
-              "solicitante": usuarioInput, 
+              "solicitante": usuarioInput,
               "cpf": cpfDigitado.replace(/\D/g, ''),
               "produto": prod.nome,
               "valor": prod.preco.toString(),
@@ -583,11 +583,11 @@ export default function TrigofyApp() {
       <div className="flex justify-center items-center bg-zinc-200 min-h-screen font-sans text-zinc-900">
         {/* Container Responsivo: Mobile (full), Tablet (Card Médio), PC (Card Grande) */}
         <div className="w-full h-full md:h-auto md:min-h-[600px] md:max-w-[600px] lg:max-w-[900px] bg-white shadow-2xl overflow-hidden flex flex-col relative md:rounded-[40px] lg:rounded-[30px] border-0 md:border-[10px] lg:border-[12px] border-zinc-900 p-8 justify-center">
-          
+
           {/* NOTIFICAÇÃO NO LOGIN */}
           {toast.show && (
             <div className={`absolute top-10 left-6 right-6 p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top duration-300 z-50 border ${toast.type === 'success' ? 'bg-zinc-900 border-yellow-500 text-yellow-500' : 'bg-red-500 border-red-400 text-white'}`}>
-              {toast.type === 'success' ? <CheckCircle2 size={20}/> : <AlertCircle size={20}/>}
+              {toast.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
               <span className="font-black text-[11px] uppercase tracking-tighter flex-1">{toast.message}</span>
             </div>
           )}
@@ -621,7 +621,7 @@ export default function TrigofyApp() {
     const textSub = temaEscuro ? 'text-zinc-400' : 'text-zinc-500';
 
     switch (activeTab) {
-      
+
       case 'home':
         return (
           <div className="space-y-4 animate-in fade-in duration-500 pb-10">
@@ -690,14 +690,14 @@ export default function TrigofyApp() {
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  <div 
+                  <div
                     onClick={() => {
                       if (usuarioLogadoOrigem === 'VR') {
                         showToast("Acesso negado para RIO/SP.", "error");
                       } else {
                         setSiteFiltro('RIO/SP'); setActiveTab('novo');
                       }
-                    }} 
+                    }}
                     className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${usuarioLogadoOrigem === 'VR' ? 'opacity-30' : ''}`}
                   >
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
@@ -707,14 +707,14 @@ export default function TrigofyApp() {
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  <div 
+                  <div
                     onClick={() => {
                       if (usuarioLogadoOrigem === 'RIO' || usuarioLogadoOrigem === 'SP') {
                         showToast("Acesso negado para Volta Redonda.", "error");
                       } else {
                         setSiteFiltro('VR'); setActiveTab('novo');
                       }
-                    }} 
+                    }}
                     className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${(usuarioLogadoOrigem === 'RIO' || usuarioLogadoOrigem === 'SP') ? 'opacity-30' : ''}`}
                   >
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
@@ -753,10 +753,10 @@ export default function TrigofyApp() {
                     </div>
                     <div className="flex gap-2 pt-2">
                       <button onClick={() => atualizarStatusPedido(p.id, 'APROVADO')} className="flex-1 bg-green-500 text-white py-2 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 active:scale-95 transition-all">
-                        <Check size={14}/> Aprovar
+                        <Check size={14} /> Aprovar
                       </button>
                       <button onClick={() => atualizarStatusPedido(p.id, 'REPROVADO')} className="flex-1 bg-red-500 text-white py-2 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 active:scale-95 transition-all">
-                        <X size={14}/> Reprovar
+                        <X size={14} /> Reprovar
                       </button>
                     </div>
                   </div>
@@ -787,23 +787,23 @@ export default function TrigofyApp() {
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Nome do Solicitante</label>
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
-              
+
               {/* Campo de Telefone */}
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Seu Telefone / WhatsApp</label>
-                <input 
-                  type="text" 
-                  placeholder="(XX) 9XXXX-XXXX" 
-                  className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} 
-                  value={telefone} 
-                  onChange={(e) => setTelefone(e.target.value)} 
+                <input
+                  type="text"
+                  placeholder="(XX) 9XXXX-XXXX"
+                  className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`}
+                  value={telefone}
+                  onChange={(e) => setTelefone(e.target.value)}
                 />
               </div>
 
               {/* NOVO: Campo de Área do Funcionário (Dropdown) */}
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área (Setor)</label>
-                <select 
+                <select
                   className={`w-full p-4 rounded-2xl outline-none border font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`}
                   value={areaFuncionarioCompra}
                   onChange={(e) => setAreaFuncionarioCompra(e.target.value)}
@@ -821,34 +821,34 @@ export default function TrigofyApp() {
                 </label>
                 <div className="grid grid-cols-1 gap-2">
                   {produtosLancados.filter(p => p.site === siteFiltro).length > 0 ? (
-                      produtosLancados.filter(p => p.site === siteFiltro).map(p => {
-                          const isSelected = produtosSelecionados.includes(p.id);
-                          return (
-                              <div 
-                                  key={p.id} 
-                                  onClick={() => toggleProduto(p.id)}
-                                  className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${isSelected ? 'border-yellow-500 bg-yellow-50' : 'border-zinc-100'}`}
-                              >
-                                  <div className="w-12 h-12 rounded-lg bg-zinc-100 overflow-hidden flex items-center justify-center border">
-                                      {p.imagem ? <img src={p.imagem} className="w-full h-full object-cover"/> : <Package size={20} className="text-zinc-300"/>}
-                                  </div>
-                                  <div className="flex-1">
-                                      <p className="text-xs font-black uppercase tracking-tight">{p.nome}</p>
-                                      <p className="text-[10px] font-bold text-yellow-600 italic">R$ {p.preco}</p>
-                                      <p className="text-[10px] font-bold text-zinc-400">Venc: {p.vencimento ? p.vencimento.split('-').reverse().join('/') : 'N/A'}</p>
-                                  </div>
-                                  {isSelected && <CheckCircle2 className="text-yellow-500" size={18}/>}
-                              </div>
-                          );
-                      })
+                    produtosLancados.filter(p => p.site === siteFiltro).map(p => {
+                      const isSelected = produtosSelecionados.includes(p.id);
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => toggleProduto(p.id)}
+                          className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${isSelected ? 'border-yellow-500 bg-yellow-50' : 'border-zinc-100'}`}
+                        >
+                          <div className="w-12 h-12 rounded-lg bg-zinc-100 overflow-hidden flex items-center justify-center border">
+                            {p.imagem ? <img src={p.imagem} className="w-full h-full object-cover" /> : <Package size={20} className="text-zinc-300" />}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs font-black uppercase tracking-tight">{p.nome}</p>
+                            <p className="text-[10px] font-bold text-yellow-600 italic">R$ {p.preco}</p>
+                            <p className="text-[10px] font-bold text-zinc-400">Venc: {p.vencimento ? p.vencimento.split('-').reverse().join('/') : 'N/A'}</p>
+                          </div>
+                          {isSelected && <CheckCircle2 className="text-yellow-500" size={18} />}
+                        </div>
+                      );
+                    })
                   ) : (
-                      <p className="text-center text-[10px] text-zinc-400 font-bold uppercase italic p-4 border rounded-2xl border-dashed">Nenhum produto disponível nesta região</p>
+                    <p className="text-center text-[10px] text-zinc-400 font-bold uppercase italic p-4 border rounded-2xl border-dashed">Nenhum produto disponível nesta região</p>
                   )}
                 </div>
               </div>
 
-              <button 
-                disabled={!nomeEncontrado || produtosSelecionados.length === 0 || carregando || !telefone || !areaFuncionarioCompra} 
+              <button
+                disabled={!nomeEncontrado || produtosSelecionados.length === 0 || carregando || !telefone || !areaFuncionarioCompra}
                 onClick={handleEnviarPedidoReal}
                 className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtosSelecionados.length > 0 && telefone && areaFuncionarioCompra ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
               >
@@ -870,15 +870,14 @@ export default function TrigofyApp() {
                 {meusPedidosHistorico.map(p => (
                   <div key={p.id} className={`${bgCard} p-4 rounded-2xl border shadow-sm flex flex-col gap-1`}>
                     <div className="flex justify-between items-start">
-                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest ${
-                        p.status === 'APROVADO' ? 'bg-green-100 text-green-700' : 
-                        p.status === 'REPROVADO' ? 'bg-red-100 text-red-700' : 
-                        'bg-yellow-100 text-yellow-700'
-                      }`}>
+                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest ${p.status === 'APROVADO' ? 'bg-green-100 text-green-700' :
+                          p.status === 'REPROVADO' ? 'bg-red-100 text-red-700' :
+                            'bg-yellow-100 text-yellow-700'
+                        }`}>
                         {p.status}
                       </span>
                       <div className="flex items-center gap-1 text-zinc-400">
-                        <Clock size={10}/>
+                        <Clock size={10} />
                         <span className="text-[10px] font-bold">{p.data}</span>
                       </div>
                     </div>
@@ -897,7 +896,7 @@ export default function TrigofyApp() {
         );
 
       case 'catalogo':
-        const nomeCompletoUsuarioLogado = pessoasCadastradas.find(p => 
+        const nomeCompletoUsuarioLogado = pessoasCadastradas.find(p =>
           p.usuarioAirtable === usuarioInput.toLowerCase()
         )?.nome || usuarioInput.toUpperCase();
 
@@ -905,12 +904,12 @@ export default function TrigofyApp() {
           <div className="animate-in slide-in-from-right duration-300 pb-20">
             <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Doações</h2>
-            
+
             <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Nome do Solicitante</label>
                 <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 flex items-center gap-3">
-                  <div className="bg-yellow-400 p-2 rounded-xl text-zinc-900"><User size={20}/></div>
+                  <div className="bg-yellow-400 p-2 rounded-xl text-zinc-900"><User size={20} /></div>
                   <div className="flex-1">
                     <p className="text-sm font-black text-zinc-900 uppercase">
                       {nomeCompletoUsuarioLogado}
@@ -921,9 +920,9 @@ export default function TrigofyApp() {
 
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Qual a sua Área?</label>
-                <input 
-                  type="text" 
-                  placeholder="Digite sua área/setor" 
+                <input
+                  type="text"
+                  placeholder="Digite sua área/setor"
                   className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
                   value={areaSolicitante}
                   onChange={(e) => setAreaSolicitante(e.target.value)}
@@ -932,8 +931,8 @@ export default function TrigofyApp() {
 
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Motivo da Doação</label>
-                <textarea 
-                  placeholder="Descreva o motivo da sua solicitação..." 
+                <textarea
+                  placeholder="Descreva o motivo da sua solicitação..."
                   rows={3}
                   className={`w-full p-4 rounded-2xl border outline-none font-bold resize-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
                   value={motivoDoacao}
@@ -943,9 +942,9 @@ export default function TrigofyApp() {
 
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Área do produto a ser doado</label>
-                <input 
-                  type="text" 
-                  placeholder="Ex: Cozinha, TI, Logística..." 
+                <input
+                  type="text"
+                  placeholder="Ex: Cozinha, TI, Logística..."
                   className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
                   value={areaProdutoDoado}
                   onChange={(e) => setAreaProdutoDoado(e.target.value)}
@@ -955,8 +954,8 @@ export default function TrigofyApp() {
               {/* NOVO CAMPO: Data de Vencimento do Produto */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Data de Vencimento do Produto</label>
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
                   value={dataVencimento}
                   onChange={(e) => setDataVencimento(e.target.value)}
@@ -966,9 +965,9 @@ export default function TrigofyApp() {
               {/* NOVO CAMPO: Origem do Produto */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Origem do Produto</label>
-                <input 
-                  type="text" 
-                  placeholder="De onde vem o produto?" 
+                <input
+                  type="text"
+                  placeholder="De onde vem o produto?"
                   className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
                   value={origemProduto}
                   onChange={(e) => setOrigemProduto(e.target.value)}
@@ -998,7 +997,7 @@ export default function TrigofyApp() {
             </div>
             <form onSubmit={enviarMensagemChat} className="flex gap-2 mb-20">
               <input type="text" placeholder="Como podemos ajudar?" className={`flex-1 p-4 rounded-2xl outline-none border shadow-sm ${temaEscuro ? 'bg-zinc-800 border-zinc-700 text-white' : 'bg-white'}`} value={inputChat} onChange={(e) => setInputChat(e.target.value)} />
-              <button type="submit" className="bg-zinc-900 text-yellow-400 p-4 rounded-2xl shadow-lg active:scale-95 transition-all"><Send size={20}/></button>
+              <button type="submit" className="bg-zinc-900 text-yellow-400 p-4 rounded-2xl shadow-lg active:scale-95 transition-all"><Send size={20} /></button>
             </form>
           </div>
         );
@@ -1010,13 +1009,13 @@ export default function TrigofyApp() {
             <h2 className={`text-xl font-black uppercase italic ${textMain}`}>Configurações</h2>
             <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-6`}>
               <div className="flex items-center gap-4 border-b pb-4 border-zinc-100 dark:border-zinc-700">
-                <div className="bg-yellow-400 p-3 rounded-full"><User className="text-zinc-900" size={24}/></div>
+                <div className="bg-yellow-400 p-3 rounded-full"><User className="text-zinc-900" size={24} /></div>
                 <div>
                   <p className={`font-black uppercase text-sm ${textMain}`}>{usuarioInput}</p>
                   <p className="text-[10px] text-zinc-400 uppercase">Usuário Ativo</p>
                 </div>
               </div>
-              
+
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Alterar Minha Senha</label>
                 <div className="flex gap-2">
@@ -1027,7 +1026,7 @@ export default function TrigofyApp() {
 
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  {temaEscuro ? <Moon className="text-yellow-400" size={20}/> : <Sun className="text-yellow-500" size={20}/>}
+                  {temaEscuro ? <Moon className="text-yellow-400" size={20} /> : <Sun className="text-yellow-500" size={20} />}
                   <span className={`font-bold text-sm ${textMain}`}>Tema do Aplicativo</span>
                 </div>
                 <button onClick={() => setTemaEscuro(!temaEscuro)} className={`w-12 h-6 rounded-full relative transition-colors ${temaEscuro ? 'bg-yellow-400' : 'bg-zinc-300'}`}>
@@ -1035,7 +1034,7 @@ export default function TrigofyApp() {
                 </button>
               </div>
               <button onClick={fazerLogoff} className="w-full flex items-center justify-center gap-2 p-4 bg-red-50 text-red-500 rounded-2xl font-bold text-sm hover:bg-red-100 transition-colors">
-                <LogOut size={18}/> SAIR DA CONTA
+                <LogOut size={18} /> SAIR DA CONTA
               </button>
             </div>
           </div>
@@ -1063,7 +1062,7 @@ export default function TrigofyApp() {
                         <p className={`font-bold text-xs ${textMain}`}>{p.nome}</p>
                         <p className="text-[10px] text-zinc-400">{p.cpf}</p>
                       </div>
-                      <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg"><Trash2 size={16}/></button>
+                      <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
                     </div>
                   ))}
                 </div>
@@ -1101,7 +1100,7 @@ export default function TrigofyApp() {
                         <p className="text-[9px] text-zinc-400 uppercase font-bold">Função: {u.funcao} | Origem: {u.origem}</p>
                       </div>
                       <div className="flex gap-1">
-                        <button onClick={() => adminExcluirUsuario(u.usuario)} className="p-2 text-zinc-400 hover:text-red-500"><Trash2 size={16}/></button>
+                        <button onClick={() => adminExcluirUsuario(u.usuario)} className="p-2 text-zinc-400 hover:text-red-500"><Trash2 size={16} /></button>
                       </div>
                     </div>
                   ))}
@@ -1113,21 +1112,21 @@ export default function TrigofyApp() {
               <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4 animate-in fade-in`}>
                 <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Lançar Produtos (Airtable)</h2>
                 <div className="space-y-4">
-                   <input type="text" placeholder="Nome do Produto" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={prodNome} onChange={(e) => setProdNome(e.target.value)} />
-                   <input type="text" placeholder="Preço (Ex: 25.00)" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={prodPreco} onChange={(e) => setProdPreco(e.target.value)} />
-                   <select className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={prodSite} onChange={(e) => setProdSite(e.target.value)}>
+                  <input type="text" placeholder="Nome do Produto" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={prodNome} onChange={(e) => setProdNome(e.target.value)} />
+                  <input type="text" placeholder="Preço (Ex: 25.00)" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={prodPreco} onChange={(e) => setProdPreco(e.target.value)} />
+                  <select className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={prodSite} onChange={(e) => setProdSite(e.target.value)}>
                     <option value="VR">Volta Redonda (VR)</option>
                     <option value="RIO/SP">Rio de Janeiro / São Paulo</option>
                   </select>
 
                   <div className="space-y-1">
-                      <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Data de Vencimento (Obrigatório)</label>
-                      <input 
-                        type="date" 
-                        className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} 
-                        value={prodVencimento} 
-                        onChange={(e) => setProdVencimento(e.target.value)} 
-                      />
+                    <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Data de Vencimento (Obrigatório)</label>
+                    <input
+                      type="date"
+                      className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`}
+                      value={prodVencimento}
+                      onChange={(e) => setProdVencimento(e.target.value)}
+                    />
                   </div>
 
                   <div className="space-y-1">
@@ -1142,22 +1141,22 @@ export default function TrigofyApp() {
                   <button onClick={handleLancarProduto} className="w-full bg-zinc-900 text-yellow-400 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">
                     {carregando ? "Lançando..." : "LANÇAR NO AIRTABLE"}
                   </button>
-                  
+
                   <div className="pt-4 border-t space-y-2 max-h-[200px] overflow-y-auto">
                     <p className="text-[10px] font-black text-zinc-400 uppercase italic">Produtos em Estoque:</p>
                     {produtosLancados.map(p => (
-                        <div key={p.id} className="flex justify-between items-center p-2 rounded-xl bg-zinc-50 border border-zinc-100">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-lg bg-white border flex items-center justify-center overflow-hidden">
-                                    {p.imagem ? <img src={p.imagem} className="w-full h-full object-cover"/> : <Package size={14}/>}
-                                </div>
-                                <div>
-                                    <span className="text-[10px] font-bold uppercase block">{p.nome} ({p.site})</span>
-                                    <span className="text-[9px] text-zinc-400 block">Venc: {p.vencimento ? p.vencimento.split('-').reverse().join('/') : '-'}</span>
-                                </div>
-                            </div>
-                            <button onClick={() => excluirProduto(p.id)} className="text-red-400 p-1"><Trash2 size={14}/></button>
+                      <div key={p.id} className="flex justify-between items-center p-2 rounded-xl bg-zinc-50 border border-zinc-100">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-white border flex items-center justify-center overflow-hidden">
+                            {p.imagem ? <img src={p.imagem} className="w-full h-full object-cover" /> : <Package size={14} />}
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-bold uppercase block">{p.nome} ({p.site})</span>
+                            <span className="text-[9px] text-zinc-400 block">Venc: {p.vencimento ? p.vencimento.split('-').reverse().join('/') : '-'}</span>
+                          </div>
                         </div>
+                        <button onClick={() => excluirProduto(p.id)} className="text-red-400 p-1"><Trash2 size={14} /></button>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -1175,13 +1174,13 @@ export default function TrigofyApp() {
     <div className={`flex justify-center min-h-screen font-sans transition-colors duration-300 ${temaEscuro ? 'bg-zinc-950 text-white' : 'bg-zinc-200 text-zinc-900'}`}>
       {/* Container Principal Responsivo: Mobile (full), Tablet (Card Médio), PC (Card Grande) */}
       <div className={`w-full h-full md:h-[844px] md:max-w-[600px] lg:max-w-[1200px] lg:h-[90vh] shadow-2xl overflow-hidden flex flex-col relative md:rounded-[55px] lg:rounded-[30px] border-0 md:border-[10px] lg:border-[12px] border-zinc-900 transition-colors ${temaEscuro ? 'bg-zinc-900' : 'bg-zinc-50'}`}>
-        
+
         {/* TOAST NOTIFICATION COMPONENT */}
         {toast.show && (
           <div className={`absolute top-20 left-4 right-4 p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top duration-300 z-50 border ${toast.type === 'success' ? (temaEscuro ? 'bg-zinc-900 border-yellow-500 text-yellow-500' : 'bg-zinc-900 border-zinc-800 text-yellow-400') : 'bg-red-500 border-red-400 text-white'}`}>
-            {toast.type === 'success' ? <CheckCircle2 size={20}/> : <AlertCircle size={20}/>}
+            {toast.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
             <span className="font-black text-[11px] uppercase tracking-tighter flex-1">{toast.message}</span>
-            <button onClick={() => setToast({ ...toast, show: false })} className="opacity-50"><X size={16}/></button>
+            <button onClick={() => setToast({ ...toast, show: false })} className="opacity-50"><X size={16} /></button>
           </div>
         )}
 
@@ -1189,7 +1188,7 @@ export default function TrigofyApp() {
           <h1 className="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">TRIGOFY</h1>
           <button onClick={fazerLogoff} className="text-zinc-400 hover:text-red-500 transition-colors"><LogOut size={20} /></button>
         </header>
-        
+
         <main className="flex-1 overflow-y-auto p-5 pb-32">
           {renderContent()}
         </main>
