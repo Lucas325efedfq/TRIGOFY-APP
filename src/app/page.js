@@ -15,13 +15,6 @@ const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
 const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios
 const TABLE_ID_USUARIOS = 'tblUsuarios'; // Tabela de Usuários
 
-// LISTA DE ÁREAS SOLICITADA
-const AREAS_EMPRESA = [
-  "Lasagna", "Pesagem", "Cozinha Central", "Pane", "Massa", "Molho",
-  "Qualidade", "P&D", "Estoque", "Manutenção", "Suprimentos", "TI",
-  "Higienização", "G&G", "Meio Ambiente", "Apontamento", "Produção"
-];
-
 export default function TrigofyApp() {
   const [estaLogado, setEstaLogado] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
@@ -57,8 +50,6 @@ export default function TrigofyApp() {
 
   // NOVO: Estado para Telefone na compra
   const [telefone, setTelefone] = useState('');
-  // NOVO: Estado para Área do Funcionário na compra
-  const [areaFuncionarioCompra, setAreaFuncionarioCompra] = useState('');
 
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
@@ -451,7 +442,6 @@ export default function TrigofyApp() {
     setDataVencimento('');
     setOrigemProduto('');
     setTelefone('');
-    setAreaFuncionarioCompra(''); // Limpa area da compra
     showToast("Logout realizado.", "success");
   };
 
@@ -523,7 +513,7 @@ export default function TrigofyApp() {
   // REAJUSTE DA FUNÇÃO: ENVIAR PEDIDO PARA RELATÓRIO (MÚLTIPLOS)
   // ==========================================================
   const handleEnviarPedidoReal = async () => {
-    if (!nomeEncontrado || produtosSelecionados.length === 0 || !areaFuncionarioCompra) return;
+    if (!nomeEncontrado || produtosSelecionados.length === 0) return;
 
     setCarregando(true);
     try {
@@ -549,8 +539,8 @@ export default function TrigofyApp() {
               "site": siteFiltro,
               "data": dataISO,
               "status": "PENDENTE",
-              "telefone": telefone,
-              "area": areaFuncionarioCompra // Adicionado campo de Área
+              "telefone": telefone
+              // REMOVIDO: "area": areaFuncionarioCompra
             }
           })
         });
@@ -564,7 +554,6 @@ export default function TrigofyApp() {
         setCpfDigitado('');
         setProdutosSelecionados([]);
         setTelefone('');
-        setAreaFuncionarioCompra('');
         setActiveTab('home');
       } else {
         showToast("Erro ao registrar um ou mais produtos.", "error");
@@ -773,7 +762,7 @@ export default function TrigofyApp() {
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
-            <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); setTelefone(''); setProdutosSelecionados([]); setAreaFuncionarioCompra(''); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
+            <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); setTelefone(''); setProdutosSelecionados([]); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <div className={`${bgCard} p-6 rounded-3xl shadow-sm border space-y-5`}>
               <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
                 {siteFiltro === 'RIO/SP' ? 'Compras RIO/SP' : 'Compras Volta Redonda'}
@@ -798,21 +787,6 @@ export default function TrigofyApp() {
                   value={telefone}
                   onChange={(e) => setTelefone(e.target.value)}
                 />
-              </div>
-
-              {/* NOVO: Campo de Área do Funcionário (Dropdown) */}
-              <div>
-                <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área (Setor)</label>
-                <select
-                  className={`w-full p-4 rounded-2xl outline-none border font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`}
-                  value={areaFuncionarioCompra}
-                  onChange={(e) => setAreaFuncionarioCompra(e.target.value)}
-                >
-                  <option value="">Selecione sua área...</option>
-                  {AREAS_EMPRESA.map(area => (
-                    <option key={area} value={area}>{area}</option>
-                  ))}
-                </select>
               </div>
 
               <div className="animate-in fade-in duration-500 space-y-3 border-t pt-4">
@@ -848,9 +822,9 @@ export default function TrigofyApp() {
               </div>
 
               <button
-                disabled={!nomeEncontrado || produtosSelecionados.length === 0 || carregando || !telefone || !areaFuncionarioCompra}
+                disabled={!nomeEncontrado || produtosSelecionados.length === 0 || carregando || !telefone}
                 onClick={handleEnviarPedidoReal}
-                className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtosSelecionados.length > 0 && telefone && areaFuncionarioCompra ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
+                className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtosSelecionados.length > 0 && telefone ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
               >
                 {carregando ? "ENVIANDO..." : `ENVIAR PEDIDO (${produtosSelecionados.length})`}
               </button>
