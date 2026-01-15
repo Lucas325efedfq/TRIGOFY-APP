@@ -10,17 +10,13 @@ import {
 // ==========================================================
 const AIRTABLE_TOKEN = 'patSTombPP4bmw0AK.43e89e93f885283e025cc1c7636c3af9053c953ca812746652c883757c25cd9a';
 const BASE_ID = 'appj9MPXg5rVQf3zK';
-const TABLE_ID = 'tblcgAQwSPe8NcvRN';
+
+// *** ATUALIZADO: Nome da tabela de Pessoas ***
+const TABLE_ID = 'tblpfxnome';
+
 const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
 const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios
 const TABLE_ID_USUARIOS = 'tblUsuarios'; // Tabela de Usuários
-
-// LISTA DE ÁREAS SOLICITADA
-const AREAS_EMPRESA = [
-  "Lasagna", "Pesagem", "Cozinha Central", "Pane", "Massa", "Molho",
-  "Qualidade", "P&D", "Estoque", "Manutenção", "Suprimentos", "TI",
-  "Higienização", "G&G", "Meio Ambiente", "Apontamento", "Produção"
-];
 
 export default function TrigofyApp() {
   const [estaLogado, setEstaLogado] = useState(false);
@@ -57,8 +53,6 @@ export default function TrigofyApp() {
 
   // NOVO: Estado para Telefone na compra
   const [telefone, setTelefone] = useState('');
-  // NOVO: Estado para Área do Funcionário na compra
-  const [areaFuncionarioCompra, setAreaFuncionarioCompra] = useState('');
 
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
@@ -105,7 +99,6 @@ export default function TrigofyApp() {
   const [prodVencimento, setProdVencimento] = useState('');
 
   // Estados de Compra do Usuário
-  // ALTERAÇÃO: Agora é um array para suportar até 5 produtos
   const [produtosSelecionados, setProdutosSelecionados] = useState([]);
 
   // ==========================================================
@@ -128,7 +121,8 @@ export default function TrigofyApp() {
           cpf: reg.fields.cpf || '',
           nome: reg.fields.nome || '',
           usuarioAirtable: reg.fields.usuario || '',
-          site: (reg.fields.site || '').toUpperCase()
+          site: (reg.fields.site || '').toUpperCase(),
+          area: reg.fields.area || '' // *** ATUALIZADO: Carrega a área ***
         }));
         setPessoasCadastradas(formatado);
       }
@@ -148,7 +142,7 @@ export default function TrigofyApp() {
           preco: reg.fields.preco || '',
           site: reg.fields.site || '',
           imagem: reg.fields.imagem || '',
-          vencimento: reg.fields.vencimento || '' // Carregando vencimento se existir
+          vencimento: reg.fields.vencimento || ''
         })));
       }
 
@@ -251,12 +245,15 @@ export default function TrigofyApp() {
     if (activeTab === 'aprovacoes' && estaLogado) buscarPedidosPendentes();
   }, [activeTab]);
 
+  // *** ATUALIZADO: Estado para Nova Área ***
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
+  const [novaArea, setNovaArea] = useState('');
 
   const salvarNoAirtable = async () => {
-    if (!novoCpf || !novoNome) {
-      showToast("Por favor, preencha CPF e Nome.", "error");
+    // *** ATUALIZADO: Validação da Área ***
+    if (!novoCpf || !novoNome || !novaArea) {
+      showToast("Por favor, preencha CPF, Nome e Área.", "error");
       return;
     }
     setCarregando(true);
@@ -270,13 +267,15 @@ export default function TrigofyApp() {
         body: JSON.stringify({
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
-            nome: novoNome.toUpperCase().trim()
+            nome: novoNome.toUpperCase().trim(),
+            area: novaArea.toUpperCase().trim() // *** ATUALIZADO: Enviando a Área ***
           }
         })
       });
       if (response.ok) {
         setNovoCpf('');
         setNovoNome('');
+        setNovaArea(''); // Limpa campo
         await buscarDadosAirtable();
         showToast("✅ Cadastrado com sucesso!", "success");
       }
@@ -371,7 +370,6 @@ export default function TrigofyApp() {
   };
 
   const adminSalvarUsuario = () => {
-    // Mantido conforme pedido
     const novos = usuariosAutorizados.map(u => {
       if (u.usuario === usuarioEmEdicao) {
         return { usuario: editNome.toLowerCase(), senha: editSenha, origem: editOrigem };
@@ -387,7 +385,6 @@ export default function TrigofyApp() {
     if (user === 'admin') return showToast("Não é possível remover o administrador.", "error");
     if (!confirm(`Excluir login de ${user}?`)) return;
 
-    // Localiza o ID no Airtable
     const uNoBanco = usuariosAutorizados.find(u => u.usuario === user);
     if (uNoBanco && uNoBanco.id) {
       try {
@@ -401,7 +398,6 @@ export default function TrigofyApp() {
         showToast("Erro ao excluir do Airtable.", "error");
       }
     } else {
-      // Fallback local caso não tenha ID (usuarios mockados)
       setUsuariosAutorizados(usuariosAutorizados.filter(u => u.usuario !== user));
       showToast("Removido da lista temporária.", "success");
     }
@@ -442,7 +438,7 @@ export default function TrigofyApp() {
     setSenha('');
     setUsuarioLogadoOrigem('');
     setCpfDigitado('');
-    setProdutosSelecionados([]); // Limpa array
+    setProdutosSelecionados([]);
     setMeusPedidosHistorico([]);
     setPedidosParaAprovar([]);
     setAreaSolicitante('');
@@ -451,7 +447,6 @@ export default function TrigofyApp() {
     setDataVencimento('');
     setOrigemProduto('');
     setTelefone('');
-    setAreaFuncionarioCompra(''); // Limpa area da compra
     showToast("Logout realizado.", "success");
   };
 
@@ -504,13 +499,10 @@ export default function TrigofyApp() {
     }
   };
 
-  // FUNÇÃO AUXILIAR PARA SELECIONAR ATÉ 5 PRODUTOS
   const toggleProduto = (id) => {
     if (produtosSelecionados.includes(id)) {
-      // Se já estiver, remove
       setProdutosSelecionados(prev => prev.filter(pid => pid !== id));
     } else {
-      // Se não estiver, verifica se já tem 5
       if (produtosSelecionados.length < 5) {
         setProdutosSelecionados(prev => [...prev, id]);
       } else {
@@ -519,17 +511,13 @@ export default function TrigofyApp() {
     }
   };
 
-  // ==========================================================
-  // REAJUSTE DA FUNÇÃO: ENVIAR PEDIDO PARA RELATÓRIO (MÚLTIPLOS)
-  // ==========================================================
   const handleEnviarPedidoReal = async () => {
-    if (!nomeEncontrado || produtosSelecionados.length === 0 || !areaFuncionarioCompra) return;
+    if (!nomeEncontrado || produtosSelecionados.length === 0) return;
 
     setCarregando(true);
     try {
       const dataISO = new Date().toISOString().split('T')[0];
 
-      // Itera sobre os produtos selecionados para enviar um a um
       const promises = produtosSelecionados.map(async (prodId) => {
         const prod = produtosLancados.find(p => p.id === prodId);
         if (!prod) return null;
@@ -549,8 +537,7 @@ export default function TrigofyApp() {
               "site": siteFiltro,
               "data": dataISO,
               "status": "PENDENTE",
-              "telefone": telefone,
-              "area": areaFuncionarioCompra // Adicionado campo de Área
+              "telefone": telefone
             }
           })
         });
@@ -564,7 +551,6 @@ export default function TrigofyApp() {
         setCpfDigitado('');
         setProdutosSelecionados([]);
         setTelefone('');
-        setAreaFuncionarioCompra('');
         setActiveTab('home');
       } else {
         showToast("Erro ao registrar um ou mais produtos.", "error");
@@ -581,10 +567,7 @@ export default function TrigofyApp() {
   if (!estaLogado) {
     return (
       <div className="flex justify-center items-center bg-zinc-200 min-h-screen font-sans text-zinc-900">
-        {/* Container Responsivo: Mobile (full), Tablet (Card Médio), PC (Card Grande) */}
         <div className="w-full h-full md:h-auto md:min-h-[600px] md:max-w-[600px] lg:max-w-[900px] bg-white shadow-2xl overflow-hidden flex flex-col relative md:rounded-[40px] lg:rounded-[30px] border-0 md:border-[10px] lg:border-[12px] border-zinc-900 p-8 justify-center">
-
-          {/* NOTIFICAÇÃO NO LOGIN */}
           {toast.show && (
             <div className={`absolute top-10 left-6 right-6 p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top duration-300 z-50 border ${toast.type === 'success' ? 'bg-zinc-900 border-yellow-500 text-yellow-500' : 'bg-red-500 border-red-400 text-white'}`}>
               {toast.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
@@ -638,7 +621,6 @@ export default function TrigofyApp() {
             <h3 className={`font-extrabold text-lg px-2 mt-6 uppercase italic tracking-tighter ${textMain}`}>
               Ações Rápidas
             </h3>
-            {/* Grid responsivo: Desktop 2 colunas, Mobile 1 coluna */}
             <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4">
               {isAprovador && (
                 <div onClick={() => setActiveTab('aprovacoes')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm border border-zinc-800 flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
@@ -773,7 +755,7 @@ export default function TrigofyApp() {
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
-            <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); setTelefone(''); setProdutosSelecionados([]); setAreaFuncionarioCompra(''); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
+            <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); setTelefone(''); setProdutosSelecionados([]); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <div className={`${bgCard} p-6 rounded-3xl shadow-sm border space-y-5`}>
               <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
                 {siteFiltro === 'RIO/SP' ? 'Compras RIO/SP' : 'Compras Volta Redonda'}
@@ -798,21 +780,6 @@ export default function TrigofyApp() {
                   value={telefone}
                   onChange={(e) => setTelefone(e.target.value)}
                 />
-              </div>
-
-              {/* NOVO: Campo de Área do Funcionário (Dropdown) */}
-              <div>
-                <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área (Setor)</label>
-                <select
-                  className={`w-full p-4 rounded-2xl outline-none border font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`}
-                  value={areaFuncionarioCompra}
-                  onChange={(e) => setAreaFuncionarioCompra(e.target.value)}
-                >
-                  <option value="">Selecione sua área...</option>
-                  {AREAS_EMPRESA.map(area => (
-                    <option key={area} value={area}>{area}</option>
-                  ))}
-                </select>
               </div>
 
               <div className="animate-in fade-in duration-500 space-y-3 border-t pt-4">
@@ -848,9 +815,9 @@ export default function TrigofyApp() {
               </div>
 
               <button
-                disabled={!nomeEncontrado || produtosSelecionados.length === 0 || carregando || !telefone || !areaFuncionarioCompra}
+                disabled={!nomeEncontrado || produtosSelecionados.length === 0 || carregando || !telefone}
                 onClick={handleEnviarPedidoReal}
-                className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtosSelecionados.length > 0 && telefone && areaFuncionarioCompra ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
+                className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtosSelecionados.length > 0 && telefone ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
               >
                 {carregando ? "ENVIANDO..." : `ENVIAR PEDIDO (${produtosSelecionados.length})`}
               </button>
@@ -1052,6 +1019,10 @@ export default function TrigofyApp() {
                 <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Nuvem (Airtable)</h2>
                 <input type="text" placeholder="CPF" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
                 <input type="text" placeholder="Nome Completo" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
+
+                {/* *** ATUALIZADO: CAMPO PARA ÁREA/SETOR *** */}
+                <input type="text" placeholder="Área / Setor" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novaArea} onChange={(e) => setNovaArea(e.target.value)} />
+
                 <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">
                   {carregando ? "Salvando..." : "Salvar no Airtable"}
                 </button>
@@ -1060,7 +1031,8 @@ export default function TrigofyApp() {
                     <div key={p.id} className={`flex justify-between items-center p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50'}`}>
                       <div>
                         <p className={`font-bold text-xs ${textMain}`}>{p.nome}</p>
-                        <p className="text-[10px] text-zinc-400">{p.cpf}</p>
+                        {/* *** ATUALIZADO: MOSTRA A ÁREA NA LISTA *** */}
+                        <p className="text-[10px] text-zinc-400">{p.cpf} {p.area ? `| ${p.area}` : ''}</p>
                       </div>
                       <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
                     </div>

@@ -11,9 +11,7 @@ import {
 const AIRTABLE_TOKEN = 'patSTombPP4bmw0AK.43e89e93f885283e025cc1c7636c3af9053c953ca812746652c883757c25cd9a';
 const BASE_ID = 'appj9MPXg5rVQf3zK';
 
-// *** ATUALIZADO: Nome da tabela de Pessoas ***
-const TABLE_ID = 'tblpfxnome';
-
+const TABLE_ID = 'tblpfxnome'; // Tabela de Pessoas
 const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
 const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios
 const TABLE_ID_USUARIOS = 'tblUsuarios'; // Tabela de Usuários
@@ -122,7 +120,7 @@ export default function TrigofyApp() {
           nome: reg.fields.nome || '',
           usuarioAirtable: reg.fields.usuario || '',
           site: (reg.fields.site || '').toUpperCase(),
-          area: reg.fields.area || '' // *** ATUALIZADO: Carrega a área ***
+          area: reg.fields.area || '' // Carrega a área
         }));
         setPessoasCadastradas(formatado);
       }
@@ -245,13 +243,12 @@ export default function TrigofyApp() {
     if (activeTab === 'aprovacoes' && estaLogado) buscarPedidosPendentes();
   }, [activeTab]);
 
-  // *** ATUALIZADO: Estado para Nova Área ***
+  // Estados para Cadastro na Nuvem
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
   const [novaArea, setNovaArea] = useState('');
 
   const salvarNoAirtable = async () => {
-    // *** ATUALIZADO: Validação da Área ***
     if (!novoCpf || !novoNome || !novaArea) {
       showToast("Por favor, preencha CPF, Nome e Área.", "error");
       return;
@@ -268,14 +265,14 @@ export default function TrigofyApp() {
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
             nome: novoNome.toUpperCase().trim(),
-            area: novaArea.toUpperCase().trim() // *** ATUALIZADO: Enviando a Área ***
+            area: novaArea.toUpperCase().trim()
           }
         })
       });
       if (response.ok) {
         setNovoCpf('');
         setNovoNome('');
-        setNovaArea(''); // Limpa campo
+        setNovaArea('');
         await buscarDadosAirtable();
         showToast("✅ Cadastrado com sucesso!", "success");
       }
@@ -304,15 +301,21 @@ export default function TrigofyApp() {
   // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
+  
+  // *** NOVO: Estado para armazenar a área encontrada ***
+  const [areaEncontrada, setAreaEncontrada] = useState('');
 
   useEffect(() => {
     const pessoa = pessoasCadastradas.find(p => p.cpf === cpfDigitado.replace(/\D/g, ''));
     if (pessoa) {
       setNomeEncontrado(pessoa.nome);
       setSiteUsuarioIdentificado(pessoa.site);
+      // *** Puxa a área do cadastro ***
+      setAreaEncontrada(pessoa.area || ''); 
     } else {
       setNomeEncontrado('');
       setSiteUsuarioIdentificado('');
+      setAreaEncontrada('');
     }
   }, [cpfDigitado, pessoasCadastradas]);
 
@@ -447,6 +450,7 @@ export default function TrigofyApp() {
     setDataVencimento('');
     setOrigemProduto('');
     setTelefone('');
+    setAreaEncontrada('');
     showToast("Logout realizado.", "success");
   };
 
@@ -755,7 +759,7 @@ export default function TrigofyApp() {
       case 'novo':
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
-            <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); setTelefone(''); setProdutosSelecionados([]); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
+            <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); setTelefone(''); setProdutosSelecionados([]); setAreaEncontrada(''); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <div className={`${bgCard} p-6 rounded-3xl shadow-sm border space-y-5`}>
               <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
                 {siteFiltro === 'RIO/SP' ? 'Compras RIO/SP' : 'Compras Volta Redonda'}
@@ -770,7 +774,12 @@ export default function TrigofyApp() {
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
 
-              {/* Campo de Telefone */}
+              {/* *** NOVO CAMPO DE ÁREA VISUAL (READ-ONLY) *** */}
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Área / Setor</label>
+                <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={areaEncontrada || "---"} />
+              </div>
+
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Seu Telefone / WhatsApp</label>
                 <input
