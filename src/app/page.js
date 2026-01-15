@@ -1203,4 +1203,4 @@ export default function TrigofyApp() {
       </div>
     </div>
   );
-}
+};
