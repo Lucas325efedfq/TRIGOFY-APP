@@ -15,6 +15,7 @@ const TABLE_ID = 'tblpfxnome'; // Tabela de Pessoas
 const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
 const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios
 const TABLE_ID_USUARIOS = 'tblUsuarios'; // Tabela de Usuários
+const TABLE_ID_DOACOES = 'tblDoacoes'; // CONSTANTE SUGERIDA PARA A TABELA DE DOAÇÕES
 
 export default function TrigofyApp() {
   const [estaLogado, setEstaLogado] = useState(false);
@@ -566,6 +567,63 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
+  // NOVA FUNÇÃO: ENVIAR SOLICITAÇÃO DE DOAÇÃO
+  // (Baseada na lógica de handleEnviarPedidoReal)
+  // ==========================================================
+  const handleEnviarDoacao = async () => {
+    // Validação dos campos obrigatórios da doação
+    if (!areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto) {
+        return showToast("Preencha todos os campos da doação.", "error");
+    }
+
+    setCarregando(true);
+    try {
+      const dataISO = new Date().toISOString().split('T')[0];
+
+      // Envia os dados para a tabela de doações
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_DOACOES}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fields: {
+            "solicitante": usuarioInput,
+            "area_solicitante": areaSolicitante,
+            "motivo": motivoDoacao,
+            "area_produto": areaProdutoDoado,
+            "vencimento": dataVencimento,
+            "origem": origemProduto,
+            "data_solicitacao": dataISO,
+            "status": "PENDENTE"
+          }
+        })
+      });
+
+      if (response.ok) {
+        // Ramificações de sucesso (cópia da lógica de pedidos)
+        showToast("✅ SOLICITAÇÃO ENVIADA COM SUCESSO!", "success");
+        
+        // Limpa os campos
+        setAreaSolicitante('');
+        setMotivoDoacao('');
+        setAreaProdutoDoado('');
+        setDataVencimento('');
+        setOrigemProduto('');
+        
+        // Redireciona para home
+        setActiveTab('home');
+      } else {
+        showToast("Erro ao registrar doação.", "error");
+      }
+    } catch (e) {
+      showToast("Erro de conexão.", "error");
+    }
+    setCarregando(false);
+  };
+
+  // ==========================================================
   // 5. TELA DE LOGIN (RESPONSIVA)
   // ==========================================================
   if (!estaLogado) {
@@ -950,10 +1008,14 @@ export default function TrigofyApp() {
                 />
               </div>
 
-              <div className="text-center py-6 space-y-3 border-t border-dashed">
-                <BookOpen className="mx-auto text-zinc-200" size={48} />
-                <p className={`font-bold text-sm ${textSub}`}>O catálogo de doações está sendo preparado para você.</p>
-              </div>
+              {/* === SUBSTITUÍDO O AVISO DE CATÁLOGO PELO BOTÃO DE ENVIAR (CONFIGURADO IGUAL AO DE COMPRAS) === */}
+              <button
+                disabled={!areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto || carregando}
+                onClick={handleEnviarDoacao}
+                className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${areaSolicitante && motivoDoacao && areaProdutoDoado && dataVencimento && origemProduto ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
+              >
+                {carregando ? "ENVIANDO..." : `ENVIAR SOLICITAÇÃO`}
+              </button>
             </div>
           </div>
         );
