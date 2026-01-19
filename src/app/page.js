@@ -15,7 +15,8 @@ const TABLE_ID = 'tblpfxnome'; // Tabela de Pessoas
 const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
 const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios
 const TABLE_ID_USUARIOS = 'tblUsuarios'; // Tabela de Usuários
-const TABLE_ID_DOACOES = 'tblDoacoes'; // CONSTANTE SUGERIDA PARA A TABELA DE DOAÇÕES
+// OBS: Redirecionei o fluxo para tblPedidos para manter a integridade das Aprovações
+const TABLE_ID_DOACOES = 'tblDoacoes'; 
 
 export default function TrigofyApp() {
   const [estaLogado, setEstaLogado] = useState(false);
@@ -49,6 +50,10 @@ export default function TrigofyApp() {
   const [areaProdutoDoado, setAreaProdutoDoado] = useState('');
   const [dataVencimento, setDataVencimento] = useState('');
   const [origemProduto, setOrigemProduto] = useState('');
+  
+  // *** NOVOS CAMPOS SOLICITADOS ***
+  const [nomeProdutoDoacao, setNomeProdutoDoacao] = useState('');
+  const [codigoProdutoDoacao, setCodigoProdutoDoacao] = useState('');
 
   // NOVO: Estado para Telefone na compra
   const [telefone, setTelefone] = useState('');
@@ -571,8 +576,8 @@ export default function TrigofyApp() {
   // (Baseada na lógica de handleEnviarPedidoReal)
   // ==========================================================
   const handleEnviarDoacao = async () => {
-    // Validação dos campos obrigatórios da doação
-    if (!areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto) {
+    // Validação dos campos obrigatórios da doação (INCLUINDO NOVOS CAMPOS)
+    if (!nomeProdutoDoacao || !codigoProdutoDoacao || !areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto) {
         return showToast("Preencha todos os campos da doação.", "error");
     }
 
@@ -580,8 +585,8 @@ export default function TrigofyApp() {
     try {
       const dataISO = new Date().toISOString().split('T')[0];
 
-      // Envia os dados para a tabela de doações
-      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_DOACOES}`, {
+      // CORREÇÃO: Enviando para TABLE_ID_PEDIDOS para que apareça nas aprovações
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${AIRTABLE_TOKEN}`,
@@ -590,13 +595,20 @@ export default function TrigofyApp() {
         body: JSON.stringify({
           fields: {
             "solicitante": usuarioInput,
+            // Mapeando "Nome do Produto" para o campo principal "produto" do Airtable
+            "produto": nomeProdutoDoacao.toUpperCase(),
+            "valor": "0", // Valor zero pois é doação
+            "site": usuarioLogadoOrigem !== 'ALL' ? usuarioLogadoOrigem : 'VR',
+            "data": dataISO,
+            "status": "PENDENTE",
+            
+            // Campos específicos mapeados
+            "codigo_produto": codigoProdutoDoacao,
             "area_solicitante": areaSolicitante,
             "motivo": motivoDoacao,
             "area_produto": areaProdutoDoado,
             "vencimento": dataVencimento,
-            "origem": origemProduto,
-            "data_solicitacao": dataISO,
-            "status": "PENDENTE"
+            "origem": origemProduto
           }
         })
       });
@@ -606,6 +618,8 @@ export default function TrigofyApp() {
         showToast("✅ SOLICITAÇÃO ENVIADA COM SUCESSO!", "success");
         
         // Limpa os campos
+        setNomeProdutoDoacao('');
+        setCodigoProdutoDoacao('');
         setAreaSolicitante('');
         setMotivoDoacao('');
         setAreaProdutoDoado('');
@@ -952,6 +966,30 @@ export default function TrigofyApp() {
                 </div>
               </div>
 
+              {/* === NOVO CAMPO: NOME DO PRODUTO (OBRIGATÓRIO) === */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Nome do Produto</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Arroz, Farinha, etc."
+                  className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
+                  value={nomeProdutoDoacao}
+                  onChange={(e) => setNomeProdutoDoacao(e.target.value)}
+                />
+              </div>
+
+              {/* === NOVO CAMPO: CÓDIGO DO PRODUTO (OBRIGATÓRIO) === */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Código do Produto</label>
+                <input
+                  type="text"
+                  placeholder="Digite o código"
+                  className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
+                  value={codigoProdutoDoacao}
+                  onChange={(e) => setCodigoProdutoDoacao(e.target.value)}
+                />
+              </div>
+
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Qual a sua Área?</label>
                 <input
@@ -1008,14 +1046,16 @@ export default function TrigofyApp() {
                 />
               </div>
 
-              {/* === SUBSTITUÍDO O AVISO DE CATÁLOGO PELO BOTÃO DE ENVIAR (CONFIGURADO IGUAL AO DE COMPRAS) === */}
-              <button
-                disabled={!areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto || carregando}
-                onClick={handleEnviarDoacao}
-                className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${areaSolicitante && motivoDoacao && areaProdutoDoado && dataVencimento && origemProduto ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
-              >
-                {carregando ? "ENVIANDO..." : `ENVIAR SOLICITAÇÃO`}
-              </button>
+              {/* === BOTÃO DE ENVIO COM VALIDAÇÃO DOS NOVOS CAMPOS === */}
+              <div className="pt-4 border-t border-dashed">
+                 <button
+                  disabled={!nomeProdutoDoacao || !codigoProdutoDoacao || !areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto || carregando}
+                  onClick={handleEnviarDoacao}
+                  className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeProdutoDoacao && codigoProdutoDoacao && areaSolicitante && motivoDoacao && areaProdutoDoado && dataVencimento && origemProduto ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
+                >
+                  {carregando ? "ENVIANDO..." : "ENVIAR SOLICITAÇÃO"}
+                </button>
+              </div>
             </div>
           </div>
         );
