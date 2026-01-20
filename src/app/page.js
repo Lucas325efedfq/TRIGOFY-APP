@@ -558,6 +558,7 @@ export default function TrigofyApp() {
         const prod = produtosLancados.find(p => p.id === prodId);
         if (!prod) return null;
 
+        // *** CORREÇÃO: AQUI DEVE IR PARA PEDIDOS, NÃO DOACOES ***
         return fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
           method: 'POST',
           headers: {
@@ -610,8 +611,8 @@ export default function TrigofyApp() {
     try {
       const dataISO = new Date().toISOString().split('T')[0];
 
-      // CORREÇÃO: Enviando para TABLE_ID_PEDIDOS para que apareça nas aprovações
-      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
+      // *** CORREÇÃO: AGORA VAI PARA A TABELA DE DOAÇÕES (tblDoacoes) ***
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_DOACOES}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${AIRTABLE_TOKEN}`,
@@ -619,21 +620,17 @@ export default function TrigofyApp() {
         },
         body: JSON.stringify({
           fields: {
+            // Campos mapeados para a tabela tblDoacoes
             "solicitante": usuarioInput,
-            // Mapeando "Nome do Produto" para o campo principal "produto" do Airtable
             "produto": nomeProdutoDoacao.toUpperCase(),
-            "valor": "0", // Valor zero pois é doação
-            "site": usuarioLogadoOrigem !== 'ALL' ? usuarioLogadoOrigem : 'VR',
-            "data": dataISO,
-            "status": "PENDENTE",
-             
-            // Campos específicos mapeados
             "codigo_produto": codigoProdutoDoacao,
             "area_solicitante": areaSolicitante,
             "motivo": motivoDoacao,
             "area_produto": areaProdutoDoado,
             "vencimento": dataVencimento,
-            "origem": origemProduto
+            "origem": origemProduto,
+            "data": dataISO,
+            "status": "PENDENTE"
           }
         })
       });
