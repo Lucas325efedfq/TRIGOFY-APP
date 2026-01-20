@@ -15,6 +15,8 @@ const TABLE_ID = 'tblpfxnome'; // Tabela de Pessoas
 const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
 const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios
 const TABLE_ID_USUARIOS = 'tblUsuarios'; // Tabela de Usuários
+const TABLE_ID_DOACOES = 'tblDoacoes'; 
+const TABLE_ID_CANCELAMENTOS = 'tblCancelamentos'; // *** NOVA TABELA PARA CANCELAMENTOS ***
 
 export default function TrigofyApp() {
   const [estaLogado, setEstaLogado] = useState(false);
@@ -48,6 +50,18 @@ export default function TrigofyApp() {
   const [areaProdutoDoado, setAreaProdutoDoado] = useState('');
   const [dataVencimento, setDataVencimento] = useState('');
   const [origemProduto, setOrigemProduto] = useState('');
+  
+  // *** NOVOS CAMPOS DOACOES ***
+  const [nomeProdutoDoacao, setNomeProdutoDoacao] = useState('');
+  const [codigoProdutoDoacao, setCodigoProdutoDoacao] = useState('');
+
+  // *** NOVOS CAMPOS PARA CANCELAMENTO ***
+  const [cpfCancelamento, setCpfCancelamento] = useState('');
+  const [nomeCancelamento, setNomeCancelamento] = useState('');
+  const [telefoneCancelamento, setTelefoneCancelamento] = useState('');
+  const [areaCancelamento, setAreaCancelamento] = useState('');
+  const [produtoQtdeCancelamento, setProdutoQtdeCancelamento] = useState('');
+  const [motivoCancelamento, setMotivoCancelamento] = useState('');
 
   // NOVO: Estado para Telefone na compra
   const [telefone, setTelefone] = useState('');
@@ -305,12 +319,12 @@ export default function TrigofyApp() {
   // *** NOVO: Estado para armazenar a área encontrada ***
   const [areaEncontrada, setAreaEncontrada] = useState('');
 
+  // Lógica de busca de nome para PEDIDOS
   useEffect(() => {
     const pessoa = pessoasCadastradas.find(p => p.cpf === cpfDigitado.replace(/\D/g, ''));
     if (pessoa) {
       setNomeEncontrado(pessoa.nome);
       setSiteUsuarioIdentificado(pessoa.site);
-      // *** Puxa a área do cadastro ***
       setAreaEncontrada(pessoa.area || ''); 
     } else {
       setNomeEncontrado('');
@@ -318,6 +332,16 @@ export default function TrigofyApp() {
       setAreaEncontrada('');
     }
   }, [cpfDigitado, pessoasCadastradas]);
+
+  // *** LÓGICA DE BUSCA DE NOME PARA CANCELAMENTO (IGUAL AO PEDIDO) ***
+  useEffect(() => {
+    const pessoa = pessoasCadastradas.find(p => p.cpf === cpfCancelamento.replace(/\D/g, ''));
+    if (pessoa) {
+        setNomeCancelamento(pessoa.nome);
+    } else {
+        setNomeCancelamento('');
+    }
+  }, [cpfCancelamento, pessoasCadastradas]);
 
   const lidarComLogin = (e) => {
     e.preventDefault();
@@ -451,6 +475,14 @@ export default function TrigofyApp() {
     setOrigemProduto('');
     setTelefone('');
     setAreaEncontrada('');
+    // Limpeza novos campos
+    setCpfCancelamento('');
+    setNomeCancelamento('');
+    setTelefoneCancelamento('');
+    setAreaCancelamento('');
+    setProdutoQtdeCancelamento('');
+    setMotivoCancelamento('');
+    
     showToast("Logout realizado.", "success");
   };
 
@@ -566,6 +598,125 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
+  // NOVA FUNÇÃO: ENVIAR SOLICITAÇÃO DE DOAÇÃO
+  // ==========================================================
+  const handleEnviarDoacao = async () => {
+    // Validação dos campos obrigatórios da doação (INCLUINDO NOVOS CAMPOS)
+    if (!nomeProdutoDoacao || !codigoProdutoDoacao || !areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto) {
+        return showToast("Preencha todos os campos da doação.", "error");
+    }
+
+    setCarregando(true);
+    try {
+      const dataISO = new Date().toISOString().split('T')[0];
+
+      // CORREÇÃO: Enviando para TABLE_ID_PEDIDOS para que apareça nas aprovações
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fields: {
+            "solicitante": usuarioInput,
+            // Mapeando "Nome do Produto" para o campo principal "produto" do Airtable
+            "produto": nomeProdutoDoacao.toUpperCase(),
+            "valor": "0", // Valor zero pois é doação
+            "site": usuarioLogadoOrigem !== 'ALL' ? usuarioLogadoOrigem : 'VR',
+            "data": dataISO,
+            "status": "PENDENTE",
+            
+            // Campos específicos mapeados
+            "codigo_produto": codigoProdutoDoacao,
+            "area_solicitante": areaSolicitante,
+            "motivo": motivoDoacao,
+            "area_produto": areaProdutoDoado,
+            "vencimento": dataVencimento,
+            "origem": origemProduto
+          }
+        })
+      });
+
+      if (response.ok) {
+        showToast("✅ SOLICITAÇÃO ENVIADA COM SUCESSO!", "success");
+        
+        setNomeProdutoDoacao('');
+        setCodigoProdutoDoacao('');
+        setAreaSolicitante('');
+        setMotivoDoacao('');
+        setAreaProdutoDoado('');
+        setDataVencimento('');
+        setOrigemProduto('');
+        
+        setActiveTab('home');
+      } else {
+        showToast("Erro ao registrar doação.", "error");
+      }
+    } catch (e) {
+      showToast("Erro de conexão.", "error");
+    }
+    setCarregando(false);
+  };
+
+  // ==========================================================
+  // *** NOVA FUNÇÃO: ENVIAR CANCELAMENTO DE COMPRA ***
+  // ==========================================================
+  const handleEnviarCancelamento = async () => {
+    // Validação: Todos os campos são obrigatórios
+    if (!nomeCancelamento || !telefoneCancelamento || !areaCancelamento || !produtoQtdeCancelamento || !motivoCancelamento) {
+      return showToast("Preencha todos os campos obrigatórios.", "error");
+    }
+
+    setCarregando(true);
+    try {
+      const dataISO = new Date().toISOString().split('T')[0];
+
+      // Envia para tabela de cancelamentos
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_CANCELAMENTOS}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fields: {
+            "solicitante": usuarioInput,
+            "cpf": cpfCancelamento.replace(/\D/g, ''),
+            "nome_completo": nomeCancelamento,
+            "telefone": telefoneCancelamento,
+            "area": areaCancelamento,
+            "produto_quantidade": produtoQtdeCancelamento,
+            "motivo_cancelamento": motivoCancelamento,
+            "data": dataISO,
+            "status": "PENDENTE"
+          }
+        })
+      });
+
+      if (response.ok) {
+        showToast("✅ SOLICITAÇÃO DE CANCELAMENTO ENVIADA!", "success");
+        
+        // Limpar campos
+        setCpfCancelamento('');
+        setNomeCancelamento('');
+        setTelefoneCancelamento('');
+        setAreaCancelamento('');
+        setProdutoQtdeCancelamento('');
+        setMotivoCancelamento('');
+        
+        setActiveTab('home');
+      } else {
+        showToast("Erro ao registrar cancelamento.", "error");
+      }
+    } catch (e) {
+      showToast("Erro de conexão.", "error");
+    }
+    setCarregando(false);
+  };
+
+
+  // ==========================================================
   // 5. TELA DE LOGIN (RESPONSIVA)
   // ==========================================================
   if (!estaLogado) {
@@ -675,6 +826,15 @@ export default function TrigofyApp() {
                     <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Solicitações de doações</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
+                  
+                  {/* *** NOVO BOTÃO: CANCELAMENTO DE COMPRAS *** */}
+                   <div onClick={() => setActiveTab('cancelamento')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
+                    <div className="bg-red-500 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden text-white">
+                      <XCircle size={24} />
+                    </div>
+                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Cancelamento de Compras</div>
+                    <ChevronRight className="text-zinc-300 group-hover:text-red-500" size={20} />
+                  </div>
 
                   <div
                     onClick={() => {
@@ -717,6 +877,65 @@ export default function TrigofyApp() {
                   </div>
                 </>
               )}
+            </div>
+          </div>
+        );
+
+      // ==========================================================
+      // *** NOVA TELA: CANCELAMENTO DE COMPRAS ***
+      // ==========================================================
+      case 'cancelamento':
+        return (
+          <div className="animate-in slide-in-from-right duration-300 pb-20">
+            <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
+            <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Cancelamento de Compras</h2>
+            
+            <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
+                <div className="bg-red-50 p-4 rounded-xl mb-4 border border-red-100">
+                    <p className="text-red-600 text-xs font-bold uppercase text-center">Preencha todos os campos abaixo para solicitar o cancelamento.</p>
+                </div>
+
+                {/* 1. CPF e Nome Automático */}
+                <div>
+                    <label className="text-[10px] font-black text-zinc-400 uppercase">CPF (Apenas números)</label>
+                    <input type="text" placeholder="Digite o CPF" maxLength={11} className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={cpfCancelamento} onChange={(e) => setCpfCancelamento(e.target.value)} />
+                </div>
+                <div>
+                    <label className="text-[10px] font-black text-zinc-400 uppercase">Nome Identificado</label>
+                    <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeCancelamento || "Aguardando CPF..."} />
+                </div>
+
+                {/* 2. Telefone */}
+                <div>
+                    <label className="text-[10px] font-black text-zinc-400 uppercase">Seu Telefone / WhatsApp</label>
+                    <input type="text" placeholder="(XX) 9XXXX-XXXX" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={telefoneCancelamento} onChange={(e) => setTelefoneCancelamento(e.target.value)} />
+                </div>
+
+                {/* 3. Área */}
+                <div>
+                    <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área / Setor</label>
+                    <input type="text" placeholder="Ex: Logística, RH, Cozinha..." className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={areaCancelamento} onChange={(e) => setAreaCancelamento(e.target.value)} />
+                </div>
+
+                {/* 4. Produto e Quantidade */}
+                <div>
+                    <label className="text-[10px] font-black text-zinc-400 uppercase">Produto e Quantidade para Cancelar</label>
+                    <input type="text" placeholder="Ex: 2 unidades de Arroz Tipo 1" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={produtoQtdeCancelamento} onChange={(e) => setProdutoQtdeCancelamento(e.target.value)} />
+                </div>
+
+                {/* 5. Motivo */}
+                <div>
+                    <label className="text-[10px] font-black text-zinc-400 uppercase">Motivo do Cancelamento</label>
+                    <textarea placeholder="Por que deseja cancelar?" rows={3} className={`w-full p-4 rounded-2xl border outline-none font-bold resize-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`} value={motivoCancelamento} onChange={(e) => setMotivoCancelamento(e.target.value)} />
+                </div>
+
+                <button 
+                    disabled={!nomeCancelamento || !telefoneCancelamento || !areaCancelamento || !produtoQtdeCancelamento || !motivoCancelamento || carregando}
+                    onClick={handleEnviarCancelamento}
+                    className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeCancelamento ? 'bg-red-500 text-white active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
+                >
+                    {carregando ? "ENVIANDO..." : "SOLICITAR CANCELAMENTO"}
+                </button>
             </div>
           </div>
         );
@@ -894,6 +1113,30 @@ export default function TrigofyApp() {
                 </div>
               </div>
 
+              {/* === NOVO CAMPO: NOME DO PRODUTO (OBRIGATÓRIO) === */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Nome do Produto</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Arroz, Farinha, etc."
+                  className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
+                  value={nomeProdutoDoacao}
+                  onChange={(e) => setNomeProdutoDoacao(e.target.value)}
+                />
+              </div>
+
+              {/* === NOVO CAMPO: CÓDIGO DO PRODUTO (OBRIGATÓRIO) === */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Código do Produto</label>
+                <input
+                  type="text"
+                  placeholder="Digite o código"
+                  className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
+                  value={codigoProdutoDoacao}
+                  onChange={(e) => setCodigoProdutoDoacao(e.target.value)}
+                />
+              </div>
+
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Qual a sua Área?</label>
                 <input
@@ -950,9 +1193,15 @@ export default function TrigofyApp() {
                 />
               </div>
 
-              <div className="text-center py-6 space-y-3 border-t border-dashed">
-                <BookOpen className="mx-auto text-zinc-200" size={48} />
-                <p className={`font-bold text-sm ${textSub}`}>O catálogo de doações está sendo preparado para você.</p>
+              {/* === BOTÃO DE ENVIO COM VALIDAÇÃO DOS NOVOS CAMPOS === */}
+              <div className="pt-4 border-t border-dashed">
+                 <button
+                  disabled={!nomeProdutoDoacao || !codigoProdutoDoacao || !areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto || carregando}
+                  onClick={handleEnviarDoacao}
+                  className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeProdutoDoacao && codigoProdutoDoacao && areaSolicitante && motivoDoacao && areaProdutoDoado && dataVencimento && origemProduto ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
+                >
+                  {carregando ? "ENVIANDO..." : "ENVIAR SOLICITAÇÃO"}
+                </button>
               </div>
             </div>
           </div>
