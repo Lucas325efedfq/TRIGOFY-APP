@@ -13,10 +13,10 @@ const BASE_ID = 'appj9MPXg5rVQf3zK';
 
 const TABLE_ID = 'tblpfxnome'; // Tabela de Pessoas
 const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
-const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios e Aprovações
+const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Pedidos Comuns
 const TABLE_ID_USUARIOS = 'tblUsuarios'; // Tabela de Usuários
-const TABLE_ID_DOACOES = 'tblDoacoes'; 
-const TABLE_ID_CANCELAMENTOS = 'tblCancelamentos'; // *** NOVA TABELA PARA CANCELAMENTOS ***
+const TABLE_ID_DOACOES = 'tblDoacoes'; // Tabela de Doações
+const TABLE_ID_CANCELAMENTOS = 'tblCancelamentos'; // Tabela de Cancelamentos
 
 export default function TrigofyApp() {
   const [estaLogado, setEstaLogado] = useState(false);
@@ -85,10 +85,7 @@ export default function TrigofyApp() {
   ]);
 
   const [produtosLancados, setProdutosLancados] = useState([]);
-
   const [novaSenhaInput, setNovaSenhaInput] = useState('');
-
-  // Controle de sub-telas do Admin
   const [subAbaAdmin, setSubAbaAdmin] = useState('menu');
 
   // Estados para Cadastro de Novo Usuário (Admin)
@@ -171,7 +168,6 @@ export default function TrigofyApp() {
           origem: reg.fields.origem || 'VR',
           funcao: reg.fields.funcao || 'USER'
         }));
-        // Junta o admin master fixo com os do banco
         setUsuariosAutorizados([
           { usuario: 'admin', senha: 'T!$&gur001', origem: 'ALL', funcao: 'ADMIN' },
           ...usersCarregados
@@ -207,48 +203,92 @@ export default function TrigofyApp() {
     setCarregando(false);
   };
 
-  // FUNÇÃO PARA BUSCAR PEDIDOS PENDENTES (PARA APROVADORES)
+  // ==========================================================
+  // FUNÇÃO CORRIGIDA: BUSCAR PEDIDOS E DOAÇÕES PENDENTES
+  // ==========================================================
   const buscarPedidosPendentes = async () => {
     setCarregando(true);
     try {
       const formula = encodeURIComponent(`{status} = 'PENDENTE'`);
-      const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}?filterByFormula=${formula}`, {
+      
+      // 1. Busca Pedidos Comuns
+      const reqPedidos = fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}?filterByFormula=${formula}`, {
         headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
       });
-      const data = await res.json();
-      if (data.records) {
-        // ATUALIZADO: Agora busca também os campos de Doação para exibir no painel
-        setPedidosParaAprovar(data.records.map(r => ({
+
+      // 2. Busca Doações
+      const reqDoacoes = fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_DOACOES}?filterByFormula=${formula}`, {
+        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
+      });
+
+      const [resPedidos, resDoacoes] = await Promise.all([reqPedidos, reqDoacoes]);
+      
+      const dataPedidos = await resPedidos.json();
+      const dataDoacoes = await resDoacoes.json();
+
+      let listaCombinada = [];
+
+      // Processa Pedidos
+      if (dataPedidos.records) {
+        const pedidosNormais = dataPedidos.records.map(r => ({
           id: r.id,
+          tabelaOrigem: TABLE_ID_PEDIDOS, // Importante: Marca de onde veio
           solicitante: r.fields.solicitante,
           produto: r.fields.produto,
           valor: r.fields.valor,
           data: r.fields.data,
           site: r.fields.site,
-          // Campos Extras de Doação (se existirem)
+          tipo: 'COMPRA'
+        }));
+        listaCombinada = [...listaCombinada, ...pedidosNormais];
+      }
+
+      // Processa Doações
+      if (dataDoacoes.records) {
+        const doacoesPendentes = dataDoacoes.records.map(r => ({
+          id: r.id,
+          tabelaOrigem: TABLE_ID_DOACOES, // Importante: Marca de onde veio
+          solicitante: r.fields.solicitante,
+          produto: r.fields.produto, // Nome do produto doado
+          valor: "0.00",
+          data: r.fields.data,
+          site: r.fields.origem || 'VR', // Usa origem como local
+          tipo: 'DOACAO',
+          // Campos Extras
           motivo: r.fields.motivo,
           codigo: r.fields.codigo_produto,
           area: r.fields.area_solicitante,
           origem: r.fields.origem,
-          vencimento: r.fields.vencimento
-        })));
+          vencimento: r.fields.vencimento,
+          area_produto: r.fields.area_produto
+        }));
+        listaCombinada = [...listaCombinada, ...doacoesPendentes];
       }
-    } catch (e) { console.error("Erro ao buscar pendentes:", e); }
+
+      setPedidosParaAprovar(listaCombinada);
+
+    } catch (e) { 
+        console.error("Erro ao buscar pendentes:", e); 
+        showToast("Erro ao carregar aprovações.", "error");
+    }
     setCarregando(false);
   };
 
-  // FUNÇÃO PARA ATUALIZAR STATUS (APROVAR/REPROVAR)
-  const atualizarStatusPedido = async (id, novoStatus) => {
+  // FUNÇÃO ATUALIZADA: ATUALIZAR STATUS (AGORA SUPORTA MÚLTIPLAS TABELAS)
+  const atualizarStatusPedido = async (id, novoStatus, tabelaOrigem) => {
+    // Se tabelaOrigem não for passada, assume PEDIDOS por compatibilidade
+    const tabelaDestino = tabelaOrigem || TABLE_ID_PEDIDOS;
+
     setCarregando(true);
     try {
-      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}/${id}`, {
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${tabelaDestino}/${id}`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: { status: novoStatus } })
       });
       if (response.ok) {
-        showToast(`Pedido ${novoStatus} com sucesso!`, 'success');
-        buscarPedidosPendentes();
+        showToast(`Solicitação ${novoStatus} com sucesso!`, 'success');
+        buscarPedidosPendentes(); // Recarrega a lista mista
       }
     } catch (e) { showToast("Erro ao atualizar status.", "error"); }
     setCarregando(false);
@@ -322,8 +362,6 @@ export default function TrigofyApp() {
   // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
-   
-  // *** NOVO: Estado para armazenar a área encontrada ***
   const [areaEncontrada, setAreaEncontrada] = useState('');
 
   // Lógica de busca de nome para PEDIDOS
@@ -340,7 +378,7 @@ export default function TrigofyApp() {
     }
   }, [cpfDigitado, pessoasCadastradas]);
 
-  // *** LÓGICA DE BUSCA DE NOME PARA CANCELAMENTO (IGUAL AO PEDIDO) ***
+  // Lógica de busca de nome para CANCELAMENTO
   useEffect(() => {
     const pessoa = pessoasCadastradas.find(p => p.cpf === cpfCancelamento.replace(/\D/g, ''));
     if (pessoa) {
@@ -482,14 +520,12 @@ export default function TrigofyApp() {
     setOrigemProduto('');
     setTelefone('');
     setAreaEncontrada('');
-    // Limpeza novos campos
     setCpfCancelamento('');
     setNomeCancelamento('');
     setTelefoneCancelamento('');
     setAreaCancelamento('');
     setProdutoQtdeCancelamento('');
     setMotivoCancelamento('');
-     
     showToast("Logout realizado.", "success");
   };
 
@@ -565,7 +601,6 @@ export default function TrigofyApp() {
         const prod = produtosLancados.find(p => p.id === prodId);
         if (!prod) return null;
 
-        // *** CORREÇÃO: AQUI DEVE IR PARA PEDIDOS, NÃO DOACOES ***
         return fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
           method: 'POST',
           headers: {
@@ -606,10 +641,10 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
-  // NOVA FUNÇÃO: ENVIAR SOLICITAÇÃO DE DOAÇÃO
+  // CORREÇÃO DO ENVIO DE DOAÇÃO
   // ==========================================================
   const handleEnviarDoacao = async () => {
-    // Validação dos campos obrigatórios da doação (INCLUINDO NOVOS CAMPOS)
+    // Validação dos campos
     if (!nomeProdutoDoacao || !codigoProdutoDoacao || !areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto) {
         return showToast("Preencha todos os campos da doação.", "error");
     }
@@ -618,9 +653,8 @@ export default function TrigofyApp() {
     try {
       const dataISO = new Date().toISOString().split('T')[0];
 
-      // *** ATUALIZAÇÃO: ENVIANDO PARA TABLE_ID_PEDIDOS (PARA PAINEL DE APROVAÇÃO) ***
-      // Enviamos com "status": "PENDENTE" para aparecer na lista de aprovação
-      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
+      // VOLTANDO A ENVIAR PARA A TABELA DE DOAÇÕES CORRETA (EVITA ERRO 422)
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_DOACOES}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${AIRTABLE_TOKEN}`,
@@ -629,26 +663,21 @@ export default function TrigofyApp() {
         body: JSON.stringify({
           fields: {
             "solicitante": usuarioInput,
-            "produto": "DOAÇÃO: " + nomeProdutoDoacao.toUpperCase(), // Identifica como Doação no título
-            "valor": "0", // Valor zero
-            "site": usuarioLogadoOrigem !== 'ALL' ? usuarioLogadoOrigem : 'VR',
-            "data": dataISO,
-            "status": "PENDENTE",
-            
-            // Campos específicos de Doação enviados para o Airtable
+            "produto": nomeProdutoDoacao.toUpperCase(),
             "codigo_produto": codigoProdutoDoacao,
             "area_solicitante": areaSolicitante,
             "motivo": motivoDoacao,
             "area_produto": areaProdutoDoado,
             "vencimento": dataVencimento,
-            "origem": origemProduto
+            "origem": origemProduto,
+            "data": dataISO,
+            "status": "PENDENTE"
           }
         })
       });
 
       if (response.ok) {
         showToast("✅ SOLICITAÇÃO ENVIADA COM SUCESSO!", "success");
-         
         setNomeProdutoDoacao('');
         setCodigoProdutoDoacao('');
         setAreaSolicitante('');
@@ -656,10 +685,12 @@ export default function TrigofyApp() {
         setAreaProdutoDoado('');
         setDataVencimento('');
         setOrigemProduto('');
-         
         setActiveTab('home');
       } else {
-        showToast("Erro ao registrar doação.", "error");
+        // Se der erro, tenta logar
+        const errData = await response.json();
+        console.error("Erro Airtable:", errData);
+        showToast("Erro no Airtable. Verifique se as colunas existem.", "error");
       }
     } catch (e) {
       showToast("Erro de conexão.", "error");
@@ -668,10 +699,9 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
-  // *** NOVA FUNÇÃO: ENVIAR CANCELAMENTO DE COMPRA ***
+  // FUNÇÃO: ENVIAR CANCELAMENTO
   // ==========================================================
   const handleEnviarCancelamento = async () => {
-    // Validação: Todos os campos são obrigatórios
     if (!nomeCancelamento || !telefoneCancelamento || !areaCancelamento || !produtoQtdeCancelamento || !motivoCancelamento) {
       return showToast("Preencha todos os campos obrigatórios.", "error");
     }
@@ -680,7 +710,6 @@ export default function TrigofyApp() {
     try {
       const dataISO = new Date().toISOString().split('T')[0];
 
-      // Envia para tabela de cancelamentos
       const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_CANCELAMENTOS}`, {
         method: 'POST',
         headers: {
@@ -704,15 +733,12 @@ export default function TrigofyApp() {
 
       if (response.ok) {
         showToast("✅ SOLICITAÇÃO DE CANCELAMENTO ENVIADA!", "success");
-         
-        // Limpar campos
         setCpfCancelamento('');
         setNomeCancelamento('');
         setTelefoneCancelamento('');
         setAreaCancelamento('');
         setProdutoQtdeCancelamento('');
         setMotivoCancelamento('');
-         
         setActiveTab('home');
       } else {
         showToast("Erro ao registrar cancelamento.", "error");
@@ -722,7 +748,6 @@ export default function TrigofyApp() {
     }
     setCarregando(false);
   };
-
 
   // ==========================================================
   // 5. TELA DE LOGIN (RESPONSIVA)
@@ -835,7 +860,6 @@ export default function TrigofyApp() {
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
                    
-                  {/* *** NOVO BOTÃO: CANCELAMENTO DE COMPRAS *** */}
                    <div onClick={() => setActiveTab('cancelamento')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center justify-between gap-4 cursor-pointer transition-all active:scale-95 group`}>
                     <div className="bg-red-500 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden text-white">
                       <XCircle size={24} />
@@ -889,9 +913,6 @@ export default function TrigofyApp() {
           </div>
         );
 
-      // ==========================================================
-      // *** NOVA TELA: CANCELAMENTO DE COMPRAS ***
-      // ==========================================================
       case 'cancelamento':
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
@@ -902,8 +923,6 @@ export default function TrigofyApp() {
                 <div className="bg-red-50 p-4 rounded-xl mb-4 border border-red-100">
                     <p className="text-red-600 text-xs font-bold uppercase text-center">Preencha todos os campos abaixo para solicitar o cancelamento.</p>
                 </div>
-
-                {/* 1. CPF e Nome Automático */}
                 <div>
                     <label className="text-[10px] font-black text-zinc-400 uppercase">CPF (Apenas números)</label>
                     <input type="text" placeholder="Digite o CPF" maxLength={11} className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={cpfCancelamento} onChange={(e) => setCpfCancelamento(e.target.value)} />
@@ -912,31 +931,22 @@ export default function TrigofyApp() {
                     <label className="text-[10px] font-black text-zinc-400 uppercase">Nome Identificado</label>
                     <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeCancelamento || "Aguardando CPF..."} />
                 </div>
-
-                {/* 2. Telefone */}
                 <div>
                     <label className="text-[10px] font-black text-zinc-400 uppercase">Seu Telefone / WhatsApp</label>
                     <input type="text" placeholder="(XX) 9XXXX-XXXX" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={telefoneCancelamento} onChange={(e) => setTelefoneCancelamento(e.target.value)} />
                 </div>
-
-                {/* 3. Área */}
                 <div>
                     <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área / Setor</label>
                     <input type="text" placeholder="Ex: Logística, RH, Cozinha..." className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={areaCancelamento} onChange={(e) => setAreaCancelamento(e.target.value)} />
                 </div>
-
-                {/* 4. Produto e Quantidade */}
                 <div>
                     <label className="text-[10px] font-black text-zinc-400 uppercase">Produto e Quantidade para Cancelar</label>
                     <input type="text" placeholder="Ex: 2 unidades de Arroz Tipo 1" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={produtoQtdeCancelamento} onChange={(e) => setProdutoQtdeCancelamento(e.target.value)} />
                 </div>
-
-                {/* 5. Motivo */}
                 <div>
                     <label className="text-[10px] font-black text-zinc-400 uppercase">Motivo do Cancelamento</label>
                     <textarea placeholder="Por que deseja cancelar?" rows={3} className={`w-full p-4 rounded-2xl border outline-none font-bold resize-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`} value={motivoCancelamento} onChange={(e) => setMotivoCancelamento(e.target.value)} />
                 </div>
-
                 <button 
                     disabled={!nomeCancelamento || !telefoneCancelamento || !areaCancelamento || !produtoQtdeCancelamento || !motivoCancelamento || carregando}
                     onClick={handleEnviarCancelamento}
@@ -960,29 +970,35 @@ export default function TrigofyApp() {
                 {pedidosParaAprovar.map(p => (
                   <div key={p.id} className={`${bgCard} p-4 rounded-2xl border shadow-sm space-y-3`}>
                     <div>
-                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">Solicitante: {p.solicitante}</p>
+                      <div className="flex justify-between items-start mb-1">
+                          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">Solicitante: {p.solicitante}</p>
+                          <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full uppercase ${p.tipo === 'DOACAO' ? 'bg-blue-100 text-blue-700' : 'bg-zinc-100 text-zinc-500'}`}>{p.tipo || 'COMPRA'}</span>
+                      </div>
                       <p className={`font-black text-sm uppercase ${textMain}`}>{p.produto}</p>
-                      <p className="text-xs font-bold text-yellow-600">R$ {p.valor} | {p.site}</p>
+                      
+                      {/* Exibe Valor se for compra */}
+                      {p.tipo !== 'DOACAO' && <p className="text-xs font-bold text-yellow-600">R$ {p.valor} | {p.site}</p>}
                       
                       {/* === ATUALIZADO: MOSTRAR DETALHES DA DOAÇÃO SE HOUVER === */}
-                      {p.motivo && (
-                         <div className={`mt-2 p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-700' : 'bg-yellow-50 border-yellow-100'}`}>
+                      {p.tipo === 'DOACAO' && (
+                         <div className={`mt-2 p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-700' : 'bg-blue-50 border-blue-100'}`}>
                             <p className="text-[10px] font-black text-zinc-400 uppercase mb-1">Detalhes da Doação:</p>
                             <div className="grid grid-cols-2 gap-2 text-[10px]">
-                                <div><span className="font-bold">Motivo:</span> {p.motivo}</div>
+                                <div className="col-span-2"><span className="font-bold">Motivo:</span> {p.motivo}</div>
                                 <div><span className="font-bold">Código:</span> {p.codigo}</div>
-                                <div><span className="font-bold">Área:</span> {p.area}</div>
+                                <div><span className="font-bold">Sua Área:</span> {p.area}</div>
                                 <div><span className="font-bold">Origem:</span> {p.origem}</div>
+                                <div><span className="font-bold">Área Prod:</span> {p.area_produto}</div>
                                 <div className="col-span-2"><span className="font-bold">Vencimento:</span> {p.vencimento}</div>
                             </div>
                          </div>
                       )}
                     </div>
                     <div className="flex gap-2 pt-2">
-                      <button onClick={() => atualizarStatusPedido(p.id, 'APROVADO')} className="flex-1 bg-green-500 text-white py-2 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 active:scale-95 transition-all">
+                      <button onClick={() => atualizarStatusPedido(p.id, 'APROVADO', p.tabelaOrigem)} className="flex-1 bg-green-500 text-white py-2 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 active:scale-95 transition-all">
                         <Check size={14} /> Aprovar
                       </button>
-                      <button onClick={() => atualizarStatusPedido(p.id, 'REPROVADO')} className="flex-1 bg-red-500 text-white py-2 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 active:scale-95 transition-all">
+                      <button onClick={() => atualizarStatusPedido(p.id, 'REPROVADO', p.tabelaOrigem)} className="flex-1 bg-red-500 text-white py-2 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 active:scale-95 transition-all">
                         <X size={14} /> Reprovar
                       </button>
                     </div>
@@ -1015,7 +1031,6 @@ export default function TrigofyApp() {
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={nomeEncontrado || "Aguardando CPF..."} />
               </div>
 
-              {/* *** NOVO CAMPO DE ÁREA VISUAL (READ-ONLY) *** */}
               <div>
                 <label className="text-[10px] font-black text-zinc-400 uppercase">Área / Setor</label>
                 <input type="text" readOnly className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} value={areaEncontrada || "---"} />
@@ -1135,7 +1150,6 @@ export default function TrigofyApp() {
                 </div>
               </div>
 
-              {/* === NOVO CAMPO: NOME DO PRODUTO (OBRIGATÓRIO) === */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Nome do Produto</label>
                 <input
@@ -1147,7 +1161,6 @@ export default function TrigofyApp() {
                 />
               </div>
 
-              {/* === NOVO CAMPO: CÓDIGO DO PRODUTO (OBRIGATÓRIO) === */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Código do Produto</label>
                 <input
@@ -1192,7 +1205,6 @@ export default function TrigofyApp() {
                 />
               </div>
 
-              {/* NOVO CAMPO: Data de Vencimento do Produto */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Data de Vencimento do Produto</label>
                 <input
@@ -1203,7 +1215,6 @@ export default function TrigofyApp() {
                 />
               </div>
 
-              {/* NOVO CAMPO: Origem do Produto */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Origem do Produto</label>
                 <input
@@ -1215,7 +1226,6 @@ export default function TrigofyApp() {
                 />
               </div>
 
-              {/* === BOTÃO DE ENVIO COM VALIDAÇÃO DOS NOVOS CAMPOS === */}
               <div className="pt-4 border-t border-dashed">
                  <button
                   disabled={!nomeProdutoDoacao || !codigoProdutoDoacao || !areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto || carregando}
@@ -1299,8 +1309,6 @@ export default function TrigofyApp() {
                 <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Nuvem (Airtable)</h2>
                 <input type="text" placeholder="CPF" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
                 <input type="text" placeholder="Nome Completo" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
-
-                {/* *** ATUALIZADO: CAMPO PARA ÁREA/SETOR *** */}
                 <input type="text" placeholder="Área / Setor" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novaArea} onChange={(e) => setNovaArea(e.target.value)} />
 
                 <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">
@@ -1311,7 +1319,6 @@ export default function TrigofyApp() {
                     <div key={p.id} className={`flex justify-between items-center p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50'}`}>
                       <div>
                         <p className={`font-bold text-xs ${textMain}`}>{p.nome}</p>
-                        {/* *** ATUALIZADO: MOSTRA A ÁREA NA LISTA *** */}
                         <p className="text-[10px] text-zinc-400">{p.cpf} {p.area ? `| ${p.area}` : ''}</p>
                       </div>
                       <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
