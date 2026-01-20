@@ -13,7 +13,7 @@ const BASE_ID = 'appj9MPXg5rVQf3zK';
 
 const TABLE_ID = 'tblpfxnome'; // Tabela de Pessoas
 const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
-const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios
+const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios e Aprovações
 const TABLE_ID_USUARIOS = 'tblUsuarios'; // Tabela de Usuários
 const TABLE_ID_DOACOES = 'tblDoacoes'; 
 const TABLE_ID_CANCELAMENTOS = 'tblCancelamentos'; // *** NOVA TABELA PARA CANCELAMENTOS ***
@@ -217,13 +217,20 @@ export default function TrigofyApp() {
       });
       const data = await res.json();
       if (data.records) {
+        // ATUALIZADO: Agora busca também os campos de Doação para exibir no painel
         setPedidosParaAprovar(data.records.map(r => ({
           id: r.id,
           solicitante: r.fields.solicitante,
           produto: r.fields.produto,
           valor: r.fields.valor,
           data: r.fields.data,
-          site: r.fields.site
+          site: r.fields.site,
+          // Campos Extras de Doação (se existirem)
+          motivo: r.fields.motivo,
+          codigo: r.fields.codigo_produto,
+          area: r.fields.area_solicitante,
+          origem: r.fields.origem,
+          vencimento: r.fields.vencimento
         })));
       }
     } catch (e) { console.error("Erro ao buscar pendentes:", e); }
@@ -611,8 +618,9 @@ export default function TrigofyApp() {
     try {
       const dataISO = new Date().toISOString().split('T')[0];
 
-      // *** CORREÇÃO: AGORA VAI PARA A TABELA DE DOAÇÕES (tblDoacoes) ***
-      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_DOACOES}`, {
+      // *** ATUALIZAÇÃO: ENVIANDO PARA TABLE_ID_PEDIDOS (PARA PAINEL DE APROVAÇÃO) ***
+      // Enviamos com "status": "PENDENTE" para aparecer na lista de aprovação
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${AIRTABLE_TOKEN}`,
@@ -620,17 +628,20 @@ export default function TrigofyApp() {
         },
         body: JSON.stringify({
           fields: {
-            // Campos mapeados para a tabela tblDoacoes
             "solicitante": usuarioInput,
-            "produto": nomeProdutoDoacao.toUpperCase(),
+            "produto": "DOAÇÃO: " + nomeProdutoDoacao.toUpperCase(), // Identifica como Doação no título
+            "valor": "0", // Valor zero
+            "site": usuarioLogadoOrigem !== 'ALL' ? usuarioLogadoOrigem : 'VR',
+            "data": dataISO,
+            "status": "PENDENTE",
+            
+            // Campos específicos de Doação enviados para o Airtable
             "codigo_produto": codigoProdutoDoacao,
             "area_solicitante": areaSolicitante,
             "motivo": motivoDoacao,
             "area_produto": areaProdutoDoado,
             "vencimento": dataVencimento,
-            "origem": origemProduto,
-            "data": dataISO,
-            "status": "PENDENTE"
+            "origem": origemProduto
           }
         })
       });
@@ -952,6 +963,20 @@ export default function TrigofyApp() {
                       <p className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">Solicitante: {p.solicitante}</p>
                       <p className={`font-black text-sm uppercase ${textMain}`}>{p.produto}</p>
                       <p className="text-xs font-bold text-yellow-600">R$ {p.valor} | {p.site}</p>
+                      
+                      {/* === ATUALIZADO: MOSTRAR DETALHES DA DOAÇÃO SE HOUVER === */}
+                      {p.motivo && (
+                         <div className={`mt-2 p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-700' : 'bg-yellow-50 border-yellow-100'}`}>
+                            <p className="text-[10px] font-black text-zinc-400 uppercase mb-1">Detalhes da Doação:</p>
+                            <div className="grid grid-cols-2 gap-2 text-[10px]">
+                                <div><span className="font-bold">Motivo:</span> {p.motivo}</div>
+                                <div><span className="font-bold">Código:</span> {p.codigo}</div>
+                                <div><span className="font-bold">Área:</span> {p.area}</div>
+                                <div><span className="font-bold">Origem:</span> {p.origem}</div>
+                                <div className="col-span-2"><span className="font-bold">Vencimento:</span> {p.vencimento}</div>
+                            </div>
+                         </div>
+                      )}
                     </div>
                     <div className="flex gap-2 pt-2">
                       <button onClick={() => atualizarStatusPedido(p.id, 'APROVADO')} className="flex-1 bg-green-500 text-white py-2 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 active:scale-95 transition-all">
