@@ -50,7 +50,7 @@ export default function TrigofyApp() {
   const [areaProdutoDoado, setAreaProdutoDoado] = useState('');
   const [dataVencimento, setDataVencimento] = useState('');
   const [origemProduto, setOrigemProduto] = useState('');
-   
+    
   // *** NOVOS CAMPOS DOACOES ***
   const [nomeProdutoDoacao, setNomeProdutoDoacao] = useState('');
   const [codigoProdutoDoacao, setCodigoProdutoDoacao] = useState('');
@@ -370,7 +370,7 @@ export default function TrigofyApp() {
   // ==========================================================
   const [cpfDigitado, setCpfDigitado] = useState('');
   const [nomeEncontrado, setNomeEncontrado] = useState('');
-   
+    
   // *** NOVO: Estado para armazenar a área encontrada ***
   const [areaEncontrada, setAreaEncontrada] = useState('');
 
@@ -537,7 +537,7 @@ export default function TrigofyApp() {
     setAreaCancelamento('');
     setProdutoQtdeCancelamento('');
     setMotivoCancelamento('');
-     
+      
     showToast("Logout realizado.", "success");
   };
 
@@ -603,7 +603,10 @@ export default function TrigofyApp() {
   };
 
   const handleEnviarPedidoReal = async () => {
-    if (!nomeEncontrado || produtosSelecionados.length === 0) return;
+    // Validação estrita de todos os campos
+    if (!nomeEncontrado || produtosSelecionados.length === 0 || !telefone || !cpfDigitado) {
+        return showToast("Preencha todos os campos obrigatórios (CPF, Telefone, Produtos).", "error");
+    }
 
     setCarregando(true);
     try {
@@ -658,7 +661,7 @@ export default function TrigofyApp() {
   const handleEnviarDoacao = async () => {
     // Validação dos campos obrigatórios da doação
     if (!nomeProdutoDoacao || !codigoProdutoDoacao || !areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto) {
-        return showToast("Preencha todos os campos da doação.", "error");
+        return showToast("Preencha todos os campos obrigatórios da doação.", "error");
     }
 
     setCarregando(true);
@@ -876,7 +879,7 @@ export default function TrigofyApp() {
                     <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Solicitações de doações</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
-                   
+                    
                   {/* *** NOVO BOTÃO: CANCELAMENTO DE COMPRAS *** */}
                    <div onClick={() => setActiveTab('cancelamento')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
                     <div className="bg-red-500 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden text-white">
@@ -1039,6 +1042,12 @@ export default function TrigofyApp() {
           <div className="animate-in slide-in-from-right duration-300 pb-20">
             <button onClick={() => { setActiveTab('home'); setSiteFiltro(''); setCpfDigitado(''); setTelefone(''); setProdutosSelecionados([]); setAreaEncontrada(''); }} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <div className={`${bgCard} p-6 rounded-3xl shadow-sm border space-y-5`}>
+              
+              {/* NOVO: AVISO DE OBRIGATORIEDADE */}
+              <div className="bg-red-50 p-4 rounded-xl mb-4 border border-red-100">
+                 <p className="text-red-600 text-xs font-bold uppercase text-center">Preencha todos os campos obrigatórios (CPF, Telefone e Produtos).</p>
+              </div>
+
               <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
                 {siteFiltro === 'RIO/SP' ? 'Compras RIO/SP' : 'Compras Volta Redonda'}
               </h2>
@@ -1102,9 +1111,9 @@ export default function TrigofyApp() {
               </div>
 
               <button
-                disabled={!nomeEncontrado || produtosSelecionados.length === 0 || carregando || !telefone}
+                disabled={!nomeEncontrado || produtosSelecionados.length === 0 || carregando || !telefone || !cpfDigitado}
                 onClick={handleEnviarPedidoReal}
-                className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtosSelecionados.length > 0 && telefone ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
+                className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeEncontrado && produtosSelecionados.length > 0 && telefone && cpfDigitado ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
               >
                 {carregando ? "ENVIANDO..." : `ENVIAR PEDIDO (${produtosSelecionados.length})`}
               </button>
@@ -1123,8 +1132,8 @@ export default function TrigofyApp() {
               <div className="space-y-3">
                 {meusPedidosHistorico.map(p => (
                   <div key={p.id} className={`${bgCard} p-4 rounded-2xl border shadow-sm flex flex-col gap-1 relative overflow-hidden`}>
-                     {/* BADE INDICANDO SE É COMPRA OU DOAÇÃO */}
-                     <div className={`absolute top-0 right-0 px-3 py-1 rounded-bl-2xl font-black text-[9px] uppercase tracking-wider ${p.tipo === 'DOAÇÃO' ? 'bg-blue-100 text-blue-600' : 'bg-yellow-50 text-yellow-600'}`}>
+                      {/* BADE INDICANDO SE É COMPRA OU DOAÇÃO */}
+                      <div className={`absolute top-0 right-0 px-3 py-1 rounded-bl-2xl font-black text-[9px] uppercase tracking-wider ${p.tipo === 'DOAÇÃO' ? 'bg-blue-100 text-blue-600' : 'bg-yellow-50 text-yellow-600'}`}>
                         {p.tipo}
                     </div>
 
@@ -1167,6 +1176,12 @@ export default function TrigofyApp() {
             <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Doações</h2>
 
             <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
+              
+               {/* NOVO: AVISO DE OBRIGATORIEDADE */}
+              <div className="bg-red-50 p-4 rounded-xl mb-4 border border-red-100">
+                 <p className="text-red-600 text-xs font-bold uppercase text-center">Preencha todos os campos abaixo para solicitar a doação.</p>
+              </div>
+
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Nome do Solicitante</label>
                 <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-100 flex items-center gap-3">
