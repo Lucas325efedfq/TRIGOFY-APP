@@ -13,10 +13,10 @@ const BASE_ID = 'appj9MPXg5rVQf3zK';
 
 const TABLE_ID = 'tblpfxnome'; // Tabela de Pessoas
 const TABLE_ID_PRODUTOS = 'tblProdutos'; // Nova tabela integrada
-const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Compras (Apenas Compras)
+const TABLE_ID_PEDIDOS = 'tblPedidos'; // Tabela de Relatórios
 const TABLE_ID_USUARIOS = 'tblUsuarios'; // Tabela de Usuários
-const TABLE_ID_DOACOES = 'tblDoacoes'; // Tabela Exclusiva para Doações
-const TABLE_ID_CANCELAMENTOS = 'tblCancelamentos'; // Tabela de Cancelamentos
+const TABLE_ID_DOACOES = 'tblDoacoes'; 
+const TABLE_ID_CANCELAMENTOS = 'tblCancelamentos'; // *** NOVA TABELA PARA CANCELAMENTOS ***
 
 export default function TrigofyApp() {
   const [estaLogado, setEstaLogado] = useState(false);
@@ -184,118 +184,63 @@ export default function TrigofyApp() {
     setCarregando(false);
   };
 
-  // ==========================================================
-  // FUNÇÃO ATUALIZADA: BUSCAR MEUS PEDIDOS (COMPRAS + DOAÇÕES)
-  // ==========================================================
+  // FUNÇÃO PARA BUSCAR MEUS PEDIDOS FILTRADOS PELO LOGIN
   const buscarMeusPedidos = async () => {
     setCarregando(true);
     try {
       const formula = encodeURIComponent(`{solicitante} = '${usuarioInput}'`);
-      
-      // 1. Busca Compras na tblPedidos
-      const resCompras = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}?filterByFormula=${formula}`, {
+      const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}?filterByFormula=${formula}`, {
         headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
       });
-      const dataCompras = await resCompras.json();
-      const listaCompras = dataCompras.records ? dataCompras.records.map(r => ({
-        id: r.id,
-        produto: r.fields.produto,
-        valor: r.fields.valor,
-        data: r.fields.data,
-        status: r.fields.status || 'PENDENTE',
-        tipo: 'COMPRA',
-        tabela: TABLE_ID_PEDIDOS
-      })) : [];
-
-      // 2. Busca Doações na tblDoacoes
-      const resDoacoes = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_DOACOES}?filterByFormula=${formula}`, {
-        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
-      });
-      const dataDoacoes = await resDoacoes.json();
-      const listaDoacoes = dataDoacoes.records ? dataDoacoes.records.map(r => ({
-        id: r.id,
-        produto: r.fields.produto,
-        valor: 'DOAÇÃO',
-        data: r.fields.data,
-        status: r.fields.status || 'PENDENTE',
-        tipo: 'DOAÇÃO',
-        tabela: TABLE_ID_DOACOES
-      })) : [];
-
-      // Junta as duas listas e ordena pela data (mais recente primeiro)
-      const historicoCombinado = [...listaCompras, ...listaDoacoes].sort((a, b) => {
-        return new Date(b.data) - new Date(a.data);
-      });
-
-      setMeusPedidosHistorico(historicoCombinado);
-
+      const data = await res.json();
+      if (data.records) {
+        setMeusPedidosHistorico(data.records.map(r => ({
+          id: r.id,
+          produto: r.fields.produto,
+          valor: r.fields.valor,
+          data: r.fields.data,
+          site: r.fields.site,
+          status: r.fields.status || 'PENDENTE'
+        })));
+      }
     } catch (e) { console.error("Erro ao carregar pedidos:", e); }
     setCarregando(false);
   };
 
-  // ==========================================================
-  // FUNÇÃO ATUALIZADA: BUSCAR PENDENTES (COMPRAS + DOAÇÕES)
-  // ==========================================================
+  // FUNÇÃO PARA BUSCAR PEDIDOS PENDENTES (PARA APROVADORES)
   const buscarPedidosPendentes = async () => {
     setCarregando(true);
     try {
       const formula = encodeURIComponent(`{status} = 'PENDENTE'`);
-      
-      // 1. Busca Pendentes em Compras
-      const resCompras = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}?filterByFormula=${formula}`, {
+      const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}?filterByFormula=${formula}`, {
         headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
       });
-      const dataCompras = await resCompras.json();
-      const listaCompras = dataCompras.records ? dataCompras.records.map(r => ({
-        id: r.id,
-        solicitante: r.fields.solicitante,
-        produto: r.fields.produto,
-        valor: r.fields.valor,
-        data: r.fields.data,
-        site: r.fields.site,
-        tipo: 'COMPRA',
-        tabela: TABLE_ID_PEDIDOS
-      })) : [];
-
-      // 2. Busca Pendentes em Doações
-      const resDoacoes = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_DOACOES}?filterByFormula=${formula}`, {
-        headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` }
-      });
-      const dataDoacoes = await resDoacoes.json();
-      const listaDoacoes = dataDoacoes.records ? dataDoacoes.records.map(r => ({
-        id: r.id,
-        solicitante: r.fields.solicitante,
-        produto: r.fields.produto,
-        valor: 'DOAÇÃO',
-        data: r.fields.data,
-        site: r.fields.origem || 'N/A', // Usa origem como local
-        tipo: 'DOAÇÃO',
-        tabela: TABLE_ID_DOACOES,
-        detalhe: r.fields.motivo
-      })) : [];
-
-      setPedidosParaAprovar([...listaCompras, ...listaDoacoes]);
-
+      const data = await res.json();
+      if (data.records) {
+        setPedidosParaAprovar(data.records.map(r => ({
+          id: r.id,
+          solicitante: r.fields.solicitante,
+          produto: r.fields.produto,
+          valor: r.fields.valor,
+          data: r.fields.data,
+          site: r.fields.site
+        })));
+      }
     } catch (e) { console.error("Erro ao buscar pendentes:", e); }
     setCarregando(false);
   };
 
-  // ==========================================================
-  // FUNÇÃO ATUALIZADA: APROVAR/REPROVAR (COM SELEÇÃO DE TABELA)
-  // ==========================================================
-  const atualizarStatusPedido = async (id, novoStatus, tabelaAlvo) => {
-    // Se a tabela não for passada, assume pedidos como padrão
-    const tabelaFinal = tabelaAlvo || TABLE_ID_PEDIDOS;
-
+  // FUNÇÃO PARA ATUALIZAR STATUS (APROVAR/REPROVAR)
+  const atualizarStatusPedido = async (id, novoStatus) => {
     setCarregando(true);
     try {
-      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${tabelaFinal}/${id}`, {
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}/${id}`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: { status: novoStatus } })
       });
       if (response.ok) {
-        showToast(`Item ${novoStatus} com sucesso!`, 'success');
+        showToast(`Pedido ${novoStatus} com sucesso!`, 'success');
         buscarPedidosPendentes();
       }
     } catch (e) { showToast("Erro ao atualizar status.", "error"); }
@@ -613,7 +558,7 @@ export default function TrigofyApp() {
         const prod = produtosLancados.find(p => p.id === prodId);
         if (!prod) return null;
 
-        return fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
+        return fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_DOACOES}`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${AIRTABLE_TOKEN}`,
@@ -624,7 +569,7 @@ export default function TrigofyApp() {
               "solicitante": usuarioInput,
               "cpf": cpfDigitado.replace(/\D/g, ''),
               "produto": prod.nome,
-              "valor": prod.preco.toString(),
+              "codigo": prod.preco.toString(),
               "site": siteFiltro,
               "data": dataISO,
               "status": "PENDENTE",
@@ -653,10 +598,10 @@ export default function TrigofyApp() {
   };
 
   // ==========================================================
-  // FUNÇÃO ATUALIZADA: ENVIAR SOLICITAÇÃO DE DOAÇÃO
+  // NOVA FUNÇÃO: ENVIAR SOLICITAÇÃO DE DOAÇÃO
   // ==========================================================
   const handleEnviarDoacao = async () => {
-    // Validação dos campos obrigatórios da doação
+    // Validação dos campos obrigatórios da doação (INCLUINDO NOVOS CAMPOS)
     if (!nomeProdutoDoacao || !codigoProdutoDoacao || !areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto) {
         return showToast("Preencha todos os campos da doação.", "error");
     }
@@ -665,8 +610,8 @@ export default function TrigofyApp() {
     try {
       const dataISO = new Date().toISOString().split('T')[0];
 
-      // *** ATENÇÃO: Agora envia para TABLE_ID_DOACOES ***
-      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_DOACOES}`, {
+      // CORREÇÃO: Enviando para TABLE_ID_PEDIDOS para que apareça nas aprovações
+      const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID_PEDIDOS}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${AIRTABLE_TOKEN}`,
@@ -675,22 +620,27 @@ export default function TrigofyApp() {
         body: JSON.stringify({
           fields: {
             "solicitante": usuarioInput,
-            "produto": nomeProdutoDoacao.toUpperCase(), // Campo padrão "produto"
+            // Mapeando "Nome do Produto" para o campo principal "produto" do Airtable
+            "produto": nomeProdutoDoacao.toUpperCase(),
+            "valor": "0", // Valor zero pois é doação
+            "site": usuarioLogadoOrigem !== 'ALL' ? usuarioLogadoOrigem : 'VR',
+            "data": dataISO,
+            "status": "PENDENTE",
+             
+            // Campos específicos mapeados
             "codigo_produto": codigoProdutoDoacao,
             "area_solicitante": areaSolicitante,
             "motivo": motivoDoacao,
             "area_produto": areaProdutoDoado,
             "vencimento": dataVencimento,
-            "origem": origemProduto,
-            "data": dataISO,
-            "status": "PENDENTE"
+            "origem": origemProduto
           }
         })
       });
 
       if (response.ok) {
-        showToast("✅ DOAÇÃO ENVIADA COM SUCESSO!", "success");
-        
+        showToast("✅ SOLICITAÇÃO ENVIADA COM SUCESSO!", "success");
+         
         setNomeProdutoDoacao('');
         setCodigoProdutoDoacao('');
         setAreaSolicitante('');
@@ -698,7 +648,7 @@ export default function TrigofyApp() {
         setAreaProdutoDoado('');
         setDataVencimento('');
         setOrigemProduto('');
-        
+         
         setActiveTab('home');
       } else {
         showToast("Erro ao registrar doação.", "error");
@@ -746,7 +696,7 @@ export default function TrigofyApp() {
 
       if (response.ok) {
         showToast("✅ SOLICITAÇÃO DE CANCELAMENTO ENVIADA!", "success");
-        
+         
         // Limpar campos
         setCpfCancelamento('');
         setNomeCancelamento('');
@@ -754,7 +704,7 @@ export default function TrigofyApp() {
         setAreaCancelamento('');
         setProdutoQtdeCancelamento('');
         setMotivoCancelamento('');
-        
+         
         setActiveTab('home');
       } else {
         showToast("Erro ao registrar cancelamento.", "error");
@@ -828,61 +778,61 @@ export default function TrigofyApp() {
             </h3>
             <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4">
               {isAprovador && (
-                <div onClick={() => setActiveTab('aprovacoes')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm border border-zinc-800 flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
+                <div onClick={() => setActiveTab('aprovacoes')} className="bg-zinc-900 p-4 rounded-2xl shadow-sm border border-zinc-800 flex items-center justify-between gap-4 cursor-pointer active:scale-95 transition-all">
                   <div className="bg-yellow-50 p-3 rounded-full text-zinc-900"><CheckCircle2 size={20} /></div>
-                  <div className="flex-1 font-bold uppercase text-sm text-yellow-500 tracking-tighter">Painel de Aprovações</div>
+                  <div className="flex-1 font-bold uppercase text-sm text-yellow-500 tracking-tighter text-center">Painel de Aprovações</div>
                   <ChevronRight className="text-yellow-500" size={20} />
                 </div>
               )}
 
               {isAdmin ? (
                 <>
-                  <div onClick={() => { setSubAbaAdmin('nuvem'); setActiveTab('admin-painel'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer active:scale-95 transition-all`}>
+                  <div onClick={() => { setSubAbaAdmin('nuvem'); setActiveTab('admin-painel'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center justify-between gap-4 cursor-pointer active:scale-95 transition-all`}>
                     <div className="bg-blue-500 p-3 rounded-full text-white"><Database size={20} /></div>
-                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Nuvem (Airtable)</div>
+                    <div className={`flex-1 font-bold uppercase text-sm text-center ${textMain}`}>Nuvem (Airtable)</div>
                     <ChevronRight className="text-zinc-300" size={20} />
                   </div>
 
-                  <div onClick={() => { setSubAbaAdmin('cadastro'); setActiveTab('admin-painel'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer active:scale-95 transition-all`}>
+                  <div onClick={() => { setSubAbaAdmin('cadastro'); setActiveTab('admin-painel'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center justify-between gap-4 cursor-pointer active:scale-95 transition-all`}>
                     <div className="bg-green-500 p-3 rounded-full text-white"><UserPlus size={20} /></div>
-                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Cadastrar Novo Usuário</div>
+                    <div className={`flex-1 font-bold uppercase text-sm text-center ${textMain}`}>Cadastrar Novo Usuário</div>
                     <ChevronRight className="text-zinc-300" size={20} />
                   </div>
 
-                  <div onClick={() => { setSubAbaAdmin('lista'); setActiveTab('admin-painel'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer active:scale-95 transition-all`}>
+                  <div onClick={() => { setSubAbaAdmin('lista'); setActiveTab('admin-painel'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center justify-between gap-4 cursor-pointer active:scale-95 transition-all`}>
                     <div className="bg-yellow-500 p-3 rounded-full text-white"><Users size={20} /></div>
-                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Lista de Usuários</div>
+                    <div className={`flex-1 font-bold uppercase text-sm text-center ${textMain}`}>Lista de Usuários</div>
                     <ChevronRight className="text-zinc-300" size={20} />
                   </div>
 
-                  <div onClick={() => { setSubAbaAdmin('produtos'); setActiveTab('admin-painel'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer active:scale-95 transition-all`}>
+                  <div onClick={() => { setSubAbaAdmin('produtos'); setActiveTab('admin-painel'); }} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center justify-between gap-4 cursor-pointer active:scale-95 transition-all`}>
                     <div className="bg-zinc-900 p-3 rounded-full text-yellow-400"><Package size={20} /></div>
-                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Lançar Produtos</div>
+                    <div className={`flex-1 font-bold uppercase text-sm text-center ${textMain}`}>Lançar Produtos</div>
                     <ChevronRight className="text-zinc-300" size={20} />
                   </div>
                 </>
               ) : (
                 <>
-                  <div onClick={() => setActiveTab('pedidos')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
+                  <div onClick={() => setActiveTab('pedidos')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center justify-between gap-4 cursor-pointer transition-all active:scale-95 group`}>
                     <div className="bg-yellow-400 p-3 rounded-full text-zinc-900"><ShoppingBag size={20} /></div>
-                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Meus Pedidos</div>
+                    <div className={`flex-1 font-bold uppercase text-sm text-center ${textMain}`}>Meus Pedidos</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  <div onClick={() => setActiveTab('catalogo')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
+                  <div onClick={() => setActiveTab('catalogo')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center justify-between gap-4 cursor-pointer transition-all active:scale-95 group`}>
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                       <img src="/doacao.png" alt="Doação" className="w-full h-full object-contain" />
                     </div>
-                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Solicitações de doações</div>
+                    <div className={`flex-1 font-bold uppercase text-sm text-center ${textMain}`}>Solicitações de doações</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
                    
                   {/* *** NOVO BOTÃO: CANCELAMENTO DE COMPRAS *** */}
-                   <div onClick={() => setActiveTab('cancelamento')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group`}>
+                   <div onClick={() => setActiveTab('cancelamento')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center justify-between gap-4 cursor-pointer transition-all active:scale-95 group`}>
                     <div className="bg-red-500 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden text-white">
                       <XCircle size={24} />
                     </div>
-                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Cancelamento de Compras</div>
+                    <div className={`flex-1 font-bold uppercase text-sm text-center ${textMain}`}>Cancelamento de Compras</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-red-500" size={20} />
                   </div>
 
@@ -894,12 +844,12 @@ export default function TrigofyApp() {
                         setSiteFiltro('RIO/SP'); setActiveTab('novo');
                       }
                     }}
-                    className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${usuarioLogadoOrigem === 'VR' ? 'opacity-30' : ''}`}
+                    className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center justify-between gap-4 cursor-pointer transition-all active:scale-95 group ${usuarioLogadoOrigem === 'VR' ? 'opacity-30' : ''}`}
                   >
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                       <img src="/cesta.png" alt="Cesta" className="w-full h-full object-contain" />
                     </div>
-                    <div className={`flex-1 font-bold uppercase text-sm leading-tight ${textMain}`}>Produtos disponíveis para compra RIO/SP</div>
+                    <div className={`flex-1 font-bold uppercase text-sm leading-tight text-center ${textMain}`}>Produtos disponíveis para compra RIO/SP</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
@@ -911,18 +861,18 @@ export default function TrigofyApp() {
                         setSiteFiltro('VR'); setActiveTab('novo');
                       }
                     }}
-                    className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all active:scale-95 group ${(usuarioLogadoOrigem === 'RIO' || usuarioLogadoOrigem === 'SP') ? 'opacity-30' : ''}`}
+                    className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center justify-between gap-4 cursor-pointer transition-all active:scale-95 group ${(usuarioLogadoOrigem === 'RIO' || usuarioLogadoOrigem === 'SP') ? 'opacity-30' : ''}`}
                   >
                     <div className="bg-yellow-400 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden">
                       <img src="/pizza.png" alt="Novo" className="w-full h-full object-contain" />
                     </div>
-                    <div className={`flex-1 font-bold uppercase text-sm ${textMain}`}>Produtos Disponíveis para compras Volta Redonda</div>
+                    <div className={`flex-1 font-bold uppercase text-sm text-center ${textMain}`}>Produtos Disponíveis para compras Volta Redonda</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
 
-                  <div onClick={() => setActiveTab('suporte')} className="bg-yellow-400 p-4 rounded-2xl shadow-md flex items-center gap-4 cursor-pointer active:scale-95 transition-all">
+                  <div onClick={() => setActiveTab('suporte')} className="bg-yellow-400 p-4 rounded-2xl shadow-md flex items-center justify-between gap-4 cursor-pointer active:scale-95 transition-all">
                     <div className="bg-zinc-900 p-3 rounded-full text-yellow-400"><Megaphone size={20} /></div>
-                    <div className="flex-1 font-bold text-zinc-900 uppercase text-sm">Suporte</div>
+                    <div className="flex-1 font-bold text-zinc-900 uppercase text-sm text-center">Suporte</div>
                     <ChevronRight className="text-zinc-800" size={20} />
                   </div>
                 </>
@@ -939,7 +889,7 @@ export default function TrigofyApp() {
           <div className="animate-in slide-in-from-right duration-300 pb-20">
             <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Cancelamento de Compras</h2>
-            
+             
             <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
                 <div className="bg-red-50 p-4 rounded-xl mb-4 border border-red-100">
                     <p className="text-red-600 text-xs font-bold uppercase text-center">Preencha todos os campos abaixo para solicitar o cancelamento.</p>
@@ -994,32 +944,23 @@ export default function TrigofyApp() {
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
             <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
-            <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Aprovar Pedidos & Doações</h2>
+            <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Aprovar Pedidos</h2>
             {carregando ? (
-              <p className="text-center font-bold text-xs animate-pulse">Buscando pendentes...</p>
+              <p className="text-center font-bold text-xs animate-pulse">Buscando pedidos pendentes...</p>
             ) : pedidosParaAprovar.length > 0 ? (
               <div className="space-y-3">
                 {pedidosParaAprovar.map(p => (
-                  <div key={p.id} className={`${bgCard} p-4 rounded-2xl border shadow-sm space-y-3 relative overflow-hidden`}>
-                    {/* BADE INDICANDO SE É COMPRA OU DOAÇÃO */}
-                    <div className={`absolute top-0 right-0 px-3 py-1 rounded-bl-2xl font-black text-[9px] uppercase tracking-wider ${p.tipo === 'DOAÇÃO' ? 'bg-blue-500 text-white' : 'bg-yellow-400 text-zinc-900'}`}>
-                        {p.tipo}
-                    </div>
-
+                  <div key={p.id} className={`${bgCard} p-4 rounded-2xl border shadow-sm space-y-3`}>
                     <div>
                       <p className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">Solicitante: {p.solicitante}</p>
                       <p className={`font-black text-sm uppercase ${textMain}`}>{p.produto}</p>
-                      <p className="text-xs font-bold text-yellow-600">
-                        {p.tipo === 'COMPRA' ? `R$ ${p.valor}` : 'Doação Gratuita'} | {p.site}
-                      </p>
-                      {p.detalhe && <p className="text-[10px] text-zinc-500 italic mt-1">Motivo: {p.detalhe}</p>}
+                      <p className="text-xs font-bold text-yellow-600">R$ {p.valor} | {p.site}</p>
                     </div>
                     <div className="flex gap-2 pt-2">
-                      {/* ATENÇÃO: Botões agora passam a TABELA correta para atualizar */}
-                      <button onClick={() => atualizarStatusPedido(p.id, 'APROVADO', p.tabela)} className="flex-1 bg-green-500 text-white py-2 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 active:scale-95 transition-all">
+                      <button onClick={() => atualizarStatusPedido(p.id, 'APROVADO')} className="flex-1 bg-green-500 text-white py-2 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 active:scale-95 transition-all">
                         <Check size={14} /> Aprovar
                       </button>
-                      <button onClick={() => atualizarStatusPedido(p.id, 'REPROVADO', p.tabela)} className="flex-1 bg-red-500 text-white py-2 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 active:scale-95 transition-all">
+                      <button onClick={() => atualizarStatusPedido(p.id, 'REPROVADO')} className="flex-1 bg-red-500 text-white py-2 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 active:scale-95 transition-all">
                         <X size={14} /> Reprovar
                       </button>
                     </div>
@@ -1028,7 +969,7 @@ export default function TrigofyApp() {
               </div>
             ) : (
               <div className={`${bgCard} p-8 rounded-3xl border shadow-sm text-center`}>
-                <p className={`font-bold text-sm ${textSub}`}>Nenhum item pendente para aprovação.</p>
+                <p className={`font-bold text-sm ${textSub}`}>Nenhum pedido pendente para aprovação.</p>
               </div>
             )}
           </div>
@@ -1116,22 +1057,17 @@ export default function TrigofyApp() {
         return (
           <div className="animate-in slide-in-from-right duration-300 pb-20">
             <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
-            <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Meus Pedidos & Doações</h2>
+            <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Meus Pedidos</h2>
             {carregando ? (
               <p className="text-center font-bold text-xs animate-pulse">Carregando histórico...</p>
             ) : meusPedidosHistorico.length > 0 ? (
               <div className="space-y-3">
                 {meusPedidosHistorico.map(p => (
-                  <div key={p.id} className={`${bgCard} p-4 rounded-2xl border shadow-sm flex flex-col gap-1 relative overflow-hidden`}>
-                     {/* BADE INDICANDO SE É COMPRA OU DOAÇÃO */}
-                     <div className={`absolute top-0 right-0 px-3 py-1 rounded-bl-2xl font-black text-[9px] uppercase tracking-wider ${p.tipo === 'DOAÇÃO' ? 'bg-blue-100 text-blue-600' : 'bg-yellow-50 text-yellow-600'}`}>
-                        {p.tipo}
-                    </div>
-
-                    <div className="flex justify-between items-start mt-4">
+                  <div key={p.id} className={`${bgCard} p-4 rounded-2xl border shadow-sm flex flex-col gap-1`}>
+                    <div className="flex justify-between items-start">
                       <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest ${p.status === 'APROVADO' ? 'bg-green-100 text-green-700' :
                           p.status === 'REPROVADO' ? 'bg-red-100 text-red-700' :
-                            'bg-zinc-100 text-zinc-500'
+                            'bg-yellow-100 text-yellow-700'
                         }`}>
                         {p.status}
                       </span>
@@ -1141,16 +1077,14 @@ export default function TrigofyApp() {
                       </div>
                     </div>
                     <p className={`font-black text-sm uppercase ${textMain}`}>{p.produto}</p>
-                    <p className="text-xs font-bold text-zinc-400">
-                        {p.tipo === 'COMPRA' ? `VALOR: R$ ${p.valor}` : 'Doação Solicitada'}
-                    </p>
+                    <p className="text-xs font-bold text-zinc-400">VALOR: R$ {p.valor}</p>
                   </div>
                 ))}
               </div>
             ) : (
               <div className={`${bgCard} p-8 rounded-3xl border shadow-sm text-center space-y-3`}>
                 <ShoppingBag className="mx-auto text-zinc-200" size={48} />
-                <p className={`font-bold text-sm ${textSub}`}>Você ainda não possui pedidos ou doações.</p>
+                <p className={`font-bold text-sm ${textSub}`}>Você ainda não possui pedidos realizados.</p>
               </div>
             )}
           </div>
@@ -1270,6 +1204,194 @@ export default function TrigofyApp() {
                 </button>
               </div>
             </div>
+          </div>
+        );
+
+      case 'suporte':
+        return (
+          <div className="flex flex-col h-full animate-in slide-in-from-right duration-300 pb-20">
+            <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-4`}>← Voltar</button>
+            <div className="flex-1 space-y-4 mb-4">
+              {mensagens.map(m => (
+                <div key={m.id} className={`flex ${m.bot ? 'justify-start' : 'justify-end'}`}>
+                  <div className={`max-w-[80%] p-4 rounded-2xl font-medium text-sm shadow-sm ${m.bot ? (temaEscuro ? 'bg-zinc-800 text-white' : 'bg-white text-zinc-800') : 'bg-yellow-400 text-zinc-900'}`}>
+                    {m.texto}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <form onSubmit={enviarMensagemChat} className="flex gap-2 mb-20">
+              <input type="text" placeholder="Como podemos ajudar?" className={`flex-1 p-4 rounded-2xl outline-none border shadow-sm ${temaEscuro ? 'bg-zinc-800 border-zinc-700 text-white' : 'bg-white'}`} value={inputChat} onChange={(e) => setInputChat(e.target.value)} />
+              <button type="submit" className="bg-zinc-900 text-yellow-400 p-4 rounded-2xl shadow-lg active:scale-95 transition-all"><Send size={20} /></button>
+            </form>
+          </div>
+        );
+
+      case 'config':
+        return (
+          <div className="animate-in slide-in-from-bottom duration-300 space-y-4 pb-20">
+            <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
+            <h2 className={`text-xl font-black uppercase italic ${textMain}`}>Configurações</h2>
+            <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-6`}>
+              <div className="flex items-center gap-4 border-b pb-4 border-zinc-100 dark:border-zinc-700">
+                <div className="bg-yellow-400 p-3 rounded-full"><User className="text-zinc-900" size={24} /></div>
+                <div>
+                  <p className={`font-black uppercase text-sm ${textMain}`}>{usuarioInput}</p>
+                  <p className="text-[10px] text-zinc-400 uppercase">Usuário Ativo</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-zinc-400 uppercase">Alterar Minha Senha</label>
+                <div className="flex gap-2">
+                  <input type="password" placeholder="Nova senha" className={`flex-1 p-3 rounded-xl border text-sm outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={novaSenhaInput} onChange={(e) => setNovaSenhaInput(e.target.value)} />
+                  <button onClick={alterarSenhaUsuario} className="bg-zinc-900 text-yellow-400 px-4 rounded-xl font-bold text-xs uppercase">Salvar</button>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  {temaEscuro ? <Moon className="text-yellow-400" size={20} /> : <Sun className="text-yellow-500" size={20} />}
+                  <span className={`font-bold text-sm ${textMain}`}>Tema do Aplicativo</span>
+                </div>
+                <button onClick={() => setTemaEscuro(!temaEscuro)} className={`w-12 h-6 rounded-full relative transition-colors ${temaEscuro ? 'bg-yellow-400' : 'bg-zinc-300'}`}>
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${temaEscuro ? 'left-7' : 'left-1'}`} />
+                </button>
+              </div>
+              <button onClick={fazerLogoff} className="w-full flex items-center justify-center gap-2 p-4 bg-red-50 text-red-500 rounded-2xl font-bold text-sm hover:bg-red-100 transition-colors">
+                <LogOut size={18} /> SAIR DA CONTA
+              </button>
+            </div>
+          </div>
+        );
+
+      case 'admin-painel':
+        return (
+          <div className="animate-in slide-in-from-right duration-300 space-y-6 pb-20">
+            <div className="flex items-center gap-2">
+              <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase`}>← Voltar</button>
+            </div>
+
+            {subAbaAdmin === 'nuvem' && (
+              <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4 animate-in fade-in`}>
+                <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Nuvem (Airtable)</h2>
+                <input type="text" placeholder="CPF" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
+                <input type="text" placeholder="Nome Completo" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
+
+                {/* *** ATUALIZADO: CAMPO PARA ÁREA/SETOR *** */}
+                <input type="text" placeholder="Área / Setor" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novaArea} onChange={(e) => setNovaArea(e.target.value)} />
+
+                <button onClick={salvarNoAirtable} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">
+                  {carregando ? "Salvando..." : "Salvar no Airtable"}
+                </button>
+                <div className="max-h-[300px] overflow-y-auto space-y-2 pt-4">
+                  {pessoasCadastradas.map(p => (
+                    <div key={p.id} className={`flex justify-between items-center p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50'}`}>
+                      <div>
+                        <p className={`font-bold text-xs ${textMain}`}>{p.nome}</p>
+                        {/* *** ATUALIZADO: MOSTRA A ÁREA NA LISTA *** */}
+                        <p className="text-[10px] text-zinc-400">{p.cpf} {p.area ? `| ${p.area}` : ''}</p>
+                      </div>
+                      <button onClick={() => excluirDoAirtable(p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {subAbaAdmin === 'cadastro' && (
+              <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4 animate-in fade-in`}>
+                <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Novo Usuário do App</h2>
+                <input type="text" placeholder="Nome de Usuário" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoUserLogin} onChange={(e) => setNovoUserLogin(e.target.value)} />
+                <input type="text" placeholder="Senha de Acesso" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={novoUserSenha} onChange={(e) => setNovoUserSenha(e.target.value)} />
+                <select className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={novoUserOrigem} onChange={(e) => setNovoUserOrigem(e.target.value)}>
+                  <option value="VR">Volta Redonda (VR)</option>
+                  <option value="RIO">Rio de Janeiro (RIO)</option>
+                  <option value="SP">São Paulo (SP)</option>
+                  <option value="ALL">Administrador (ALL)</option>
+                </select>
+                <select className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={novoUserFuncao} onChange={(e) => setNovoUserFuncao(e.target.value)}>
+                  <option value="USER">USUÁRIO COMUM</option>
+                  <option value="APROVADOR">APROVADOR</option>
+                  <option value="ADMIN">ADMINISTRADOR TOTAL</option>
+                </select>
+                <button onClick={cadastrarNovoUsuarioSistema} className="w-full bg-zinc-900 text-yellow-400 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">CADASTRAR ACESSO</button>
+              </div>
+            )}
+
+            {subAbaAdmin === 'lista' && (
+              <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4 animate-in fade-in`}>
+                <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Usuários Ativos</h2>
+                <div className="space-y-2">
+                  {usuariosAutorizados.map(u => (
+                    <div key={u.usuario} className={`flex justify-between items-center p-4 rounded-2xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-100'}`}>
+                      <div>
+                        <p className={`font-black uppercase text-xs ${textMain}`}>{u.usuario}</p>
+                        <p className="text-[9px] text-zinc-400 uppercase font-bold">Função: {u.funcao} | Origem: {u.origem}</p>
+                      </div>
+                      <div className="flex gap-1">
+                        <button onClick={() => adminExcluirUsuario(u.usuario)} className="p-2 text-zinc-400 hover:text-red-500"><Trash2 size={16} /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {subAbaAdmin === 'produtos' && (
+              <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4 animate-in fade-in`}>
+                <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Lançar Produtos (Airtable)</h2>
+                <div className="space-y-4">
+                  <input type="text" placeholder="Nome do Produto" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={prodNome} onChange={(e) => setProdNome(e.target.value)} />
+                  <input type="text" placeholder="Preço (Ex: 25.00)" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={prodPreco} onChange={(e) => setProdPreco(e.target.value)} />
+                  <select className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={prodSite} onChange={(e) => setProdSite(e.target.value)}>
+                    <option value="VR">Volta Redonda (VR)</option>
+                    <option value="RIO/SP">Rio de Janeiro / São Paulo</option>
+                  </select>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Data de Vencimento (Obrigatório)</label>
+                    <input
+                      type="date"
+                      className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`}
+                      value={prodVencimento}
+                      onChange={(e) => setProdVencimento(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase px-1">URL da Imagem do Produto</label>
+                    <div className="flex gap-2">
+                      <input type="text" placeholder="http://..." className={`flex-1 p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={prodImagem} onChange={(e) => setProdImagem(e.target.value)} />
+                      <div className="w-14 h-14 bg-zinc-100 rounded-2xl flex items-center justify-center border overflow-hidden">
+                        {prodImagem ? <img src={prodImagem} alt="Preview" className="w-full h-full object-cover" /> : <ImageIcon className="text-zinc-300" size={24} />}
+                      </div>
+                    </div>
+                  </div>
+                  <button onClick={handleLancarProduto} className="w-full bg-zinc-900 text-yellow-400 py-3 rounded-2xl font-black uppercase shadow-md active:scale-95 transition-all">
+                    {carregando ? "Lançando..." : "LANÇAR NO AIRTABLE"}
+                  </button>
+
+                  <div className="pt-4 border-t space-y-2 max-h-[200px] overflow-y-auto">
+                    <p className="text-[10px] font-black text-zinc-400 uppercase italic">Produtos em Estoque:</p>
+                    {produtosLancados.map(p => (
+                      <div key={p.id} className="flex justify-between items-center p-2 rounded-xl bg-zinc-50 border border-zinc-100">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-white border flex items-center justify-center overflow-hidden">
+                            {p.imagem ? <img src={p.imagem} className="w-full h-full object-cover" /> : <Package size={14} />}
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-bold uppercase block">{p.nome} ({p.site})</span>
+                            <span className="text-[9px] text-zinc-400 block">Venc: {p.vencimento ? p.vencimento.split('-').reverse().join('/') : '-'}</span>
+                          </div>
+                        </div>
+                        <button onClick={() => excluirProduto(p.id)} className="text-red-400 p-1"><Trash2 size={14} /></button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
 
