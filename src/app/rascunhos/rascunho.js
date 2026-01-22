@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   LayoutGrid, Send, ChevronRight, ShoppingBag,
-  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus, Database, Users, Package, Image as ImageIcon, CheckCircle2, Clock, AlertCircle, XCircle, Check, X
+  LogOut, BookOpen, Plus, Trash2, Megaphone, Settings, Sun, Moon, User, Lock, Edit3, UserPlus, Database, Users, Package, Image as ImageIcon, CheckCircle2, Clock, AlertCircle, XCircle, Check, X, Camera
 } from 'lucide-react';
 
 // ==========================================================
@@ -54,13 +54,25 @@ export default function TrigofyApp() {
   // *** NOVOS CAMPOS DOACOES ***
   const [nomeProdutoDoacao, setNomeProdutoDoacao] = useState('');
   const [codigoProdutoDoacao, setCodigoProdutoDoacao] = useState('');
+  
+  // *** NOVOS CAMPOS SOLICITADOS PARA DOACOES ***
+  const [localArmazenamentoDoacao, setLocalArmazenamentoDoacao] = useState('');
+  const [qtdeDoacao, setQtdeDoacao] = useState('');
+  const [unidadeDoacao, setUnidadeDoacao] = useState('CX');
+  const [porcionamentoDoacao, setPorcionamentoDoacao] = useState('');
+  const [fotoDoacao, setFotoDoacao] = useState(''); // Armazenará Base64 da imagem
 
   // *** NOVOS CAMPOS PARA CANCELAMENTO ***
   const [cpfCancelamento, setCpfCancelamento] = useState('');
   const [nomeCancelamento, setNomeCancelamento] = useState('');
   const [telefoneCancelamento, setTelefoneCancelamento] = useState('');
   const [areaCancelamento, setAreaCancelamento] = useState('');
-  const [produtoQtdeCancelamento, setProdutoQtdeCancelamento] = useState('');
+  
+  // *** ALTERAÇÃO CANCELAMENTO: REMOVIDO "produtoQtdeCancelamento" ***
+  const [produtoCancelamento, setProdutoCancelamento] = useState('');
+  const [qtdeCancelamento, setQtdeCancelamento] = useState('');
+  const [unidadeCancelamento, setUnidadeCancelamento] = useState('CX'); // Default CX
+  
   const [motivoCancelamento, setMotivoCancelamento] = useState('');
 
   // NOVO: Estado para Telefone na compra
@@ -524,8 +536,20 @@ export default function TrigofyApp() {
     setNomeCancelamento('');
     setTelefoneCancelamento('');
     setAreaCancelamento('');
-    setProdutoQtdeCancelamento('');
+    
+    // Limpeza novos campos
+    setProdutoCancelamento('');
+    setQtdeCancelamento('');
+    setUnidadeCancelamento('CX');
     setMotivoCancelamento('');
+    
+    // Limpeza Doações
+    setLocalArmazenamentoDoacao('');
+    setQtdeDoacao('');
+    setUnidadeDoacao('CX');
+    setPorcionamentoDoacao('');
+    setFotoDoacao('');
+
     showToast("Logout realizado.", "success");
   };
 
@@ -640,12 +664,24 @@ export default function TrigofyApp() {
     setCarregando(false);
   };
 
+  // Função auxiliar para converter imagem
+  const handleFotoDoacaoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFotoDoacao(reader.result); // Base64
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // ==========================================================
   // CORREÇÃO DO ENVIO DE DOAÇÃO
   // ==========================================================
   const handleEnviarDoacao = async () => {
-    // Validação dos campos
-    if (!nomeProdutoDoacao || !codigoProdutoDoacao || !areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto) {
+    // Validação dos campos (incluindo os novos)
+    if (!nomeProdutoDoacao || !codigoProdutoDoacao || !areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto || !localArmazenamentoDoacao || !qtdeDoacao || !unidadeDoacao || !porcionamentoDoacao) {
         return showToast("Preencha todos os campos da doação.", "error");
     }
 
@@ -671,7 +707,13 @@ export default function TrigofyApp() {
             "vencimento": dataVencimento,
             "origem": origemProduto,
             "data": dataISO,
-            "status": "PENDENTE"
+            "status": "PENDENTE",
+            // Novos Campos Mapeados
+            "local_armazenamento": localArmazenamentoDoacao,
+            "quantidade_doacao": qtdeDoacao,
+            "unidade_medida": unidadeDoacao,
+            "porcionamento": porcionamentoDoacao,
+            "foto_etiqueta": fotoDoacao ? fotoDoacao.substring(0, 100000) : "Sem foto" // Limita tamanho por precaução se for campo texto
           }
         })
       });
@@ -685,6 +727,14 @@ export default function TrigofyApp() {
         setAreaProdutoDoado('');
         setDataVencimento('');
         setOrigemProduto('');
+        
+        // Limpa novos
+        setLocalArmazenamentoDoacao('');
+        setQtdeDoacao('');
+        setUnidadeDoacao('CX');
+        setPorcionamentoDoacao('');
+        setFotoDoacao('');
+
         setActiveTab('home');
       } else {
         // Se der erro, tenta logar
@@ -702,7 +752,8 @@ export default function TrigofyApp() {
   // FUNÇÃO: ENVIAR CANCELAMENTO
   // ==========================================================
   const handleEnviarCancelamento = async () => {
-    if (!nomeCancelamento || !telefoneCancelamento || !areaCancelamento || !produtoQtdeCancelamento || !motivoCancelamento) {
+    // Validação Atualizada
+    if (!nomeCancelamento || !telefoneCancelamento || !areaCancelamento || !produtoCancelamento || !qtdeCancelamento || !unidadeCancelamento || !motivoCancelamento) {
       return showToast("Preencha todos os campos obrigatórios.", "error");
     }
 
@@ -723,7 +774,10 @@ export default function TrigofyApp() {
             "nome_completo": nomeCancelamento,
             "telefone": telefoneCancelamento,
             "area": areaCancelamento,
-            "produto_quantidade": produtoQtdeCancelamento,
+            // Novos campos separados
+            "produto_cancelar": produtoCancelamento,
+            "quantidade": qtdeCancelamento,
+            "unidade_medida": unidadeCancelamento,
             "motivo_cancelamento": motivoCancelamento,
             "data": dataISO,
             "status": "PENDENTE"
@@ -737,7 +791,9 @@ export default function TrigofyApp() {
         setNomeCancelamento('');
         setTelefoneCancelamento('');
         setAreaCancelamento('');
-        setProdutoQtdeCancelamento('');
+        setProdutoCancelamento('');
+        setQtdeCancelamento('');
+        setUnidadeCancelamento('CX');
         setMotivoCancelamento('');
         setActiveTab('home');
       } else {
@@ -859,8 +915,8 @@ export default function TrigofyApp() {
                     <div className={`flex-1 font-bold uppercase text-sm text-center ${textMain}`}>Solicitações de doações</div>
                     <ChevronRight className="text-zinc-300 group-hover:text-yellow-500" size={20} />
                   </div>
-                   
-                   <div onClick={() => setActiveTab('cancelamento')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center justify-between gap-4 cursor-pointer transition-all active:scale-95 group`}>
+                    
+                    <div onClick={() => setActiveTab('cancelamento')} className={`${bgCard} p-4 rounded-2xl shadow-sm border flex items-center justify-between gap-4 cursor-pointer transition-all active:scale-95 group`}>
                     <div className="bg-red-500 p-2 rounded-full w-11 h-11 flex items-center justify-center overflow-hidden text-white">
                       <XCircle size={24} />
                     </div>
@@ -918,7 +974,7 @@ export default function TrigofyApp() {
           <div className="animate-in slide-in-from-right duration-300 pb-20">
             <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
             <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Cancelamento de Compras</h2>
-             
+              
             <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
                 <div className="bg-red-50 p-4 rounded-xl mb-4 border border-red-100">
                     <p className="text-red-600 text-xs font-bold uppercase text-center">Preencha todos os campos abaixo para solicitar o cancelamento.</p>
@@ -939,16 +995,33 @@ export default function TrigofyApp() {
                     <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área / Setor</label>
                     <input type="text" placeholder="Ex: Logística, RH, Cozinha..." className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={areaCancelamento} onChange={(e) => setAreaCancelamento(e.target.value)} />
                 </div>
+                
+                {/* NOVOS CAMPOS DE CANCELAMENTO */}
                 <div>
-                    <label className="text-[10px] font-black text-zinc-400 uppercase">Produto e Quantidade para Cancelar</label>
-                    <input type="text" placeholder="Ex: 2 unidades de Arroz Tipo 1" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={produtoQtdeCancelamento} onChange={(e) => setProdutoQtdeCancelamento(e.target.value)} />
+                    <label className="text-[10px] font-black text-zinc-400 uppercase">Produto a Cancelar</label>
+                    <input type="text" placeholder="Ex: Arroz Tipo 1" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={produtoCancelamento} onChange={(e) => setProdutoCancelamento(e.target.value)} />
                 </div>
+                <div className="flex gap-2">
+                    <div className="flex-1">
+                        <label className="text-[10px] font-black text-zinc-400 uppercase">Quantidade</label>
+                        <input type="number" placeholder="0" className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={qtdeCancelamento} onChange={(e) => setQtdeCancelamento(e.target.value)} />
+                    </div>
+                    <div className="flex-1">
+                        <label className="text-[10px] font-black text-zinc-400 uppercase">Unidade de Medida (Sobra)</label>
+                        <select className={`w-full p-4 rounded-2xl outline-none border font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={unidadeCancelamento} onChange={(e) => setUnidadeCancelamento(e.target.value)}>
+                            <option value="CX">CX</option>
+                            <option value="KG">KG</option>
+                            <option value="BAG">BAG</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div>
                     <label className="text-[10px] font-black text-zinc-400 uppercase">Motivo do Cancelamento</label>
                     <textarea placeholder="Por que deseja cancelar?" rows={3} className={`w-full p-4 rounded-2xl border outline-none font-bold resize-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`} value={motivoCancelamento} onChange={(e) => setMotivoCancelamento(e.target.value)} />
                 </div>
                 <button 
-                    disabled={!nomeCancelamento || !telefoneCancelamento || !areaCancelamento || !produtoQtdeCancelamento || !motivoCancelamento || carregando}
+                    disabled={!nomeCancelamento || !telefoneCancelamento || !areaCancelamento || !produtoCancelamento || !qtdeCancelamento || !unidadeCancelamento || !motivoCancelamento || carregando}
                     onClick={handleEnviarCancelamento}
                     className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeCancelamento ? 'bg-red-500 text-white active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
                 >
@@ -981,18 +1054,18 @@ export default function TrigofyApp() {
                       
                       {/* === ATUALIZADO: MOSTRAR DETALHES DA DOAÇÃO SE HOUVER === */}
                       {p.tipo === 'DOACAO' && (
-                         <div className={`mt-2 p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-700' : 'bg-blue-50 border-blue-100'}`}>
-                            <p className="text-[10px] font-black text-zinc-400 uppercase mb-1">Detalhes da Doação:</p>
-                            <div className="grid grid-cols-2 gap-2 text-[10px]">
+                          <div className={`mt-2 p-3 rounded-xl border ${temaEscuro ? 'bg-zinc-900 border-zinc-700' : 'bg-blue-50 border-blue-100'}`}>
+                             <p className="text-[10px] font-black text-zinc-400 uppercase mb-1">Detalhes da Doação:</p>
+                             <div className="grid grid-cols-2 gap-2 text-[10px]">
                                 <div className="col-span-2"><span className="font-bold">Motivo:</span> {p.motivo}</div>
                                 <div><span className="font-bold">Código:</span> {p.codigo}</div>
                                 <div><span className="font-bold">Sua Área:</span> {p.area}</div>
                                 <div><span className="font-bold">Origem:</span> {p.origem}</div>
                                 <div><span className="font-bold">Área Prod:</span> {p.area_produto}</div>
                                 <div className="col-span-2"><span className="font-bold">Vencimento:</span> {p.vencimento}</div>
-                            </div>
-                         </div>
-                      )}
+                             </div>
+                          </div>
+                       )}
                     </div>
                     <div className="flex gap-2 pt-2">
                       <button onClick={() => atualizarStatusPedido(p.id, 'APROVADO', p.tabelaOrigem)} className="flex-1 bg-green-500 text-white py-2 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-1 active:scale-95 transition-all">
@@ -1183,11 +1256,56 @@ export default function TrigofyApp() {
                 />
               </div>
 
+              {/* NOVOS CAMPOS PARA DOAÇÃO */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Câmara/Local de Armazenamento</label>
+                <input
+                  type="text"
+                  placeholder="Digite em qual câmara/local o produto está armazenado"
+                  className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
+                  value={localArmazenamentoDoacao}
+                  onChange={(e) => setLocalArmazenamentoDoacao(e.target.value)}
+                />
+              </div>
+
+              <div className="flex gap-2">
+                  <div className="flex-1 space-y-1">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Quantidade</label>
+                    <input
+                      type="number"
+                      placeholder="Qtd a doar"
+                      className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
+                      value={qtdeDoacao}
+                      onChange={(e) => setQtdeDoacao(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Unidade</label>
+                     <select className={`w-full p-4 rounded-2xl outline-none border font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={unidadeDoacao} onChange={(e) => setUnidadeDoacao(e.target.value)}>
+                        <option value="CX">CX</option>
+                        <option value="KG">KG</option>
+                        <option value="BAG">BAG</option>
+                     </select>
+                  </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Porcionamento do Volume Total</label>
+                <textarea
+                  placeholder="Ex: um total de 30Kg de Farinha, está dividido em 3 sacos com 10kg cada..."
+                  rows={3}
+                  className={`w-full p-4 rounded-2xl border outline-none font-bold resize-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
+                  value={porcionamentoDoacao}
+                  onChange={(e) => setPorcionamentoDoacao(e.target.value)}
+                />
+                <p className="text-[9px] text-zinc-400 italic px-2">Ex: um total de 30Kg de Farinha, está dividido em 3 sacos com 10kg cada (ou seja, podemos chamar 3 Instituições para que cada uma colete 10kg de Farinha)</p>
+              </div>
+
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Motivo da Doação</label>
                 <textarea
                   placeholder="Descreva o motivo da sua solicitação..."
-                  rows={3}
+                  rows={2}
                   className={`w-full p-4 rounded-2xl border outline-none font-bold resize-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`}
                   value={motivoDoacao}
                   onChange={(e) => setMotivoDoacao(e.target.value)}
@@ -1225,12 +1343,27 @@ export default function TrigofyApp() {
                   onChange={(e) => setOrigemProduto(e.target.value)}
                 />
               </div>
+              
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Foto do Produto e Etiqueta</label>
+                <div className={`flex items-center gap-4 p-4 rounded-2xl border border-dashed ${temaEscuro ? 'border-zinc-600 bg-zinc-800' : 'border-zinc-300 bg-zinc-50'}`}>
+                    <Camera size={24} className="text-zinc-400" />
+                    <input 
+                        type="file" 
+                        accept="image/*" 
+                        capture="environment"
+                        onChange={handleFotoDoacaoChange}
+                        className="text-xs font-bold w-full text-zinc-500"
+                    />
+                </div>
+                {fotoDoacao && <p className="text-[10px] text-green-500 font-bold px-2">Imagem capturada com sucesso!</p>}
+              </div>
 
               <div className="pt-4 border-t border-dashed">
-                 <button
-                  disabled={!nomeProdutoDoacao || !codigoProdutoDoacao || !areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto || carregando}
+                  <button
+                  disabled={!nomeProdutoDoacao || !codigoProdutoDoacao || !areaSolicitante || !motivoDoacao || !areaProdutoDoado || !dataVencimento || !origemProduto || !localArmazenamentoDoacao || !qtdeDoacao || !unidadeDoacao || !porcionamentoDoacao || carregando}
                   onClick={handleEnviarDoacao}
-                  className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeProdutoDoacao && codigoProdutoDoacao && areaSolicitante && motivoDoacao && areaProdutoDoado && dataVencimento && origemProduto ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
+                  className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeProdutoDoacao && codigoProdutoDoacao && areaSolicitante && motivoDoacao && areaProdutoDoado && dataVencimento && origemProduto && localArmazenamentoDoacao && qtdeDoacao && unidadeDoacao && porcionamentoDoacao ? 'bg-zinc-900 text-yellow-400 active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
                 >
                   {carregando ? "ENVIANDO..." : "ENVIAR SOLICITAÇÃO"}
                 </button>
