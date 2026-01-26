@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, UserPlus, Users } from 'lucide-react';
 import { TABLES, getHeaders, getBaseUrl } from '../../configuracao/airtable';
 
 const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
+  const [abaInterna, setAbaInterna] = useState('pessoas'); // 'pessoas' ou 'usuarios'
+  
+  // Estados para Pessoas
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
   const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
+  
+  // Estados para Usuários (Logins)
+  const [novoUsuario, setNovoUsuario] = useState('');
+  const [novaSenha, setNovaSenha] = useState('');
+  const [novaOrigem, setNovaOrigem] = useState('VR');
+  const [novaFuncao, setNovaFuncao] = useState('USER');
+  const [usuariosCadastrados, setUsuariosCadastrados] = useState([]);
+  
   const [carregando, setCarregando] = useState(false);
 
   const bgCard = temaEscuro ? 'bg-zinc-800' : 'bg-white';
@@ -16,17 +27,27 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
   const buscarDadosAirtable = async () => {
     setCarregando(true);
     try {
-      const response = await fetch(getBaseUrl(TABLES.PESSOAS), {
-        headers: getHeaders()
-      });
-      const data = await response.json();
-      if (data.records) {
-        const formatado = data.records.map(reg => ({
+      // Busca Pessoas
+      const respPessoas = await fetch(getBaseUrl(TABLES.PESSOAS), { headers: getHeaders() });
+      const dataPessoas = await respPessoas.json();
+      if (dataPessoas.records) {
+        setPessoasCadastradas(dataPessoas.records.map(reg => ({
           id: reg.id,
           cpf: reg.fields.cpf || '',
           nome: reg.fields.nome || ''
-        }));
-        setPessoasCadastradas(formatado);
+        })));
+      }
+
+      // Busca Usuários (Logins)
+      const respUsuarios = await fetch(getBaseUrl(TABLES.USUARIOS), { headers: getHeaders() });
+      const dataUsuarios = await respUsuarios.json();
+      if (dataUsuarios.records) {
+        setUsuariosCadastrados(dataUsuarios.records.map(reg => ({
+          id: reg.id,
+          usuario: reg.fields.usuario || '',
+          origem: reg.fields.origem || '',
+          funcao: reg.fields.funcao || ''
+        })));
       }
     } catch (e) {
       console.error("Erro ao buscar dados:", e);
@@ -39,9 +60,9 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
     buscarDadosAirtable();
   }, []);
 
-  const salvarNoAirtable = async () => {
+  const salvarPessoa = async () => {
     if (!novoCpf || !novoNome) {
-      showToast?.("Por favor, preencha o CPF e o Nome Completo.", "error");
+      showToast?.("Preencha CPF e Nome.", "error");
       return;
     }
     setCarregando(true);
@@ -60,7 +81,7 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
         setNovoCpf('');
         setNovoNome('');
         await buscarDadosAirtable();
-        showToast?.("✅ Cadastrado com sucesso na Nuvem!", "success");
+        showToast?.("✅ Pessoa cadastrada!", "success");
       }
     } catch (e) {
       showToast?.("Erro ao salvar.", "error");
@@ -68,18 +89,48 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
     setCarregando(false);
   };
 
-  const excluirDoAirtable = async (recordId) => {
-    if (!confirm("Tem certeza que deseja excluir este registro?")) return;
-    
+  const salvarUsuario = async () => {
+    if (!novoUsuario || !novaSenha) {
+      showToast?.("Preencha Usuário e Senha.", "error");
+      return;
+    }
     setCarregando(true);
     try {
-      const response = await fetch(`${getBaseUrl(TABLES.PESSOAS)}/${recordId}`, {
+      const response = await fetch(getBaseUrl(TABLES.USUARIOS), {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({
+          fields: {
+            usuario: novoUsuario.trim(),
+            senha: novaSenha,
+            origem: novaOrigem,
+            funcao: novaFuncao
+          }
+        })
+      });
+      if (response.ok) {
+        setNovoUsuario('');
+        setNovaSenha('');
+        await buscarDadosAirtable();
+        showToast?.("✅ Login criado com sucesso!", "success");
+      }
+    } catch (e) {
+      showToast?.("Erro ao criar login.", "error");
+    }
+    setCarregando(false);
+  };
+
+  const excluirRegistro = async (tableId, recordId) => {
+    if (!confirm("Tem certeza que deseja excluir?")) return;
+    setCarregando(true);
+    try {
+      const response = await fetch(`${getBaseUrl(tableId)}/${recordId}`, {
         method: 'DELETE',
         headers: getHeaders()
       });
       if (response.ok) {
         await buscarDadosAirtable();
-        showToast?.("Registro excluído com sucesso!", "success");
+        showToast?.("Excluído com sucesso!", "success");
       }
     } catch (e) {
       showToast?.("Erro ao excluir.", "error");
@@ -91,66 +142,125 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
     <div className="animate-in slide-in-from-right duration-300 pb-20">
       <button 
         onClick={() => setActiveTab('home')} 
-        className="text-zinc-400 font-bold text-xs uppercase mb-2 hover:text-yellow-500 transition-colors"
+        className="text-zinc-400 font-bold text-xs uppercase mb-4 hover:text-yellow-500 transition-colors flex items-center gap-1"
       >
-        ← Voltar
+        ← Voltar ao Menu
       </button>
+
+      {/* Seleção de Aba Interna */}
+      <div className="flex gap-2 mb-4">
+        <button 
+          onClick={() => setAbaInterna('pessoas')}
+          className={`flex-1 py-3 rounded-2xl font-black uppercase text-[10px] transition-all flex items-center justify-center gap-2 ${abaInterna === 'pessoas' ? 'bg-yellow-400 text-zinc-900 shadow-lg' : 'bg-zinc-100 text-zinc-400'}`}
+        >
+          <Users size={14} /> Cadastrar Pessoas
+        </button>
+        <button 
+          onClick={() => setAbaInterna('usuarios')}
+          className={`flex-1 py-3 rounded-2xl font-black uppercase text-[10px] transition-all flex items-center justify-center gap-2 ${abaInterna === 'usuarios' ? 'bg-yellow-400 text-zinc-900 shadow-lg' : 'bg-zinc-100 text-zinc-400'}`}
+        >
+          <UserPlus size={14} /> Criar Logins
+        </button>
+      </div>
       
       <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
-        <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
-          Cadastrar na Nuvem
-        </h2>
-        
-        <input 
-          type="text" 
-          placeholder="CPF" 
-          className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`}
-          value={novoCpf} 
-          onChange={(e) => setNovoCpf(e.target.value)} 
-        />
-        
-        <input 
-          type="text" 
-          placeholder="Nome Completo" 
-          className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`}
-          value={novoNome} 
-          onChange={(e) => setNovoNome(e.target.value)} 
-        />
-        
-        <button 
-          onClick={salvarNoAirtable} 
-          className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm hover:bg-yellow-500 transition-colors active:scale-95"
-          disabled={carregando}
-        >
-          {carregando ? "Salvando..." : "Salvar no Airtable"}
-        </button>
-        
-        <div className="pt-4 space-y-2">
-          <h3 className={`text-xs font-black uppercase ${textSub}`}>
-            Lista Sincronizada ({pessoasCadastradas.length})
-          </h3>
-          
-          <div className="max-h-[400px] overflow-y-auto space-y-2">
-            {pessoasCadastradas.map(p => (
-              <div 
-                key={p.id} 
-                className={`flex justify-between items-center p-3 ${bgInput} rounded-xl border`}
-              >
-                <div>
-                  <p className={`font-bold text-xs ${textMain}`}>{p.nome}</p>
-                  <p className={`text-[10px] ${textSub}`}>{p.cpf}</p>
-                </div>
-                <button 
-                  onClick={() => excluirDoAirtable(p.id)} 
-                  className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition-colors"
-                  disabled={carregando}
-                >
-                  <Trash2 size={16}/>
-                </button>
+        {abaInterna === 'pessoas' ? (
+          <>
+            <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
+              Cadastrar na Nuvem
+            </h2>
+            <input 
+              type="text" placeholder="CPF" 
+              className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`}
+              value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} 
+            />
+            <input 
+              type="text" placeholder="Nome Completo" 
+              className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`}
+              value={novoNome} onChange={(e) => setNovoNome(e.target.value)} 
+            />
+            <button 
+              onClick={salvarPessoa} 
+              className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm hover:bg-yellow-500 transition-colors active:scale-95"
+              disabled={carregando}
+            >
+              {carregando ? "Salvando..." : "Salvar no Airtable"}
+            </button>
+            
+            <div className="pt-4 space-y-2">
+              <h3 className={`text-xs font-black uppercase ${textSub}`}>Lista de Pessoas ({pessoasCadastradas.length})</h3>
+              <div className="max-h-[300px] overflow-y-auto space-y-2">
+                {pessoasCadastradas.map(p => (
+                  <div key={p.id} className={`flex justify-between items-center p-3 ${bgInput} rounded-xl border`}>
+                    <div>
+                      <p className={`font-bold text-xs ${textMain}`}>{p.nome}</p>
+                      <p className={`text-[10px] ${textSub}`}>{p.cpf}</p>
+                    </div>
+                    <button onClick={() => excluirRegistro(TABLES.PESSOAS, p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition-colors">
+                      <Trash2 size={16}/>
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
+              Criar Acesso (Login)
+            </h2>
+            <input 
+              type="text" placeholder="Usuário" 
+              className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`}
+              value={novoUsuario} onChange={(e) => setNovoUsuario(e.target.value)} 
+            />
+            <input 
+              type="password" placeholder="Senha" 
+              className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`}
+              value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} 
+            />
+            <div className="flex gap-2">
+              <select 
+                className={`flex-1 p-4 ${bgInput} border rounded-2xl outline-none ${textMain}`}
+                value={novaOrigem} onChange={(e) => setNovaOrigem(e.target.value)}
+              >
+                <option value="VR">VR</option>
+                <option value="RIO/SP">RIO/SP</option>
+              </select>
+              <select 
+                className={`flex-1 p-4 ${bgInput} border rounded-2xl outline-none ${textMain}`}
+                value={novaFuncao} onChange={(e) => setNovaFuncao(e.target.value)}
+              >
+                <option value="USER">USUÁRIO</option>
+                <option value="ADMIN">ADMIN</option>
+              </select>
+            </div>
+            <button 
+              onClick={salvarUsuario} 
+              className="w-full bg-zinc-900 text-white py-3 rounded-2xl font-black uppercase text-sm hover:bg-zinc-800 transition-colors active:scale-95"
+              disabled={carregando}
+            >
+              {carregando ? "Criando..." : "Criar Login"}
+            </button>
+
+            <div className="pt-4 space-y-2">
+              <h3 className={`text-xs font-black uppercase ${textSub}`}>Logins Ativos ({usuariosCadastrados.length})</h3>
+              <div className="max-h-[300px] overflow-y-auto space-y-2">
+                {usuariosCadastrados.map(u => (
+                  <div key={u.id} className={`flex justify-between items-center p-3 ${bgInput} rounded-xl border`}>
+                    <div>
+                      <p className={`font-bold text-xs ${textMain}`}>{u.usuario}</p>
+                      <p className={`text-[10px] ${textSub}`}>{u.origem} • {u.funcao}</p>
+                    </div>
+                    <button onClick={() => excluirRegistro(TABLES.USUARIOS, u.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition-colors">
+                      <Trash2 size={16}/>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
