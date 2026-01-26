@@ -2,7 +2,8 @@ import React from 'react';
 import { 
   LayoutGrid, 
   ShoppingBag, 
-  Settings
+  Settings,
+  BookOpen
 } from 'lucide-react';
 
 const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro }) => {
@@ -10,9 +11,13 @@ const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro 
     { id: 'home', icon: LayoutGrid, label: 'Menu' }
   ];
 
-  // Botão de Compras disponível para todos (exceto talvez Admin puro, mas o usuário pediu ao lado do menu)
-  // Se for Admin, ele vê Compras e Administração. Se for User/Aprovador, vê Compras.
+  // Aba de Compras centralizada na barra inferior
   navItems.push({ id: 'compras-aba', icon: ShoppingBag, label: 'Compras' });
+
+  // Para usuários comuns e aprovadores, podemos manter o Histórico na barra inferior para facilitar o acesso
+  if (!isAdmin || isAprovador) {
+    navItems.push({ id: 'historico', icon: BookOpen, label: 'Histórico' });
+  }
 
   // Apenas Admin vê a aba de Administração na navegação
   if (isAdmin) {
@@ -33,7 +38,7 @@ const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro 
               key={item.id}
               onClick={() => {
                 if (item.id === 'compras-aba') {
-                  setActiveTab('novo'); // Redireciona para a página de novo pedido
+                  setActiveTab('novo'); 
                 } else {
                   setActiveTab(item.id);
                 }

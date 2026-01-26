@@ -1,9 +1,8 @@
 import React from 'react';
-import { ShoppingBag, Megaphone, XCircle, CheckCircle2, BookOpen, Settings, MessageCircle, Database } from 'lucide-react';
+import { Megaphone, XCircle, CheckCircle2, BookOpen, Settings, MessageCircle, Database } from 'lucide-react';
 
 const HomePage = ({ 
   setActiveTab, 
-  setSiteFiltro,
   isAdmin, 
   isAprovador,
   temaEscuro 
@@ -14,31 +13,9 @@ const HomePage = ({
 
   const menuItems = [];
 
-  // Se NÃO for Admin OU se for Aprovador, mostra os formulários de usuário
+  // Se NÃO for Admin OU se for Aprovador, mostra os formulários de usuário (EXCETO COMPRAS que foi para a aba inferior)
   if (!isAdmin || isAprovador) {
     menuItems.push(
-      {
-        id: 'pedidos-vr',
-        title: 'Compras VR',
-        description: 'Fazer pedidos Volta Redonda',
-        icon: ShoppingBag,
-        color: 'from-blue-500 to-blue-600',
-        action: () => {
-          setSiteFiltro('VR');
-          setActiveTab('novo'); // Redireciona para a aba de compras (novo pedido)
-        }
-      },
-      {
-        id: 'pedidos-rio',
-        title: 'Compras RIO/SP',
-        description: 'Fazer pedidos Rio/SP',
-        icon: ShoppingBag,
-        color: 'from-purple-500 to-purple-600',
-        action: () => {
-          setSiteFiltro('RIO/SP');
-          setActiveTab('novo'); // Redireciona para a aba de compras (novo pedido)
-        }
-      },
       {
         id: 'doacoes',
         title: 'Doações',
