@@ -1,0 +1,216 @@
+"use client";
+import React, { useState, useEffect } from 'react';
+
+// Hooks
+import { useToast } from '../hooks/useToast';
+import { useTheme } from '../hooks/useTheme';
+
+// Services
+import { 
+  fetchPessoas, 
+  fetchProdutos, 
+  fetchUsuarios 
+} from '../services/airtableService';
+import { 
+  criarPedidosEmLote, 
+  buscarPedidosUsuario, 
+  buscarPedidosPendentes as buscarPedidosPendentesService,
+  atualizarStatusPedido 
+} from '../services/pedidosService';
+import { 
+  criarDoacao, 
+  buscarDoacoesPendentes 
+} from '../services/doacoesService';
+import { criarCancelamento } from '../services/cancelamentosService';
+
+// Components
+import Toast from '../components/ui/Toast';
+import Header from '../components/layout/Header';
+import Navigation from '../components/layout/Navigation';
+import LoginPage from '../components/pages/LoginPage';
+import HomePage from '../components/pages/HomePage';
+
+// Constants
+import { ADMIN_USER } from '../constants/roles';
+import { updateRecord } from '../services/airtableService';
+
+export default function TrigofyApp() {
+  // Estados de autenticação
+  const [estaLogado, setEstaLogado] = useState(false);
+  const [usuarioInput, setUsuarioInput] = useState('');
+  const [usuarioLogadoOrigem, setUsuarioLogadoOrigem] = useState('');
+  const [usuarioLogadoFuncao, setUsuarioLogadoFuncao] = useState('');
+
+  // Estados de navegação
+  const [activeTab, setActiveTab] = useState('home');
+  
+  // Estados de dados
+  const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
+  const [produtosLancados, setProdutosLancados] = useState([]);
+  const [usuariosAutorizados, setUsuariosAutorizados] = useState([ADMIN_USER]);
+  const [carregando, setCarregando] = useState(true);
+
+  // Estados de filtros
+  const [siteFiltro, setSiteFiltro] = useState('');
+  
+  // Estados de pedidos
+  const [meusPedidosHistorico, setMeusPedidosHistorico] = useState([]);
+  const [pedidosParaAprovar, setPedidosParaAprovar] = useState([]);
+  
+  // Hooks customizados
+  const { toast, showToast } = useToast();
+  const { temaEscuro, toggleTheme, bgMain, bgCard, textMain, textSub, borderColor } = useTheme();
+
+  // Carrega dados iniciais
+  useEffect(() => {
+    if (estaLogado) {
+      carregarDadosIniciais();
+    }
+  }, [estaLogado]);
+
+  const carregarDadosIniciais = async () => {
+    setCarregando(true);
+    try {
+      const [pessoas, produtos, usuarios] = await Promise.all([
+        fetchPessoas(),
+        fetchProdutos(),
+        fetchUsuarios()
+      ]);
+      
+      setPessoasCadastradas(pessoas);
+      setProdutosLancados(produtos);
+      setUsuariosAutorizados([ADMIN_USER, ...usuarios]);
+    } catch (error) {
+      showToast('Erro ao carregar dados', 'error');
+    }
+    setCarregando(false);
+  };
+
+  const handleLogin = (usuario, origem, funcao) => {
+    setEstaLogado(true);
+    setUsuarioInput(usuario);
+    setUsuarioLogadoOrigem(origem);
+    setUsuarioLogadoFuncao(funcao);
+    showToast(`Bem-vindo, ${usuario}!`, 'success');
+  };
+
+  const handleLogout = () => {
+    setEstaLogado(false);
+    setActiveTab('home');
+    setUsuarioInput('');
+    setUsuarioLogadoOrigem('');
+    setUsuarioLogadoFuncao('');
+    setSiteFiltro('');
+    setMeusPedidosHistorico([]);
+    setPedidosParaAprovar([]);
+    showToast('Logout realizado', 'success');
+  };
+
+  const carregarMeusPedidos = async () => {
+    setCarregando(true);
+    try {
+      const pedidos = await buscarPedidosUsuario(usuarioInput);
+      setMeusPedidosHistorico(pedidos);
+    } catch (error) {
+      showToast('Erro ao carregar pedidos', 'error');
+    }
+    setCarregando(false);
+  };
+
+  const carregarPedidosPendentes = async () => {
+    setCarregando(true);
+    try {
+      const pedidosComuns = await buscarPedidosPendentesService();
+      const doacoes = await buscarDoacoesPendentes();
+      setPedidosParaAprovar([...pedidosComuns, ...doacoes]);
+    } catch (error) {
+      showToast('Erro ao carregar pedidos pendentes', 'error');
+    }
+    setCarregando(false);
+  };
+
+  const handleAtualizarStatus = async (recordId, novoStatus, tabelaOrigem) => {
+    try {
+      await updateRecord(tabelaOrigem, recordId, { status: novoStatus });
+      showToast(`Pedido ${novoStatus.toLowerCase()} com sucesso!`, 'success');
+      await carregarPedidosPendentes();
+    } catch (error) {
+      showToast('Erro ao atualizar status', 'error');
+    }
+  };
+
+  // Efeito para carregar pedidos quando necessário
+  useEffect(() => {
+    if (activeTab === 'historico' || activeTab === 'pedidos') {
+      carregarMeusPedidos();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 'aprovacoes') {
+      carregarPedidosPendentes();
+    }
+  }, [activeTab]);
+
+  // Renderização
+  if (!estaLogado) {
+    return (
+      <>
+        <Toast toast={toast} />
+        <LoginPage 
+          onLogin={handleLogin}
+          usuariosAutorizados={usuariosAutorizados}
+          temaEscuro={temaEscuro}
+        />
+      </>
+    );
+  }
+
+  const isAdmin = usuarioLogadoFuncao === 'ADMIN';
+
+  return (
+    <div className={`min-h-screen ${bgMain}`}>
+      <Toast toast={toast} />
+      
+      <Header 
+        usuarioInput={usuarioInput}
+        temaEscuro={temaEscuro}
+        toggleTheme={toggleTheme}
+        onLogout={handleLogout}
+      />
+
+      <main className="p-4 max-w-2xl mx-auto">
+        {activeTab === 'home' && (
+          <HomePage 
+            setActiveTab={setActiveTab}
+            setSiteFiltro={setSiteFiltro}
+            isAdmin={isAdmin}
+            temaEscuro={temaEscuro}
+          />
+        )}
+        
+        {/* Outras páginas serão adicionadas aqui */}
+        {activeTab !== 'home' && (
+          <div className={`${bgCard} p-6 rounded-3xl shadow-sm border`}>
+            <p className={`${textMain} font-bold`}>
+              Página em desenvolvimento: {activeTab}
+            </p>
+            <button 
+              onClick={() => setActiveTab('home')}
+              className="mt-4 px-4 py-2 bg-yellow-500 text-white rounded-xl font-bold"
+            >
+              Voltar ao Menu
+            </button>
+          </div>
+        )}
+      </main>
+
+      <Navigation 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isAdmin={isAdmin}
+        temaEscuro={temaEscuro}
+      />
+    </div>
+  );
+}
