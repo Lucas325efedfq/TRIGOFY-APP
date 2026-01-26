@@ -232,6 +232,7 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
                 value={novaFuncao} onChange={(e) => setNovaFuncao(e.target.value)}
               >
                 <option value="USER">USUÁRIO</option>
+                <option value="APROVADOR">APROVADOR</option>
                 <option value="ADMIN">ADMIN</option>
               </select>
             </div>

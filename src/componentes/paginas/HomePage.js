@@ -1,9 +1,11 @@
 import React from 'react';
-import { CheckCircle2, Settings, Database } from 'lucide-react';
+import { ShoppingBag, Megaphone, XCircle, CheckCircle2, BookOpen, Settings, MessageCircle, Database } from 'lucide-react';
 
 const HomePage = ({ 
   setActiveTab, 
+  setSiteFiltro,
   isAdmin, 
+  isAprovador,
   temaEscuro 
 }) => {
   const bgCard = temaEscuro ? 'bg-zinc-800' : 'bg-white';
@@ -12,15 +14,69 @@ const HomePage = ({
 
   const menuItems = [];
 
-  if (isAdmin) {
-    menuItems.push({
-      id: 'admin-painel',
-      title: 'Painel Admin',
-      description: 'Gerenciar cadastros na nuvem',
-      icon: Database,
-      color: 'from-indigo-500 to-indigo-600',
-      action: () => setActiveTab('admin-painel')
-    });
+  // Se NÃO for Admin OU se for Aprovador, mostra os formulários de usuário
+  if (!isAdmin || isAprovador) {
+    menuItems.push(
+      {
+        id: 'pedidos-vr',
+        title: 'Compras VR',
+        description: 'Fazer pedidos Volta Redonda',
+        icon: ShoppingBag,
+        color: 'from-blue-500 to-blue-600',
+        action: () => {
+          setSiteFiltro('VR');
+          setActiveTab('novo');
+        }
+      },
+      {
+        id: 'pedidos-rio',
+        title: 'Compras RIO/SP',
+        description: 'Fazer pedidos Rio/SP',
+        icon: ShoppingBag,
+        color: 'from-purple-500 to-purple-600',
+        action: () => {
+          setSiteFiltro('RIO/SP');
+          setActiveTab('novo');
+        }
+      },
+      {
+        id: 'doacoes',
+        title: 'Doações',
+        description: 'Solicitar doação de produtos',
+        icon: Megaphone,
+        color: 'from-green-500 to-green-600',
+        action: () => setActiveTab('doacoes')
+      },
+      {
+        id: 'historico',
+        title: 'Meu Histórico',
+        description: 'Ver meus pedidos',
+        icon: BookOpen,
+        color: 'from-yellow-500 to-yellow-600',
+        action: () => setActiveTab('historico')
+      },
+      {
+        id: 'cancelamentos',
+        title: 'Cancelamentos',
+        description: 'Cancelar pedidos/produtos',
+        icon: XCircle,
+        color: 'from-red-500 to-red-600',
+        action: () => setActiveTab('cancelamentos')
+      },
+      {
+        id: 'suporte',
+        title: 'Suporte',
+        description: 'Chat com Agente Triger',
+        icon: MessageCircle,
+        color: 'from-orange-500 to-orange-600',
+        action: () => setActiveTab('suporte')
+      }
+    );
+  }
+
+  // Se for Admin OU Aprovador, mostra opções de aprovação/admin
+  if (isAdmin || isAprovador) {
+    // Aprovador vê o card de aprovações
     menuItems.push({
       id: 'aprovacoes',
       title: 'Aprovar Pedidos',
@@ -29,14 +85,26 @@ const HomePage = ({
       color: 'from-emerald-500 to-emerald-600',
       action: () => setActiveTab('aprovacoes')
     });
-    menuItems.push({
-      id: 'config',
-      title: 'Administração',
-      description: 'Configurações do sistema',
-      icon: Settings,
-      color: 'from-zinc-500 to-zinc-600',
-      action: () => setActiveTab('config')
-    });
+
+    // Apenas Admin vê os painéis de configuração e cadastros
+    if (isAdmin) {
+      menuItems.push({
+        id: 'admin-painel',
+        title: 'Painel Admin',
+        description: 'Gerenciar cadastros na nuvem',
+        icon: Database,
+        color: 'from-indigo-500 to-indigo-600',
+        action: () => setActiveTab('admin-painel')
+      });
+      menuItems.push({
+        id: 'config',
+        title: 'Administração',
+        description: 'Configurações do sistema',
+        icon: Settings,
+        color: 'from-zinc-500 to-zinc-600',
+        action: () => setActiveTab('config')
+      });
+    }
   }
 
   return (
@@ -46,7 +114,7 @@ const HomePage = ({
           Bem-vindo ao Trigofy!
         </h2>
         <p className={`text-sm font-bold ${textSub}`}>
-          {isAdmin ? 'Escolha uma opção administrativa abaixo' : 'Acesso restrito a administradores'}
+          Escolha uma opção abaixo para começar
         </p>
       </div>
 
@@ -75,11 +143,6 @@ const HomePage = ({
             </button>
           );
         })}
-        {!isAdmin && (
-          <div className={`${bgCard} p-6 rounded-2xl border shadow-sm text-center`}>
-            <p className={`${textSub} font-bold`}>Você não tem permissão para acessar esta área.</p>
-          </div>
-        )}
       </div>
     </div>
   );

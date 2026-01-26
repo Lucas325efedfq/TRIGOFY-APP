@@ -1,14 +1,25 @@
 import React from 'react';
 import { 
   LayoutGrid, 
-  Settings
+  ShoppingBag, 
+  Megaphone, 
+  Settings, 
+  BookOpen 
 } from 'lucide-react';
 
-const Navigation = ({ activeTab, setActiveTab, isAdmin, temaEscuro }) => {
+const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro }) => {
   const navItems = [
     { id: 'home', icon: LayoutGrid, label: 'Menu' }
   ];
 
+  // Usuários comuns e Aprovadores veem as abas de compras/doações
+  if (!isAdmin || isAprovador) {
+    navItems.push({ id: 'pedidos', icon: ShoppingBag, label: 'Compras' });
+    navItems.push({ id: 'doacoes', icon: Megaphone, label: 'Doações' });
+    navItems.push({ id: 'historico', icon: BookOpen, label: 'Histórico' });
+  }
+
+  // Apenas Admin vê a aba de Administração na navegação
   if (isAdmin) {
     navItems.push({ id: 'config', icon: Settings, label: 'Administração' });
   }

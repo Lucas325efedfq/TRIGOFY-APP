@@ -12,7 +12,9 @@ import {
   fetchUsuarios 
 } from '../servicos/airtableService';
 import { 
+  buscarPedidosUsuario,
   buscarPedidosPendentes as buscarPedidosPendentesService,
+  atualizarStatusPedido 
 } from '../servicos/pedidosService';
 import { 
   buscarDoacoesPendentes 
@@ -25,6 +27,10 @@ import Header from '../componentes/layout/Header';
 import Navigation from '../componentes/layout/Navigation';
 import LoginPage from '../componentes/paginas/LoginPage';
 import HomePage from '../componentes/paginas/HomePage';
+import NovoPedidoPage from '../componentes/paginas/NovoPedidoPage';
+import DoacoesPage from '../componentes/paginas/DoacoesPage';
+import CancelamentosPage from '../componentes/paginas/CancelamentosPage';
+import SuportePage from '../componentes/paginas/SuportePage';
 import AdminPainelPage from '../componentes/paginas/AdminPainelPage';
 
 
@@ -52,6 +58,7 @@ export default function TrigofyApp() {
   const [siteFiltro, setSiteFiltro] = useState('');
   
   // Estados de pedidos
+  const [meusPedidosHistorico, setMeusPedidosHistorico] = useState([]);
   const [pedidosParaAprovar, setPedidosParaAprovar] = useState([]);
   
   // Hooks customizados
@@ -96,8 +103,20 @@ export default function TrigofyApp() {
     setUsuarioLogadoOrigem('');
     setUsuarioLogadoFuncao('');
     setSiteFiltro('');
+    setMeusPedidosHistorico([]);
     setPedidosParaAprovar([]);
     showToast('Logout realizado', 'success');
+  };
+
+  const carregarMeusPedidos = async () => {
+    setCarregando(true);
+    try {
+      const pedidos = await buscarPedidosUsuario(usuarioInput);
+      setMeusPedidosHistorico(pedidos);
+    } catch (error) {
+      showToast('Erro ao carregar pedidos', 'error');
+    }
+    setCarregando(false);
   };
 
   const carregarPedidosPendentes = async () => {
@@ -122,6 +141,13 @@ export default function TrigofyApp() {
     }
   };
 
+  // Efeito para carregar pedidos quando necessário
+  useEffect(() => {
+    if (activeTab === 'historico' || activeTab === 'pedidos') {
+      carregarMeusPedidos();
+    }
+  }, [activeTab]);
+
   useEffect(() => {
     if (activeTab === 'aprovacoes') {
       carregarPedidosPendentes();
@@ -143,6 +169,7 @@ export default function TrigofyApp() {
   }
 
   const isAdmin = usuarioLogadoFuncao === 'ADMIN';
+  const isAprovador = usuarioLogadoFuncao === 'APROVADOR';
 
   return (
     <div className={`min-h-screen ${bgMain}`}>
@@ -159,7 +186,48 @@ export default function TrigofyApp() {
         {activeTab === 'home' && (
           <HomePage 
             setActiveTab={setActiveTab}
+            setSiteFiltro={setSiteFiltro}
             isAdmin={isAdmin}
+            isAprovador={isAprovador}
+            temaEscuro={temaEscuro}
+          />
+        )}
+
+        {activeTab === 'novo' && (
+          <NovoPedidoPage 
+            usuarioInput={usuarioInput}
+            pessoasCadastradas={pessoasCadastradas}
+            produtosLancados={produtosLancados}
+            siteFiltro={siteFiltro}
+            temaEscuro={temaEscuro}
+            showToast={showToast}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
+        {activeTab === 'doacoes' && (
+          <DoacoesPage 
+            usuarioInput={usuarioInput}
+            pessoasCadastradas={pessoasCadastradas}
+            temaEscuro={temaEscuro}
+            showToast={showToast}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
+        {activeTab === 'cancelamentos' && (
+          <CancelamentosPage 
+            usuarioInput={usuarioInput}
+            pessoasCadastradas={pessoasCadastradas}
+            temaEscuro={temaEscuro}
+            showToast={showToast}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
+        {activeTab === 'suporte' && (
+          <SuportePage 
+            setActiveTab={setActiveTab}
             temaEscuro={temaEscuro}
           />
         )}
@@ -172,14 +240,14 @@ export default function TrigofyApp() {
           />
         )}
 
-        {/* Outras páginas administrativas */}
-        {activeTab !== 'home' && activeTab !== 'admin-painel' && (
+        {/* Outras páginas (Aprovações, Administração, etc) */}
+        {activeTab !== 'home' && activeTab !== 'novo' && activeTab !== 'doacoes' && activeTab !== 'cancelamentos' && activeTab !== 'suporte' && activeTab !== 'admin-painel' && (
           <div className={`${bgCard} p-6 rounded-3xl shadow-sm border`}>
             <p className={`${textMain} font-bold`}>
               Página: {activeTab}
             </p>
             <p className={`${textSub} text-sm mt-2`}>
-              Esta funcionalidade está sendo integrada ao novo fluxo administrativo.
+              Funcionalidade em integração.
             </p>
             <button 
               onClick={() => setActiveTab('home')}
@@ -195,6 +263,7 @@ export default function TrigofyApp() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         isAdmin={isAdmin}
+        isAprovador={isAprovador}
         temaEscuro={temaEscuro}
       />
     </div>
