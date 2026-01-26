@@ -29,6 +29,7 @@ import Header from '../componentes/layout/Header';
 import Navigation from '../componentes/layout/Navigation';
 import LoginPage from '../componentes/paginas/LoginPage';
 import HomePage from '../componentes/paginas/HomePage';
+import CancelamentosPage from '../componentes/paginas/CancelamentosPage';
 
 // Constants
 import { ADMIN_USER } from '../constantes/roles';
@@ -188,9 +189,19 @@ export default function TrigofyApp() {
             temaEscuro={temaEscuro}
           />
         )}
+
+        {activeTab === 'cancelamentos' && (
+          <CancelamentosPage 
+            usuarioInput={usuarioInput}
+            pessoasCadastradas={pessoasCadastradas}
+            temaEscuro={temaEscuro}
+            showToast={showToast}
+            setActiveTab={setActiveTab}
+          />
+        )}
         
         {/* Outras páginas serão adicionadas aqui */}
-        {activeTab !== 'home' && (
+        {activeTab !== 'home' && activeTab !== 'cancelamentos' && (
           <div className={`${bgCard} p-6 rounded-3xl shadow-sm border`}>
             <p className={`${textMain} font-bold`}>
               Página em desenvolvimento: {activeTab}
