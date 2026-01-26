@@ -21,7 +21,7 @@ import {
   criarDoacao, 
   buscarDoacoesPendentes 
 } from '../servicos/doacoesService';
-import { criarCancelamento } from '../servicos/cancelamentosService';
+
 
 // Components
 import Toast from '../componentes/ui/Toast';
@@ -29,7 +29,7 @@ import Header from '../componentes/layout/Header';
 import Navigation from '../componentes/layout/Navigation';
 import LoginPage from '../componentes/paginas/LoginPage';
 import HomePage from '../componentes/paginas/HomePage';
-import CancelamentosPage from '../componentes/paginas/CancelamentosPage';
+
 
 // Constants
 import { ADMIN_USER } from '../constantes/roles';
@@ -190,18 +190,10 @@ export default function TrigofyApp() {
           />
         )}
 
-        {activeTab === 'cancelamentos' && (
-          <CancelamentosPage 
-            usuarioInput={usuarioInput}
-            pessoasCadastradas={pessoasCadastradas}
-            temaEscuro={temaEscuro}
-            showToast={showToast}
-            setActiveTab={setActiveTab}
-          />
-        )}
+
         
         {/* Outras páginas serão adicionadas aqui */}
-        {activeTab !== 'home' && activeTab !== 'cancelamentos' && (
+        {activeTab !== 'home' &&  (
           <div className={`${bgCard} p-6 rounded-3xl shadow-sm border`}>
             <p className={`${textMain} font-bold`}>
               Página em desenvolvimento: {activeTab}

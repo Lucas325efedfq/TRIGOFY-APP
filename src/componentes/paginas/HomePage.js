@@ -42,14 +42,7 @@ const HomePage = ({
       color: 'from-green-500 to-green-600',
       action: () => setActiveTab('doacoes')
     },
-    {
-      id: 'cancelamentos',
-      title: 'Cancelamentos',
-      description: 'Cancelar pedidos',
-      icon: XCircle,
-      color: 'from-red-500 to-red-600',
-      action: () => setActiveTab('cancelamentos')
-    },
+
     {
       id: 'historico',
       title: 'Meu Histórico',
