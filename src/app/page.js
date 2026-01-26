@@ -31,6 +31,9 @@ import LoginPage from '../componentes/paginas/LoginPage';
 import HomePage from '../componentes/paginas/HomePage';
 import NovoPedidoPage from '../componentes/paginas/NovoPedidoPage';
 import DoacoesPage from '../componentes/paginas/DoacoesPage';
+import CancelamentosPage from '../componentes/paginas/CancelamentosPage';
+import SuportePage from '../componentes/paginas/SuportePage';
+import AdminPainelPage from '../componentes/paginas/AdminPainelPage';
 
 
 // Constants
@@ -212,10 +215,33 @@ export default function TrigofyApp() {
           />
         )}
 
+        {activeTab === 'cancelamentos' && (
+          <CancelamentosPage 
+            usuarioInput={usuarioInput}
+            pessoasCadastradas={pessoasCadastradas}
+            temaEscuro={temaEscuro}
+            showToast={showToast}
+            setActiveTab={setActiveTab}
+          />
+        )}
 
-        
+        {activeTab === 'suporte' && (
+          <SuportePage 
+            setActiveTab={setActiveTab}
+            temaEscuro={temaEscuro}
+          />
+        )}
+
+        {activeTab === 'admin-painel' && isAdmin && (
+          <AdminPainelPage 
+            setActiveTab={setActiveTab}
+            temaEscuro={temaEscuro}
+            showToast={showToast}
+          />
+        )}
+
         {/* Outras páginas serão adicionadas aqui */}
-        {activeTab !== 'home' && activeTab !== 'novo' && activeTab !== 'doacoes' && (
+        {activeTab !== 'home' && activeTab !== 'novo' && activeTab !== 'doacoes' && activeTab !== 'cancelamentos' && activeTab !== 'suporte' && activeTab !== 'admin-painel' && (
           <div className={`${bgCard} p-6 rounded-3xl shadow-sm border`}>
             <p className={`${textMain} font-bold`}>
               Página em desenvolvimento: {activeTab}

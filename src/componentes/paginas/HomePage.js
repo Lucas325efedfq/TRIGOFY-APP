@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, Megaphone, XCircle, CheckCircle2, BookOpen, Settings } from 'lucide-react';
+import { ShoppingBag, Megaphone, XCircle, CheckCircle2, BookOpen, Settings, MessageCircle, Database } from 'lucide-react';
 
 const HomePage = ({ 
   setActiveTab, 
@@ -50,6 +50,22 @@ const HomePage = ({
       icon: BookOpen,
       color: 'from-yellow-500 to-yellow-600',
       action: () => setActiveTab('historico')
+    },
+    {
+      id: 'cancelamentos',
+      title: 'Cancelamentos',
+      description: 'Cancelar pedidos/produtos',
+      icon: XCircle,
+      color: 'from-red-500 to-red-600',
+      action: () => setActiveTab('cancelamentos')
+    },
+    {
+      id: 'suporte',
+      title: 'Suporte',
+      description: 'Chat com Agente Triger',
+      icon: MessageCircle,
+      color: 'from-orange-500 to-orange-600',
+      action: () => setActiveTab('suporte')
     }
   ];
 
@@ -69,6 +85,14 @@ const HomePage = ({
       icon: Settings,
       color: 'from-zinc-500 to-zinc-600',
       action: () => setActiveTab('config')
+    });
+    menuItems.push({
+      id: 'admin-painel',
+      title: 'Painel Admin',
+      description: 'Gerenciar cadastros na nuvem',
+      icon: Database,
+      color: 'from-indigo-500 to-indigo-600',
+      action: () => setActiveTab('admin-painel')
     });
   }
 
