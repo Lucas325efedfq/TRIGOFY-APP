@@ -1,192 +1,177 @@
 import React, { useState, useEffect } from 'react';
-import { XCircle, Clock } from 'lucide-react';
-import { criarCancelamento } from '../../servicos/cancelamentosService';
+import { enviarCancelamento } from '../../servicos/cancelamentosService';
 
-const CancelamentosPage = ({ 
-  usuarioInput, 
-  pessoasCadastradas, 
-  temaEscuro, 
-  showToast,
-  setActiveTab 
-}) => {
-  const [cpfCancelamento, setCpfCancelamento] = useState('');
-  const [nomeCancelamento, setNomeCancelamento] = useState('');
-  const [telefoneCancelamento, setTelefoneCancelamento] = useState('');
-  const [areaCancelamento, setAreaCancelamento] = useState('');
-  const [produtoCancelamento, setProdutoCancelamento] = useState('');
-  const [qtdeCancelamento, setQtdeCancelamento] = useState('');
-  const [unidadeCancelamento, setUnidadeCancelamento] = useState('CX');
-  const [motivoCancelamento, setMotivoCancelamento] = useState('');
+export default function CancelamentosPage({ usuario, showToast, onVoltar, pessoasCadastradas = [] }) {
   const [carregando, setCarregando] = useState(false);
+  
+  // Estados do Formulário
+  const [cpf, setCpf] = useState('');
+  const [nome, setNome] = useState('');
+  const [telefone, setTelefone] = useState('');
+  const [area, setArea] = useState('');
+  
+  // Dados específicos do cancelamento
+  const [produto, setProduto] = useState('');
+  const [qtde, setQtde] = useState('');
+  const [unidade, setUnidade] = useState('CX');
+  const [motivo, setMotivo] = useState('');
 
-  // Busca nome pelo CPF
+  // Busca automática do nome ao digitar CPF (se a lista de pessoas tiver sido carregada)
   useEffect(() => {
-    if (cpfCancelamento.length === 11) {
-      const pessoa = pessoasCadastradas.find(p => p.cpf === cpfCancelamento);
+    const cpfLimpo = cpf.replace(/\D/g, '');
+    if (cpfLimpo.length === 11 && pessoasCadastradas.length > 0) {
+      const pessoa = pessoasCadastradas.find(p => p.cpf === cpfLimpo);
       if (pessoa) {
-        setNomeCancelamento(pessoa.nome);
-        setAreaCancelamento(pessoa.area || '');
+        setNome(pessoa.nome);
+        if (pessoa.area) setArea(pessoa.area); // Preenche a área se existir no cadastro
       } else {
-        setNomeCancelamento('');
-        showToast("CPF não encontrado na base de dados.", "error");
+        setNome('');
       }
-    } else {
-      setNomeCancelamento('');
     }
-  }, [cpfCancelamento, pessoasCadastradas]);
+  }, [cpf, pessoasCadastradas]);
 
-  const handleEnviar = async () => {
-    if (!nomeCancelamento || !telefoneCancelamento || !areaCancelamento || !produtoCancelamento || !qtdeCancelamento || !unidadeCancelamento || !motivoCancelamento) {
-      return showToast("Preencha todos os campos obrigatórios.", "error");
+  const handleSubmit = async () => {
+    // 1. Validação dos campos visuais
+    if (!nome || !telefone || !area || !produto || !qtde || !motivo) {
+      showToast("Preencha todos os campos obrigatórios.", "error");
+      return;
+    }
+
+    // 2. Validação do usuário logado (passado pelo arquivo pai)
+    if (!usuario) {
+      showToast("Erro crítico: Usuário não identificado. Faça login novamente.", "error");
+      return;
     }
 
     setCarregando(true);
     try {
-      const dados = {
-        solicitante: usuarioInput,
-        nomeCompleto: nomeCancelamento,
-        telefone: telefoneCancelamento,
-        area: areaCancelamento,
-        produto: produtoCancelamento,
-        quantidade: qtdeCancelamento,
-        unidade: unidadeCancelamento,
-        motivo: motivoCancelamento
-      };
+      // Chama o serviço passando o objeto completo
+      await enviarCancelamento({
+        solicitante: usuario, // Envia quem está logado no sistema
+        cpf,
+        nome,
+        telefone,
+        area,
+        produto,
+        quantidade: qtde,
+        unidade,
+        motivo
+      });
 
-      const response = await criarCancelamento(dados);
+      showToast("✅ Solicitação enviada com sucesso!", "success");
       
-      if (response && response.id) {
-        showToast("✅ SOLICITAÇÃO DE CANCELAMENTO ENVIADA!", "success");
-        setActiveTab('home');
-      } else {
-        showToast("Erro ao registrar cancelamento no Airtable.", "error");
-      }
+      // Limpa os campos após enviar
+      setCpf('');
+      setNome('');
+      setTelefone('');
+      setArea('');
+      setProduto('');
+      setQtde('');
+      setUnidade('CX');
+      setMotivo('');
+      
     } catch (error) {
-      console.error("Erro ao enviar cancelamento:", error);
-      showToast("Erro de conexão ao enviar cancelamento.", "error");
+      console.error(error);
+      // Tenta identificar o erro comum de nome de coluna errado
+      if (error.message && error.message.includes('422')) {
+        showToast("Erro de configuração: Verifique os nomes das colunas no Airtable.", "error");
+      } else {
+        showToast("Erro de conexão ao enviar.", "error");
+      }
+    } finally {
+      setCarregando(false);
     }
-    setCarregando(false);
   };
 
-  const bgCard = temaEscuro ? 'bg-zinc-800' : 'bg-white';
-  const textMain = temaEscuro ? 'text-white' : 'text-zinc-900';
-  const textSub = temaEscuro ? 'text-zinc-400' : 'text-zinc-600';
+  const inputStyle = "w-full p-4 rounded-2xl outline-none border bg-zinc-50 border-zinc-200 font-bold text-zinc-900 focus:border-yellow-500 transition-all";
 
   return (
     <div className="animate-in slide-in-from-right duration-300 pb-20">
-      <button onClick={() => setActiveTab('home')} className={`${textSub} font-bold text-xs uppercase mb-2`}>← Voltar</button>
-      <h2 className={`text-xl font-black uppercase italic mb-4 ${textMain}`}>Cancelamentos</h2>
+      <button onClick={onVoltar} className="text-zinc-500 font-bold text-xs uppercase mb-2 hover:text-zinc-800">← Voltar</button>
       
-      <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
-        <div className="bg-red-50 p-4 rounded-2xl border border-red-100 flex items-center gap-3">
-          <div className="bg-red-500 p-2 rounded-xl text-white"><XCircle size={20} /></div>
-          <div className="flex-1">
-            <p className="text-[10px] font-black text-red-400 uppercase">Atenção</p>
-            <p className="text-xs font-bold text-red-700">Preencha os dados abaixo para solicitar o cancelamento de um registro.</p>
+      <h2 className="text-xl font-black uppercase italic mb-4 text-zinc-900">Cancelamento de Compra</h2>
+      
+      <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm space-y-4">
+          <div className="bg-red-50 p-4 rounded-xl mb-4 border border-red-100">
+              <p className="text-red-600 text-xs font-bold uppercase text-center">Preencha os dados abaixo para cancelar um item.</p>
           </div>
-        </div>
 
-        <div>
-          <label className="text-[10px] font-black text-zinc-400 uppercase">CPF (Apenas números)</label>
-          <input 
-            type="text" 
-            placeholder="Digite o CPF" 
-            maxLength={11} 
-            className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} 
-            value={cpfCancelamento} 
-            onChange={(e) => setCpfCancelamento(e.target.value)} 
-          />
-        </div>
-
-        <div>
-          <label className="text-[10px] font-black text-zinc-400 uppercase">Nome Identificado</label>
-          <input 
-            type="text" 
-            readOnly 
-            className={`w-full p-4 border rounded-2xl font-bold ${temaEscuro ? 'bg-zinc-900 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-800'}`} 
-            value={nomeCancelamento || "Aguardando CPF..."} 
-          />
-        </div>
-
-        <div>
-          <label className="text-[10px] font-black text-zinc-400 uppercase">Seu Telefone / WhatsApp</label>
-          <input 
-            type="text" 
-            placeholder="(XX) 9XXXX-XXXX" 
-            className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} 
-            value={telefoneCancelamento} 
-            onChange={(e) => setTelefoneCancelamento(e.target.value)} 
-          />
-        </div>
-
-        <div>
-          <label className="text-[10px] font-black text-zinc-400 uppercase">Sua Área / Setor</label>
-          <input 
-            type="text" 
-            placeholder="Ex: Logística, RH, Cozinha..." 
-            className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} 
-            value={areaCancelamento} 
-            onChange={(e) => setAreaCancelamento(e.target.value)} 
-          />
-        </div>
-        
-        <div>
-          <label className="text-[10px] font-black text-zinc-400 uppercase">Produto a Cancelar</label>
-          <input 
-            type="text" 
-            placeholder="Ex: Arroz Tipo 1" 
-            className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} 
-            value={produtoCancelamento} 
-            onChange={(e) => setProdutoCancelamento(e.target.value)} 
-          />
-        </div>
-
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <label className="text-[10px] font-black text-zinc-400 uppercase">Quantidade</label>
-            <input 
-              type="number" 
-              placeholder="0" 
-              className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} 
-              value={qtdeCancelamento} 
-              onChange={(e) => setQtdeCancelamento(e.target.value)} 
-            />
+          {/* CPF */}
+          <div>
+              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">CPF (Apenas números)</label>
+              <input 
+                type="text" 
+                placeholder="Digite o CPF" 
+                maxLength={11} 
+                className={inputStyle} 
+                value={cpf} 
+                onChange={(e) => setCpf(e.target.value)} 
+              />
           </div>
-          <div className="flex-1">
-            <label className="text-[10px] font-black text-zinc-400 uppercase">Unidade de Medida (Sobra)</label>
-            <select 
-              className={`w-full p-4 rounded-2xl outline-none border font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} 
-              value={unidadeCancelamento} 
-              onChange={(e) => setUnidadeCancelamento(e.target.value)}
-            >
-              <option value="CX">CX</option>
-              <option value="KG">KG</option>
-              <option value="BAG">BAG</option>
-            </select>
+
+          {/* Nome Identificado (apenas leitura) */}
+          <div>
+              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Nome Identificado</label>
+              <input 
+                type="text" 
+                readOnly 
+                placeholder="Aguardando CPF..."
+                className="w-full p-4 border rounded-2xl font-bold bg-zinc-100 text-zinc-500 border-zinc-200" 
+                value={nome} 
+              />
           </div>
-        </div>
 
-        <div>
-          <label className="text-[10px] font-black text-zinc-400 uppercase">Motivo do Cancelamento</label>
-          <textarea 
-            placeholder="Por que deseja cancelar?" 
-            rows={3} 
-            className={`w-full p-4 rounded-2xl border outline-none font-bold resize-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-white border-zinc-200 text-zinc-900'}`} 
-            value={motivoCancelamento} 
-            onChange={(e) => setMotivoCancelamento(e.target.value)} 
-          />
-        </div>
+          {/* Telefone */}
+          <div>
+              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Seu Telefone / WhatsApp</label>
+              <input type="text" placeholder="(XX) 9XXXX-XXXX" className={inputStyle} value={telefone} onChange={(e) => setTelefone(e.target.value)} />
+          </div>
 
-        <button 
-          disabled={!nomeCancelamento || !telefoneCancelamento || !areaCancelamento || !produtoCancelamento || !qtdeCancelamento || !unidadeCancelamento || !motivoCancelamento || carregando}
-          onClick={handleEnviar}
-          className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all ${nomeCancelamento ? 'bg-red-500 text-white active:scale-95' : 'bg-zinc-200 text-zinc-400'}`}
-        >
-          {carregando ? "ENVIANDO..." : "SOLICITAR CANCELAMENTO"}
-        </button>
+          {/* Área */}
+          <div>
+              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Sua Área / Setor</label>
+              <input type="text" placeholder="Ex: Logística, RH, Cozinha..." className={inputStyle} value={area} onChange={(e) => setArea(e.target.value)} />
+          </div>
+          
+          <div className="pt-4 border-t border-dashed border-zinc-200 mt-2">
+            <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Produto a Cancelar</label>
+            <input type="text" placeholder="Ex: Arroz Tipo 1" className={inputStyle} value={produto} onChange={(e) => setProduto(e.target.value)} />
+          </div>
+
+          <div className="flex gap-2">
+              <div className="flex-1">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Quantidade</label>
+                  <input type="number" placeholder="0" className={inputStyle} value={qtde} onChange={(e) => setQtde(e.target.value)} />
+              </div>
+              <div className="w-1/3">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Unidade</label>
+                  <select className={inputStyle} value={unidade} onChange={(e) => setUnidade(e.target.value)}>
+                      <option value="CX">CX</option>
+                      <option value="KG">KG</option>
+                      <option value="BAG">BAG</option>
+                  </select>
+              </div>
+          </div>
+
+          <div>
+              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Motivo do Cancelamento</label>
+              <textarea 
+                placeholder="Descreva por que deseja cancelar..." 
+                rows={3} 
+                className={inputStyle} 
+                value={motivo} 
+                onChange={(e) => setMotivo(e.target.value)} 
+              />
+          </div>
+
+          <button 
+              disabled={!nome || !produto || !motivo || carregando}
+              onClick={handleSubmit}
+              className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all active:scale-95 ${nome && produto ? 'bg-red-500 text-white shadow-red-500/20' : 'bg-zinc-200 text-zinc-400'}`}
+          >
+              {carregando ? "ENVIANDO..." : "SOLICITAR CANCELAMENTO"}
+          </button>
       </div>
     </div>
   );
-};
-
-export default CancelamentosPage;
+}
