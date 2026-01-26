@@ -14,7 +14,7 @@ const LoginPage = ({
     e.preventDefault();
     
     const usuarioEncontrado = usuariosAutorizados.find(
-      u => u.usuario === usuarioInput && u.senha === senha
+      u => u.usuario.toLowerCase() === usuarioInput.toLowerCase() && u.senha === senha
     );
 
     if (usuarioEncontrado) {

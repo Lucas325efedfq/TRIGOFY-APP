@@ -64,10 +64,8 @@ export default function TrigofyApp() {
 
   // Carrega dados iniciais
   useEffect(() => {
-    if (estaLogado) {
-      carregarDadosIniciais();
-    }
-  }, [estaLogado]);
+    carregarDadosIniciais();
+  }, []);
 
   const carregarDadosIniciais = async () => {
     setCarregando(true);
