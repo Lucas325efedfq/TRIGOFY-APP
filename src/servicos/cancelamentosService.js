@@ -6,7 +6,6 @@ import { formatDateToISO, formatCPF } from '../utilitarios/formatters';
 export const criarCancelamento = async (cancelamentoData) => {
   const fields = {
     solicitante: cancelamentoData.solicitante,
-    cpf: formatCPF(cancelamentoData.cpf),
     nome_completo: cancelamentoData.nomeCompleto,
     telefone: cancelamentoData.telefone,
     area: cancelamentoData.area,

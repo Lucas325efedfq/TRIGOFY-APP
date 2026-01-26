@@ -44,7 +44,6 @@ const CancelamentosPage = ({
     try {
       const dados = {
         solicitante: usuarioInput,
-        cpf: cpfCancelamento,
         nomeCompleto: nomeCancelamento,
         telefone: telefoneCancelamento,
         area: areaCancelamento,
