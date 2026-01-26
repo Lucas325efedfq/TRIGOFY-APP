@@ -13,12 +13,14 @@ const LoginPage = ({
   const handleLogin = (e) => {
     e.preventDefault();
     
+    // Busca o usuário ignorando maiúsculas/minúsculas no nome
     const usuarioEncontrado = usuariosAutorizados.find(
-      u => u.usuario.toLowerCase() === usuarioInput.toLowerCase() && u.senha === senha
+      u => u.usuario && u.usuario.toLowerCase() === usuarioInput.toLowerCase() && u.senha === senha
     );
 
     if (usuarioEncontrado) {
-      onLogin(usuarioInput, usuarioEncontrado.origem, usuarioEncontrado.funcao);
+      // Passa o nome de usuário EXATO que está no banco para evitar erros de busca posterior
+      onLogin(usuarioEncontrado.usuario, usuarioEncontrado.origem, usuarioEncontrado.funcao);
       setErro('');
     } else {
       setErro('Usuário ou senha incorretos!');

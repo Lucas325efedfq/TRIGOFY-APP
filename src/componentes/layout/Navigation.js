@@ -2,9 +2,7 @@ import React from 'react';
 import { 
   LayoutGrid, 
   ShoppingBag, 
-  Megaphone, 
-  Settings, 
-  BookOpen 
+  Settings
 } from 'lucide-react';
 
 const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro }) => {
@@ -12,12 +10,9 @@ const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro 
     { id: 'home', icon: LayoutGrid, label: 'Menu' }
   ];
 
-  // Usuários comuns e Aprovadores veem as abas de compras/doações
-  if (!isAdmin || isAprovador) {
-    navItems.push({ id: 'pedidos', icon: ShoppingBag, label: 'Compras' });
-    navItems.push({ id: 'doacoes', icon: Megaphone, label: 'Doações' });
-    navItems.push({ id: 'historico', icon: BookOpen, label: 'Histórico' });
-  }
+  // Botão de Compras disponível para todos (exceto talvez Admin puro, mas o usuário pediu ao lado do menu)
+  // Se for Admin, ele vê Compras e Administração. Se for User/Aprovador, vê Compras.
+  navItems.push({ id: 'compras-aba', icon: ShoppingBag, label: 'Compras' });
 
   // Apenas Admin vê a aba de Administração na navegação
   if (isAdmin) {
@@ -31,12 +26,18 @@ const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro 
       <div className="flex justify-around items-center py-2 px-2">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeTab === item.id;
+          const isActive = activeTab === item.id || (item.id === 'compras-aba' && (activeTab === 'novo' || activeTab === 'pedidos'));
           
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                if (item.id === 'compras-aba') {
+                  setActiveTab('novo'); // Redireciona para a página de novo pedido
+                } else {
+                  setActiveTab(item.id);
+                }
+              }}
               className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
                 isActive 
                   ? 'bg-yellow-500 text-white scale-105' 

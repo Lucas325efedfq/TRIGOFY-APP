@@ -25,7 +25,7 @@ const HomePage = ({
         color: 'from-blue-500 to-blue-600',
         action: () => {
           setSiteFiltro('VR');
-          setActiveTab('novo');
+          setActiveTab('novo'); // Redireciona para a aba de compras (novo pedido)
         }
       },
       {
@@ -36,7 +36,7 @@ const HomePage = ({
         color: 'from-purple-500 to-purple-600',
         action: () => {
           setSiteFiltro('RIO/SP');
-          setActiveTab('novo');
+          setActiveTab('novo'); // Redireciona para a aba de compras (novo pedido)
         }
       },
       {
@@ -76,7 +76,6 @@ const HomePage = ({
 
   // Se for Admin OU Aprovador, mostra opções de aprovação/admin
   if (isAdmin || isAprovador) {
-    // Aprovador vê o card de aprovações
     menuItems.push({
       id: 'aprovacoes',
       title: 'Aprovar Pedidos',
@@ -86,7 +85,6 @@ const HomePage = ({
       action: () => setActiveTab('aprovacoes')
     });
 
-    // Apenas Admin vê os painéis de configuração e cadastros
     if (isAdmin) {
       menuItems.push({
         id: 'admin-painel',
