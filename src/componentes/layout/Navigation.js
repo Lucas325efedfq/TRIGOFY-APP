@@ -1,22 +1,16 @@
 import React from 'react';
 import { 
   LayoutGrid, 
-  ShoppingBag, 
-  Megaphone, 
-  Settings, 
-  BookOpen 
+  Settings
 } from 'lucide-react';
 
 const Navigation = ({ activeTab, setActiveTab, isAdmin, temaEscuro }) => {
   const navItems = [
-    { id: 'home', icon: LayoutGrid, label: 'Menu' },
-    { id: 'pedidos', icon: ShoppingBag, label: 'Compras' },
-    { id: 'doacoes', icon: Megaphone, label: 'Doações' },
-    { id: 'historico', icon: BookOpen, label: 'Histórico' }
+    { id: 'home', icon: LayoutGrid, label: 'Menu' }
   ];
 
   if (isAdmin) {
-    navItems.push({ id: 'config', icon: Settings, label: 'Admin' });
+    navItems.push({ id: 'config', icon: Settings, label: 'Administração' });
   }
 
   return (

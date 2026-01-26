@@ -1,9 +1,8 @@
 import React from 'react';
-import { ShoppingBag, Megaphone, XCircle, CheckCircle2, BookOpen, Settings, MessageCircle, Database } from 'lucide-react';
+import { CheckCircle2, Settings, Database } from 'lucide-react';
 
 const HomePage = ({ 
   setActiveTab, 
-  setSiteFiltro, 
   isAdmin, 
   temaEscuro 
 }) => {
@@ -11,65 +10,17 @@ const HomePage = ({
   const textMain = temaEscuro ? 'text-white' : 'text-zinc-900';
   const textSub = temaEscuro ? 'text-zinc-400' : 'text-zinc-600';
 
-  const menuItems = [
-    {
-      id: 'pedidos-vr',
-      title: 'Compras VR',
-      description: 'Fazer pedidos Volta Redonda',
-      icon: ShoppingBag,
-      color: 'from-blue-500 to-blue-600',
-      action: () => {
-        setSiteFiltro('VR');
-        setActiveTab('novo');
-      }
-    },
-    {
-      id: 'pedidos-rio',
-      title: 'Compras RIO/SP',
-      description: 'Fazer pedidos Rio/SP',
-      icon: ShoppingBag,
-      color: 'from-purple-500 to-purple-600',
-      action: () => {
-        setSiteFiltro('RIO/SP');
-        setActiveTab('novo');
-      }
-    },
-    {
-      id: 'doacoes',
-      title: 'Doações',
-      description: 'Solicitar doação de produtos',
-      icon: Megaphone,
-      color: 'from-green-500 to-green-600',
-      action: () => setActiveTab('doacoes')
-    },
-
-    {
-      id: 'historico',
-      title: 'Meu Histórico',
-      description: 'Ver meus pedidos',
-      icon: BookOpen,
-      color: 'from-yellow-500 to-yellow-600',
-      action: () => setActiveTab('historico')
-    },
-    {
-      id: 'cancelamentos',
-      title: 'Cancelamentos',
-      description: 'Cancelar pedidos/produtos',
-      icon: XCircle,
-      color: 'from-red-500 to-red-600',
-      action: () => setActiveTab('cancelamentos')
-    },
-    {
-      id: 'suporte',
-      title: 'Suporte',
-      description: 'Chat com Agente Triger',
-      icon: MessageCircle,
-      color: 'from-orange-500 to-orange-600',
-      action: () => setActiveTab('suporte')
-    }
-  ];
+  const menuItems = [];
 
   if (isAdmin) {
+    menuItems.push({
+      id: 'admin-painel',
+      title: 'Painel Admin',
+      description: 'Gerenciar cadastros na nuvem',
+      icon: Database,
+      color: 'from-indigo-500 to-indigo-600',
+      action: () => setActiveTab('admin-painel')
+    });
     menuItems.push({
       id: 'aprovacoes',
       title: 'Aprovar Pedidos',
@@ -86,14 +37,6 @@ const HomePage = ({
       color: 'from-zinc-500 to-zinc-600',
       action: () => setActiveTab('config')
     });
-    menuItems.push({
-      id: 'admin-painel',
-      title: 'Painel Admin',
-      description: 'Gerenciar cadastros na nuvem',
-      icon: Database,
-      color: 'from-indigo-500 to-indigo-600',
-      action: () => setActiveTab('admin-painel')
-    });
   }
 
   return (
@@ -103,7 +46,7 @@ const HomePage = ({
           Bem-vindo ao Trigofy!
         </h2>
         <p className={`text-sm font-bold ${textSub}`}>
-          Escolha uma opção abaixo para começar
+          {isAdmin ? 'Escolha uma opção administrativa abaixo' : 'Acesso restrito a administradores'}
         </p>
       </div>
 
@@ -132,6 +75,11 @@ const HomePage = ({
             </button>
           );
         })}
+        {!isAdmin && (
+          <div className={`${bgCard} p-6 rounded-2xl border shadow-sm text-center`}>
+            <p className={`${textSub} font-bold`}>Você não tem permissão para acessar esta área.</p>
+          </div>
+        )}
       </div>
     </div>
   );
