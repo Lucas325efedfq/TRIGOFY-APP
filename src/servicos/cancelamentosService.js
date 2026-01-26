@@ -1,6 +1,6 @@
-import { TABLES } from '../config/airtable';
+import { TABLES } from '../configuracao/airtable';
 import { createRecord } from './airtableService';
-import { formatDateToISO, formatCPF } from '../utils/formatters';
+import { formatDateToISO, formatCPF } from '../utilitarios/formatters';
 
 // Cria uma solicitação de cancelamento
 export const criarCancelamento = async (cancelamentoData) => {

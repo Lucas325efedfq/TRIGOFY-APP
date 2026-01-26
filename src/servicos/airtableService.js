@@ -1,4 +1,4 @@
-import { getBaseUrl, getHeaders, TABLES } from '../config/airtable';
+import { getBaseUrl, getHeaders, TABLES } from '../configuracao/airtable';
 
 // Busca todos os registros de uma tabela
 export const fetchRecords = async (tableId) => {

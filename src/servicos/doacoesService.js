@@ -1,6 +1,6 @@
-import { TABLES } from '../config/airtable';
+import { TABLES } from '../configuracao/airtable';
 import { createRecord, fetchRecordsWithFilter } from './airtableService';
-import { formatDateToISO, truncateString } from '../utils/formatters';
+import { formatDateToISO, truncateString } from '../utilitarios/formatters';
 
 // Cria uma nova doação
 export const criarDoacao = async (doacaoData) => {

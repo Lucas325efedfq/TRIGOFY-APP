@@ -1,6 +1,6 @@
-import { TABLES } from '../config/airtable';
+import { TABLES } from '../configuracao/airtable';
 import { createRecord, updateRecord, fetchRecordsWithFilter } from './airtableService';
-import { formatDateToISO } from '../utils/formatters';
+import { formatDateToISO } from '../utilitarios/formatters';
 
 // Cria um novo pedido
 export const criarPedido = async (pedidoData) => {

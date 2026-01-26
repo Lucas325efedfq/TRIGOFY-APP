@@ -2,37 +2,37 @@
 import React, { useState, useEffect } from 'react';
 
 // Hooks
-import { useToast } from '../hooks/useToast';
-import { useTheme } from '../hooks/useTheme';
+import { useToast } from '../ganchos/useToast';
+import { useTheme } from '../ganchos/useTheme';
 
 // Services
 import { 
   fetchPessoas, 
   fetchProdutos, 
   fetchUsuarios 
-} from '../services/airtableService';
+} from '../servicos/airtableService';
 import { 
   criarPedidosEmLote, 
   buscarPedidosUsuario, 
   buscarPedidosPendentes as buscarPedidosPendentesService,
   atualizarStatusPedido 
-} from '../services/pedidosService';
+} from '../servicos/pedidosService';
 import { 
   criarDoacao, 
   buscarDoacoesPendentes 
-} from '../services/doacoesService';
-import { criarCancelamento } from '../services/cancelamentosService';
+} from '../servicos/doacoesService';
+import { criarCancelamento } from '../servicos/cancelamentosService';
 
 // Components
-import Toast from '../components/ui/Toast';
-import Header from '../components/layout/Header';
-import Navigation from '../components/layout/Navigation';
-import LoginPage from '../components/pages/LoginPage';
-import HomePage from '../components/pages/HomePage';
+import Toast from '../componentes/ui/Toast';
+import Header from '../componentes/layout/Header';
+import Navigation from '../componentes/layout/Navigation';
+import LoginPage from '../componentes/paginas/LoginPage';
+import HomePage from '../componentes/paginas/HomePage';
 
 // Constants
-import { ADMIN_USER } from '../constants/roles';
-import { updateRecord } from '../services/airtableService';
+import { ADMIN_USER } from '../constantes/roles';
+import { updateRecord } from '../servicos/airtableService';
 
 export default function TrigofyApp() {
   // Estados de autenticação
