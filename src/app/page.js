@@ -29,6 +29,8 @@ import Header from '../componentes/layout/Header';
 import Navigation from '../componentes/layout/Navigation';
 import LoginPage from '../componentes/paginas/LoginPage';
 import HomePage from '../componentes/paginas/HomePage';
+import NovoPedidoPage from '../componentes/paginas/NovoPedidoPage';
+import DoacoesPage from '../componentes/paginas/DoacoesPage';
 
 
 // Constants
@@ -188,10 +190,32 @@ export default function TrigofyApp() {
           />
         )}
 
+        {activeTab === 'novo' && (
+          <NovoPedidoPage 
+            usuarioInput={usuarioInput}
+            pessoasCadastradas={pessoasCadastradas}
+            produtosLancados={produtosLancados}
+            siteFiltro={siteFiltro}
+            temaEscuro={temaEscuro}
+            showToast={showToast}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
+        {activeTab === 'doacoes' && (
+          <DoacoesPage 
+            usuarioInput={usuarioInput}
+            pessoasCadastradas={pessoasCadastradas}
+            temaEscuro={temaEscuro}
+            showToast={showToast}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
 
         
         {/* Outras páginas serão adicionadas aqui */}
-        {activeTab !== 'home' &&  (
+        {activeTab !== 'home' && activeTab !== 'novo' && activeTab !== 'doacoes' && (
           <div className={`${bgCard} p-6 rounded-3xl shadow-sm border`}>
             <p className={`${textMain} font-bold`}>
               Página em desenvolvimento: {activeTab}
