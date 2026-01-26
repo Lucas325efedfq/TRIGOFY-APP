@@ -71,8 +71,9 @@ const NovoPedidoPage = ({
     setCarregando(false);
   };
 
+  // Filtra produtos: deve ser da unidade atual OU estar marcado como 'AMBOS'
   const produtosFiltrados = produtosLancados.filter(p => 
-    p.site === siteFiltro && 
+    (p.site === siteFiltro || p.site === 'AMBOS') && 
     p.nome.toLowerCase().includes(buscaProduto.toLowerCase())
   );
 

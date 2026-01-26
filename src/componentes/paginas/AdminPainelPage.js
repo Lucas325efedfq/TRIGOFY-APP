@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, UserPlus, Users } from 'lucide-react';
+import { Trash2, UserPlus, Users, PackagePlus } from 'lucide-react';
 import { TABLES, getHeaders, getBaseUrl } from '../../configuracao/airtable';
 
 const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
-  const [abaInterna, setAbaInterna] = useState('pessoas'); // 'pessoas' ou 'usuarios'
+  const [abaInterna, setAbaInterna] = useState('pessoas'); // 'pessoas', 'usuarios' ou 'produtos'
   
   // Estados para Pessoas
   const [novoCpf, setNovoCpf] = useState('');
@@ -16,6 +16,12 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
   const [novaOrigem, setNovaOrigem] = useState('VR');
   const [novaFuncao, setNovaFuncao] = useState('USER');
   const [usuariosCadastrados, setUsuariosCadastrados] = useState([]);
+
+  // Estados para Produtos
+  const [novoProdNome, setNovoProdNome] = useState('');
+  const [novoProdPreco, setNovoProdPreco] = useState('');
+  const [novoProdSite, setNovoProdSite] = useState('AMBOS');
+  const [produtosCadastrados, setProdutosCadastrados] = useState([]);
   
   const [carregando, setCarregando] = useState(false);
 
@@ -47,6 +53,18 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
           usuario: reg.fields.usuario || '',
           origem: reg.fields.origem || '',
           funcao: reg.fields.funcao || ''
+        })));
+      }
+
+      // Busca Produtos
+      const respProdutos = await fetch(getBaseUrl(TABLES.PRODUTOS), { headers: getHeaders() });
+      const dataProdutos = await respProdutos.json();
+      if (dataProdutos.records) {
+        setProdutosCadastrados(dataProdutos.records.map(reg => ({
+          id: reg.id,
+          nome: reg.fields.nome || '',
+          preco: reg.fields.preco || '',
+          site: reg.fields.site || ''
         })));
       }
     } catch (e) {
@@ -120,6 +138,36 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
     setCarregando(false);
   };
 
+  const salvarProduto = async () => {
+    if (!novoProdNome || !novoProdPreco) {
+      showToast?.("Preencha Nome e Preço do produto.", "error");
+      return;
+    }
+    setCarregando(true);
+    try {
+      const response = await fetch(getBaseUrl(TABLES.PRODUTOS), {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({
+          fields: {
+            nome: novoProdNome.toUpperCase().trim(),
+            preco: parseFloat(novoProdPreco),
+            site: novoProdSite
+          }
+        })
+      });
+      if (response.ok) {
+        setNovoProdNome('');
+        setNovoProdPreco('');
+        await buscarDadosAirtable();
+        showToast?.("✅ Produto cadastrado com sucesso!", "success");
+      }
+    } catch (e) {
+      showToast?.("Erro ao cadastrar produto.", "error");
+    }
+    setCarregando(false);
+  };
+
   const excluirRegistro = async (tableId, recordId) => {
     if (!confirm("Tem certeza que deseja excluir?")) return;
     setCarregando(true);
@@ -148,114 +196,93 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
       </button>
 
       {/* Seleção de Aba Interna */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar">
         <button 
           onClick={() => setAbaInterna('pessoas')}
-          className={`flex-1 py-3 rounded-2xl font-black uppercase text-[10px] transition-all flex items-center justify-center gap-2 ${abaInterna === 'pessoas' ? 'bg-yellow-400 text-zinc-900 shadow-lg' : 'bg-zinc-100 text-zinc-400'}`}
+          className={`flex-none px-4 py-3 rounded-2xl font-black uppercase text-[10px] transition-all flex items-center justify-center gap-2 ${abaInterna === 'pessoas' ? 'bg-yellow-400 text-zinc-900 shadow-lg' : 'bg-zinc-100 text-zinc-400'}`}
         >
-          <Users size={14} /> Cadastrar Pessoas
+          <Users size={14} /> Pessoas
         </button>
         <button 
           onClick={() => setAbaInterna('usuarios')}
-          className={`flex-1 py-3 rounded-2xl font-black uppercase text-[10px] transition-all flex items-center justify-center gap-2 ${abaInterna === 'usuarios' ? 'bg-yellow-400 text-zinc-900 shadow-lg' : 'bg-zinc-100 text-zinc-400'}`}
+          className={`flex-none px-4 py-3 rounded-2xl font-black uppercase text-[10px] transition-all flex items-center justify-center gap-2 ${abaInterna === 'usuarios' ? 'bg-yellow-400 text-zinc-900 shadow-lg' : 'bg-zinc-100 text-zinc-400'}`}
         >
-          <UserPlus size={14} /> Criar Logins
+          <UserPlus size={14} /> Logins
+        </button>
+        <button 
+          onClick={() => setAbaInterna('produtos')}
+          className={`flex-none px-4 py-3 rounded-2xl font-black uppercase text-[10px] transition-all flex items-center justify-center gap-2 ${abaInterna === 'produtos' ? 'bg-yellow-400 text-zinc-900 shadow-lg' : 'bg-zinc-100 text-zinc-400'}`}
+        >
+          <PackagePlus size={14} /> Produtos
         </button>
       </div>
       
       <div className={`${bgCard} p-6 rounded-3xl border shadow-sm space-y-4`}>
-        {abaInterna === 'pessoas' ? (
+        {abaInterna === 'pessoas' && (
           <>
-            <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
-              Cadastrar na Nuvem
-            </h2>
-            <input 
-              type="text" placeholder="CPF" 
-              className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`}
-              value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} 
-            />
-            <input 
-              type="text" placeholder="Nome Completo" 
-              className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`}
-              value={novoNome} onChange={(e) => setNovoNome(e.target.value)} 
-            />
-            <button 
-              onClick={salvarPessoa} 
-              className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm hover:bg-yellow-500 transition-colors active:scale-95"
-              disabled={carregando}
-            >
-              {carregando ? "Salvando..." : "Salvar no Airtable"}
-            </button>
-            
+            <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Cadastrar Pessoa</h2>
+            <input type="text" placeholder="CPF" className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`} value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
+            <input type="text" placeholder="Nome Completo" className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`} value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
+            <button onClick={salvarPessoa} className="w-full bg-yellow-400 text-zinc-900 py-3 rounded-2xl font-black uppercase text-sm hover:bg-yellow-500 transition-colors active:scale-95" disabled={carregando}>{carregando ? "Salvando..." : "Salvar no Airtable"}</button>
             <div className="pt-4 space-y-2">
               <h3 className={`text-xs font-black uppercase ${textSub}`}>Lista de Pessoas ({pessoasCadastradas.length})</h3>
               <div className="max-h-[300px] overflow-y-auto space-y-2">
                 {pessoasCadastradas.map(p => (
                   <div key={p.id} className={`flex justify-between items-center p-3 ${bgInput} rounded-xl border`}>
-                    <div>
-                      <p className={`font-bold text-xs ${textMain}`}>{p.nome}</p>
-                      <p className={`text-[10px] ${textSub}`}>{p.cpf}</p>
-                    </div>
-                    <button onClick={() => excluirRegistro(TABLES.PESSOAS, p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition-colors">
-                      <Trash2 size={16}/>
-                    </button>
+                    <div><p className={`font-bold text-xs ${textMain}`}>{p.nome}</p><p className={`text-[10px] ${textSub}`}>{p.cpf}</p></div>
+                    <button onClick={() => excluirRegistro(TABLES.PESSOAS, p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
                   </div>
                 ))}
               </div>
             </div>
           </>
-        ) : (
-          <>
-            <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>
-              Criar Acesso (Login)
-            </h2>
-            <input 
-              type="text" placeholder="Usuário" 
-              className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`}
-              value={novoUsuario} onChange={(e) => setNovoUsuario(e.target.value)} 
-            />
-            <input 
-              type="password" placeholder="Senha" 
-              className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`}
-              value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} 
-            />
-            <div className="flex gap-2">
-              <select 
-                className={`flex-1 p-4 ${bgInput} border rounded-2xl outline-none ${textMain}`}
-                value={novaOrigem} onChange={(e) => setNovaOrigem(e.target.value)}
-              >
-                <option value="VR">VR</option>
-                <option value="RIO/SP">RIO/SP</option>
-              </select>
-              <select 
-                className={`flex-1 p-4 ${bgInput} border rounded-2xl outline-none ${textMain}`}
-                value={novaFuncao} onChange={(e) => setNovaFuncao(e.target.value)}
-              >
-                <option value="USER">USUÁRIO</option>
-                <option value="APROVADOR">APROVADOR</option>
-                <option value="ADMIN">ADMIN</option>
-              </select>
-            </div>
-            <button 
-              onClick={salvarUsuario} 
-              className="w-full bg-zinc-900 text-white py-3 rounded-2xl font-black uppercase text-sm hover:bg-zinc-800 transition-colors active:scale-95"
-              disabled={carregando}
-            >
-              {carregando ? "Criando..." : "Criar Login"}
-            </button>
+        )}
 
+        {abaInterna === 'usuarios' && (
+          <>
+            <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Criar Acesso (Login)</h2>
+            <input type="text" placeholder="Usuário" className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`} value={novoUsuario} onChange={(e) => setNovoUsuario(e.target.value)} />
+            <input type="password" placeholder="Senha" className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`} value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} />
+            <div className="flex gap-2">
+              <select className={`flex-1 p-4 ${bgInput} border rounded-2xl outline-none ${textMain}`} value={novaOrigem} onChange={(e) => setNovaOrigem(e.target.value)}><option value="VR">VR</option><option value="RIO/SP">RIO/SP</option></select>
+              <select className={`flex-1 p-4 ${bgInput} border rounded-2xl outline-none ${textMain}`} value={novaFuncao} onChange={(e) => setNovaFuncao(e.target.value)}><option value="USER">USUÁRIO</option><option value="APROVADOR">APROVADOR</option><option value="ADMIN">ADMIN</option></select>
+            </div>
+            <button onClick={salvarUsuario} className="w-full bg-zinc-900 text-white py-3 rounded-2xl font-black uppercase text-sm hover:bg-zinc-800 transition-colors active:scale-95" disabled={carregando}>{carregando ? "Criando..." : "Criar Login"}</button>
             <div className="pt-4 space-y-2">
               <h3 className={`text-xs font-black uppercase ${textSub}`}>Logins Ativos ({usuariosCadastrados.length})</h3>
               <div className="max-h-[300px] overflow-y-auto space-y-2">
                 {usuariosCadastrados.map(u => (
                   <div key={u.id} className={`flex justify-between items-center p-3 ${bgInput} rounded-xl border`}>
-                    <div>
-                      <p className={`font-bold text-xs ${textMain}`}>{u.usuario}</p>
-                      <p className={`text-[10px] ${textSub}`}>{u.origem} • {u.funcao}</p>
-                    </div>
-                    <button onClick={() => excluirRegistro(TABLES.USUARIOS, u.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition-colors">
-                      <Trash2 size={16}/>
-                    </button>
+                    <div><p className={`font-bold text-xs ${textMain}`}>{u.usuario}</p><p className={`text-[10px] ${textSub}`}>{u.origem} • {u.funcao}</p></div>
+                    <button onClick={() => excluirRegistro(TABLES.USUARIOS, u.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {abaInterna === 'produtos' && (
+          <>
+            <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Cadastrar Produto</h2>
+            <input type="text" placeholder="Nome do Produto" className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`} value={novoProdNome} onChange={(e) => setNovoProdNome(e.target.value)} />
+            <input type="number" placeholder="Preço (ex: 10.50)" className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`} value={novoProdPreco} onChange={(e) => setNovoProdPreco(e.target.value)} />
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-zinc-400 uppercase ml-2">Disponível em:</label>
+              <select className={`w-full p-4 ${bgInput} border rounded-2xl outline-none ${textMain}`} value={novoProdSite} onChange={(e) => setNovoProdSite(e.target.value)}>
+                <option value="VR">VOLTA REDONDA (VR)</option>
+                <option value="RIO/SP">RIO/SP</option>
+                <option value="AMBOS">AMBOS (VR e RIO/SP)</option>
+              </select>
+            </div>
+            <button onClick={salvarProduto} className="w-full bg-emerald-500 text-white py-3 rounded-2xl font-black uppercase text-sm hover:bg-emerald-600 transition-colors active:scale-95" disabled={carregando}>{carregando ? "Cadastrando..." : "Cadastrar Produto"}</button>
+            <div className="pt-4 space-y-2">
+              <h3 className={`text-xs font-black uppercase ${textSub}`}>Produtos no Catálogo ({produtosCadastrados.length})</h3>
+              <div className="max-h-[300px] overflow-y-auto space-y-2">
+                {produtosCadastrados.map(p => (
+                  <div key={p.id} className={`flex justify-between items-center p-3 ${bgInput} rounded-xl border`}>
+                    <div><p className={`font-bold text-xs ${textMain}`}>{p.nome}</p><p className={`text-[10px] ${textSub}`}>R$ {parseFloat(p.preco).toFixed(2)} • {p.site}</p></div>
+                    <button onClick={() => excluirRegistro(TABLES.PRODUTOS, p.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
                   </div>
                 ))}
               </div>
