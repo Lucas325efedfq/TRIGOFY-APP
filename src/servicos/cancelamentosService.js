@@ -1,5 +1,5 @@
 import { createRecord } from './airtableService';
-import { TABELAS } from '../configuracao/airtable';
+import { TABLES } from '../configuracao/airtable'; // <--- AQUI ESTAVA O ERRO (Mudei de TABELAS para TABLES)
 
 export const enviarCancelamento = async (dados) => {
   // 1. Validação: Garante que os dados chegaram até aqui
@@ -8,7 +8,6 @@ export const enviarCancelamento = async (dados) => {
   if (!dados.motivo) throw new Error("Motivo não informado.");
 
   // 2. Montagem do pacote para o Airtable
-  // IMPORTANTE: A parte da esquerda (antes dos dois pontos) deve ser IGUAL ao nome da coluna no Airtable
   const payload = {
     "solicitante": dados.solicitante,
     "cpf": dados.cpf ? dados.cpf.replace(/\D/g, '') : '',
@@ -16,7 +15,7 @@ export const enviarCancelamento = async (dados) => {
     "telefone": dados.telefone,
     "area": dados.area,
     
-    // Tentei usar o nome mais comum. Se der erro, verifique se sua coluna no Airtable se chama "Produto" ou "produto_cancelar"
+    // Verifique se no Airtable é 'produto' ou 'produto_cancelar'
     "produto_cancelar": dados.produto, 
     
     "quantidade": dados.quantidade ? String(dados.quantidade) : "0",
@@ -27,7 +26,8 @@ export const enviarCancelamento = async (dados) => {
   };
 
   try {
-    const resposta = await createRecord(TABELAS.CANCELAMENTOS, payload);
+    // AQUI TAMBÉM MUDEI PARA 'TABLES'
+    const resposta = await createRecord(TABLES.CANCELAMENTOS, payload);
     return resposta;
   } catch (error) {
     console.error("Erro ao enviar cancelamento:", error);
