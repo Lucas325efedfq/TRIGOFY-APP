@@ -14,7 +14,7 @@ const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro 
   // Aba de Compras centralizada na barra inferior
   navItems.push({ id: 'compras-aba', icon: ShoppingBag, label: 'Compras' });
 
-  // Para usuários comuns e aprovadores, podemos manter o Histórico na barra inferior para facilitar o acesso
+  // Para usuários comuns e aprovadores, mantém o Histórico na barra inferior
   if (!isAdmin || isAprovador) {
     navItems.push({ id: 'historico', icon: BookOpen, label: 'Histórico' });
   }
@@ -31,18 +31,13 @@ const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro 
       <div className="flex justify-around items-center py-2 px-2">
         {navItems.map((item) => {
           const Icon = item.icon;
+          // A aba Compras fica ativa se estiver na seleção de unidade OU no formulário de novo pedido
           const isActive = activeTab === item.id || (item.id === 'compras-aba' && (activeTab === 'novo' || activeTab === 'pedidos'));
           
           return (
             <button
               key={item.id}
-              onClick={() => {
-                if (item.id === 'compras-aba') {
-                  setActiveTab('novo'); 
-                } else {
-                  setActiveTab(item.id);
-                }
-              }}
+              onClick={() => setActiveTab(item.id)}
               className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
                 isActive 
                   ? 'bg-yellow-500 text-white scale-105' 

@@ -14,7 +14,6 @@ import {
 import { 
   buscarPedidosUsuario,
   buscarPedidosPendentes as buscarPedidosPendentesService,
-  atualizarStatusPedido 
 } from '../servicos/pedidosService';
 import { 
   buscarDoacoesPendentes 
@@ -32,6 +31,7 @@ import DoacoesPage from '../componentes/paginas/DoacoesPage';
 import CancelamentosPage from '../componentes/paginas/CancelamentosPage';
 import SuportePage from '../componentes/paginas/SuportePage';
 import AdminPainelPage from '../componentes/paginas/AdminPainelPage';
+import SelecaoUnidadePage from '../componentes/paginas/SelecaoUnidadePage';
 
 
 // Constants
@@ -193,6 +193,14 @@ export default function TrigofyApp() {
           />
         )}
 
+        {activeTab === 'compras-aba' && (
+          <SelecaoUnidadePage 
+            setActiveTab={setActiveTab}
+            setSiteFiltro={setSiteFiltro}
+            temaEscuro={temaEscuro}
+          />
+        )}
+
         {activeTab === 'novo' && (
           <NovoPedidoPage 
             usuarioInput={usuarioInput}
@@ -240,14 +248,11 @@ export default function TrigofyApp() {
           />
         )}
 
-        {/* Outras páginas (Aprovações, Administração, etc) */}
-        {activeTab !== 'home' && activeTab !== 'novo' && activeTab !== 'doacoes' && activeTab !== 'cancelamentos' && activeTab !== 'suporte' && activeTab !== 'admin-painel' && (
+        {/* Outras páginas */}
+        {activeTab !== 'home' && activeTab !== 'compras-aba' && activeTab !== 'novo' && activeTab !== 'doacoes' && activeTab !== 'cancelamentos' && activeTab !== 'suporte' && activeTab !== 'admin-painel' && (
           <div className={`${bgCard} p-6 rounded-3xl shadow-sm border`}>
             <p className={`${textMain} font-bold`}>
               Página: {activeTab}
-            </p>
-            <p className={`${textSub} text-sm mt-2`}>
-              Funcionalidade em integração.
             </p>
             <button 
               onClick={() => setActiveTab('home')}
