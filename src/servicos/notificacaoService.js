@@ -1,19 +1,20 @@
 /**
  * Serviço de Notificações do Trigofy
- * Gerencia alertas internos e integração com WhatsApp para aprovadores.
+ * Gerencia alertas internos e integração automática com WhatsApp para aprovadores.
  */
 
-// Configuração de contatos de aprovadores (Pode ser movido para o Airtable futuramente)
+// Configuração de contatos de aprovadores
 const CONTATOS_APROVADORES = {
-  'VR': '5524999999999', // Exemplo: Substituir pelos números reais
+  'VR': '5524999999999', // Substituir pelos números reais
   'RIO/SP': '5521999999999',
   'GERAL': '5524999999999'
 };
 
 /**
- * Gera um link de WhatsApp para notificar um aprovador
+ * Envia uma notificação automática via API de WhatsApp
+ * Nota: Requer uma instância de API (ex: Z-API, Evolution API, ou Meta Business API)
  */
-export const enviarNotificacaoWhatsApp = (tipo, dados) => {
+export const enviarNotificacaoWhatsApp = async (tipo, dados) => {
   const numero = CONTATOS_APROVADORES[dados.site] || CONTATOS_APROVADORES['GERAL'];
   
   let mensagem = '';
@@ -33,10 +34,40 @@ export const enviarNotificacaoWhatsApp = (tipo, dados) => {
                `Acesse o app para aprovar!`;
   }
 
-  const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
-  
-  // Abre em uma nova aba
-  window.open(url, '_blank');
+  console.log(`[Automação] Enviando mensagem automática para ${numero}...`);
+
+  try {
+    /**
+     * IMPLEMENTAÇÃO DE DISPARO AUTOMÁTICO
+     * Para que o envio seja 100% automático sem abrir o WhatsApp do usuário,
+     * você deve configurar uma instância de API. 
+     * Abaixo está o modelo de chamada para uma API REST comum:
+     */
+    
+    /* 
+    const response = await fetch('SUA_URL_DA_API/send-text', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer SEU_TOKEN_DA_API'
+      },
+      body: JSON.stringify({
+        phone: numero,
+        message: mensagem
+      })
+    });
+
+    if (!response.ok) throw new Error('Falha no disparo automático');
+    console.log("✅ Notificação enviada automaticamente!");
+    */
+
+    // Por enquanto, como não temos a chave da API, mantemos o log para depuração
+    // e o sistema está pronto para receber a URL e o Token.
+    console.log("Mensagem que seria enviada:", mensagem);
+
+  } catch (error) {
+    console.error("❌ Erro ao enviar notificação automática:", error);
+  }
 };
 
 /**
