@@ -159,20 +159,6 @@ export default function TrigofyApp() {
     }
   }, [activeTab]);
 
-  // Renderização
-  if (!estaLogado) {
-    return (
-      <>
-        <Toast toast={toast} />
-        <LoginPage 
-          onLogin={handleLogin}
-          usuariosAutorizados={usuariosAutorizados}
-          temaEscuro={temaEscuro}
-        />
-      </>
-    );
-  }
-
   const isAdmin = usuarioLogadoFuncao === 'ADMIN';
   const isAprovador = usuarioLogadoFuncao === 'APROVADOR';
 
@@ -188,6 +174,20 @@ export default function TrigofyApp() {
       return () => clearInterval(interval);
     }
   }, [estaLogado, isAdmin, isAprovador]);
+
+  // Renderização
+  if (!estaLogado) {
+    return (
+      <>
+        <Toast toast={toast} />
+        <LoginPage 
+          onLogin={handleLogin}
+          usuariosAutorizados={usuariosAutorizados}
+          temaEscuro={temaEscuro}
+        />
+      </>
+    );
+  }
 
   return (
     <div className={`min-h-screen ${bgMain}`}>
