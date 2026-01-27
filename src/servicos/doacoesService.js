@@ -46,3 +46,20 @@ export const buscarDoacoesPendentes = async () => {
     tipo: 'DOACAO'
   }));
 };
+
+// Busca doações de um usuário específico
+export const buscarDoacoesUsuario = async (usuario) => {
+  const formula = `{solicitante} = '${usuario}'`;
+  const records = await fetchRecordsWithFilter(TABLES.DOACOES, formula);
+  
+  return records.map(r => ({
+    id: r.id,
+    produto: r.fields.produto,
+    data: r.fields.data,
+    status: r.fields.status || 'PENDENTE',
+    tipo: 'DOACAO',
+    quantidade: r.fields.quantidade_doacao,
+    unidade: r.fields.unidade_medida,
+    motivo: r.fields.motivo
+  }));
+};

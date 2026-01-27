@@ -12,9 +12,9 @@ import {
   fetchUsuarios 
 } from '../servicos/airtableService';
 import { 
-  buscarPedidosUsuario,
   buscarPedidosPendentes as buscarPedidosPendentesService,
 } from '../servicos/pedidosService';
+import { buscarHistoricoCompleto } from '../servicos/historicoService';
 import { 
   buscarDoacoesPendentes 
 } from '../servicos/doacoesService';
@@ -32,6 +32,7 @@ import CancelamentosPage from '../componentes/paginas/CancelamentosPage';
 import SuportePage from '../componentes/paginas/SuportePage';
 import AdminPainelPage from '../componentes/paginas/AdminPainelPage';
 import SelecaoUnidadePage from '../componentes/paginas/SelecaoUnidadePage';
+import HistoricoPage from '../componentes/paginas/HistoricoPage';
 
 
 // Constants
@@ -111,10 +112,10 @@ export default function TrigofyApp() {
   const carregarMeusPedidos = async () => {
     setCarregando(true);
     try {
-      const pedidos = await buscarPedidosUsuario(usuarioInput);
-      setMeusPedidosHistorico(pedidos);
+      const historico = await buscarHistoricoCompleto(usuarioInput);
+      setMeusPedidosHistorico(historico);
     } catch (error) {
-      showToast('Erro ao carregar pedidos', 'error');
+      showToast('Erro ao carregar histórico', 'error');
     }
     setCarregando(false);
   };
@@ -248,8 +249,17 @@ export default function TrigofyApp() {
           />
         )}
 
+        {activeTab === 'historico' && (
+          <HistoricoPage 
+            historico={meusPedidosHistorico}
+            temaEscuro={temaEscuro}
+            setActiveTab={setActiveTab}
+            carregando={carregando}
+          />
+        )}
+
         {/* Outras páginas */}
-        {activeTab !== 'home' && activeTab !== 'compras-aba' && activeTab !== 'novo' && activeTab !== 'doacoes' && activeTab !== 'cancelamentos' && activeTab !== 'suporte' && activeTab !== 'admin-painel' && (
+        {activeTab !== 'home' && activeTab !== 'compras-aba' && activeTab !== 'novo' && activeTab !== 'doacoes' && activeTab !== 'cancelamentos' && activeTab !== 'suporte' && activeTab !== 'admin-painel' && activeTab !== 'historico' && (
           <div className={`${bgCard} p-6 rounded-3xl shadow-sm border`}>
             <p className={`${textMain} font-bold`}>
               Página: {activeTab}
