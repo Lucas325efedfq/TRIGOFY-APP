@@ -6,7 +6,7 @@ import {
   BookOpen
 } from 'lucide-react';
 
-const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro }) => {
+const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro, totalPendencias }) => {
   const navItems = [
     { id: 'home', icon: LayoutGrid, label: 'Menu' }
   ];
@@ -46,7 +46,14 @@ const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro 
                     : 'text-zinc-500 hover:text-zinc-900'
               }`}
             >
-              <Icon size={20} strokeWidth={2.5} />
+              <div className="relative">
+                <Icon size={20} strokeWidth={2.5} />
+                {item.id === 'config' && totalPendencias > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white dark:border-zinc-800 animate-bounce">
+                    {totalPendencias}
+                  </span>
+                )}
+              </div>
               <span className="text-[9px] font-black uppercase tracking-tight">
                 {item.label}
               </span>

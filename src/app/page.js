@@ -18,6 +18,7 @@ import { buscarHistoricoCompleto } from '../servicos/historicoService';
 import { 
   buscarDoacoesPendentes 
 } from '../servicos/doacoesService';
+import { buscarPendenciasContagem, enviarNotificacaoWhatsApp } from '../servicos/notificacaoService';
 
 
 // Components
@@ -61,6 +62,7 @@ export default function TrigofyApp() {
   // Estados de pedidos
   const [meusPedidosHistorico, setMeusPedidosHistorico] = useState([]);
   const [pedidosParaAprovar, setPedidosParaAprovar] = useState([]);
+  const [totalPendencias, setTotalPendencias] = useState(0);
   
   // Hooks customizados
   const { toast, showToast } = useToast();
@@ -125,7 +127,9 @@ export default function TrigofyApp() {
     try {
       const pedidosComuns = await buscarPedidosPendentesService();
       const doacoes = await buscarDoacoesPendentes();
-      setPedidosParaAprovar([...pedidosComuns, ...doacoes]);
+      const listaCompleta = [...pedidosComuns, ...doacoes];
+      setPedidosParaAprovar(listaCompleta);
+      setTotalPendencias(listaCompleta.length);
     } catch (error) {
       showToast('Erro ao carregar pedidos pendentes', 'error');
     }
@@ -172,6 +176,19 @@ export default function TrigofyApp() {
   const isAdmin = usuarioLogadoFuncao === 'ADMIN';
   const isAprovador = usuarioLogadoFuncao === 'APROVADOR';
 
+  // Atualiza contagem de pendências periodicamente para aprovadores
+  useEffect(() => {
+    if (estaLogado && (isAdmin || isAprovador)) {
+      const atualizarContagem = async () => {
+        const count = await buscarPendenciasContagem(buscarPedidosPendentesService, buscarDoacoesPendentes);
+        setTotalPendencias(count);
+      };
+      atualizarContagem();
+      const interval = setInterval(atualizarContagem, 60000); // A cada 1 minuto
+      return () => clearInterval(interval);
+    }
+  }, [estaLogado, isAdmin, isAprovador]);
+
   return (
     <div className={`min-h-screen ${bgMain}`}>
       <Toast toast={toast} />
@@ -211,6 +228,7 @@ export default function TrigofyApp() {
             temaEscuro={temaEscuro}
             showToast={showToast}
             setActiveTab={setActiveTab}
+            onNotificarAprovador={(dados) => enviarNotificacaoWhatsApp('PEDIDO', dados)}
           />
         )}
 
@@ -221,6 +239,7 @@ export default function TrigofyApp() {
             temaEscuro={temaEscuro}
             showToast={showToast}
             setActiveTab={setActiveTab}
+            onNotificarAprovador={(dados) => enviarNotificacaoWhatsApp('DOACAO', dados)}
           />
         )}
 
@@ -280,6 +299,7 @@ export default function TrigofyApp() {
         isAdmin={isAdmin}
         isAprovador={isAprovador}
         temaEscuro={temaEscuro}
+        totalPendencias={totalPendencias}
       />
     </div>
   );

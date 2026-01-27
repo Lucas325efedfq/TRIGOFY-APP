@@ -7,7 +7,8 @@ const DoacoesPage = ({
   pessoasCadastradas, 
   temaEscuro, 
   showToast, 
-  setActiveTab 
+  setActiveTab,
+  onNotificarAprovador
 }) => {
   const [cpfDoacao, setCpfDoacao] = useState('');
   const [nomeDoacao, setNomeDoacao] = useState('');
@@ -75,6 +76,18 @@ const DoacoesPage = ({
 
       await criarDoacao(dados);
       showToast("✅ DOAÇÃO REGISTRADA COM SUCESSO!", "success");
+      
+      if (onNotificarAprovador) {
+        onNotificarAprovador({
+          solicitante: nomeDoacao,
+          produto: produtoDoacao,
+          quantidade: quantidadeDoacao,
+          unidade: unidadeDoacao,
+          motivo: motivoDoacao,
+          site: origemDoacao
+        });
+      }
+
       setActiveTab('home');
     } catch (error) {
       showToast("Erro ao registrar doação.", "error");

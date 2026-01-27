@@ -10,7 +10,8 @@ const NovoPedidoPage = ({
   siteFiltro, 
   temaEscuro, 
   showToast, 
-  setActiveTab 
+  setActiveTab,
+  onNotificarAprovador
 }) => {
   const [cpfPedido, setCpfPedido] = useState('');
   const [nomePedido, setNomePedido] = useState('');
@@ -66,6 +67,16 @@ const NovoPedidoPage = ({
 
       await criarPedidosEmLote(pedidos);
       showToast("✅ PEDIDO REALIZADO COM SUCESSO!", "success");
+      
+      if (onNotificarAprovador) {
+        onNotificarAprovador({
+          solicitante: nomePedido,
+          produto: cesta.map(i => i.nome).join(', '),
+          site: siteFiltro,
+          valor: totalCesta.toFixed(2)
+        });
+      }
+
       setCesta([]);
       setCpfPedido('');
       setTelefonePedido('');
