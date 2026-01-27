@@ -34,9 +34,14 @@ const NovoPedidoPage = ({
     }
   }, [cpfPedido, pessoasCadastradas]);
 
-  const adicionarAoCarrinho = (produto) => {
-    setCesta([...cesta, { ...produto, idCesta: Date.now() }]);
-    showToast(`${produto.nome} adicionado!`, "success");
+  const toggleNoCarrinho = (produto) => {
+    const jaEstaNaCesta = cesta.find(item => item.id === produto.id);
+    if (jaEstaNaCesta) {
+      setCesta(cesta.filter(item => item.id !== produto.id));
+    } else {
+      setCesta([...cesta, { ...produto, idCesta: Date.now() }]);
+      showToast(`${produto.nome} selecionado!`, "success");
+    }
   };
 
   const removerDoCarrinho = (idCesta) => {
@@ -138,14 +143,18 @@ const NovoPedidoPage = ({
         </div>
         
         <div className="grid grid-cols-1 gap-3">
-          {produtosFiltrados.map(produto => (
-            <ProductCard 
-              key={produto.id} 
-              produto={produto} 
-              temaEscuro={temaEscuro} 
-              onAdd={() => adicionarAoCarrinho(produto)}
-            />
-          ))}
+          {produtosFiltrados.map(produto => {
+            const isSelected = cesta.some(item => item.id === produto.id);
+            return (
+              <ProductCard 
+                key={produto.id} 
+                produto={produto} 
+                temaEscuro={temaEscuro} 
+                isSelected={isSelected}
+                onToggle={() => toggleNoCarrinho(produto)}
+              />
+            );
+          })}
           {produtosFiltrados.length === 0 && (
             <p className="text-center py-10 text-zinc-400 font-bold">Nenhum produto encontrado para {siteFiltro}.</p>
           )}

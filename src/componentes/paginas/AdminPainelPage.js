@@ -21,6 +21,7 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
   const [novoProdNome, setNovoProdNome] = useState('');
   const [novoProdPreco, setNovoProdPreco] = useState('');
   const [novoProdSite, setNovoProdSite] = useState('AMBOS');
+  const [novoProdImagem, setNovoProdImagem] = useState('');
   const [produtosCadastrados, setProdutosCadastrados] = useState([]);
   
   const [carregando, setCarregando] = useState(false);
@@ -152,7 +153,8 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
         fields: {
           nome: novoProdNome.toUpperCase().trim(),
           preco: novoProdPreco.toString(),
-          site: novoProdSite
+          site: novoProdSite,
+          imagem: novoProdImagem.trim()
         }
       };
       
@@ -170,6 +172,7 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
       if (response.ok) {
         setNovoProdNome('');
         setNovoProdPreco('');
+        setNovoProdImagem('');
         await buscarDadosAirtable();
         showToast?.("✅ Produto cadastrado com sucesso!", "success");
       } else {
@@ -284,6 +287,7 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
             <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Cadastrar Produto</h2>
             <input type="text" placeholder="Nome do Produto" className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`} value={novoProdNome} onChange={(e) => setNovoProdNome(e.target.value)} />
             <input type="number" placeholder="Preço (ex: 10.50)" className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`} value={novoProdPreco} onChange={(e) => setNovoProdPreco(e.target.value)} />
+            <input type="text" placeholder="URL da Imagem do Produto" className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`} value={novoProdImagem} onChange={(e) => setNovoProdImagem(e.target.value)} />
             <div className="space-y-1">
               <label className="text-[10px] font-black text-zinc-400 uppercase ml-2">Disponível em:</label>
               <select className={`w-full p-4 ${bgInput} border rounded-2xl outline-none ${textMain}`} value={novoProdSite} onChange={(e) => setNovoProdSite(e.target.value)}>
