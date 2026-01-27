@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, UserPlus, Users, PackagePlus } from 'lucide-react';
+import { Trash2, UserPlus, Users, PackagePlus, Camera, Image as ImageIcon } from 'lucide-react';
 import { TABLES, getHeaders, getBaseUrl } from '../../configuracao/airtable';
 
 const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
@@ -139,6 +139,17 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
     setCarregando(false);
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNovoProdImagem(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const salvarProduto = async () => {
     console.log("Iniciando salvamento de produto...");
     if (!novoProdNome || !novoProdPreco) {
@@ -154,7 +165,7 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
           nome: novoProdNome.toUpperCase().trim(),
           preco: novoProdPreco.toString(),
           site: novoProdSite,
-          imagem: novoProdImagem.trim()
+          imagem: novoProdImagem // Pode ser URL ou Base64
         }
       };
       
@@ -287,7 +298,32 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
             <h2 className={`text-lg font-bold uppercase italic border-b pb-2 ${textMain}`}>Cadastrar Produto</h2>
             <input type="text" placeholder="Nome do Produto" className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`} value={novoProdNome} onChange={(e) => setNovoProdNome(e.target.value)} />
             <input type="number" placeholder="Preço (ex: 10.50)" className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`} value={novoProdPreco} onChange={(e) => setNovoProdPreco(e.target.value)} />
-            <input type="text" placeholder="URL da Imagem do Produto" className={`w-full p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`} value={novoProdImagem} onChange={(e) => setNovoProdImagem(e.target.value)} />
+            
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-zinc-400 uppercase ml-2">Foto do Produto</label>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  placeholder="URL da Imagem (opcional)" 
+                  className={`flex-1 p-4 ${bgInput} border rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400 ${textMain}`} 
+                  value={novoProdImagem.startsWith('data:') ? 'Imagem selecionada do arquivo' : novoProdImagem} 
+                  onChange={(e) => setNovoProdImagem(e.target.value)} 
+                />
+                <div className="relative">
+                  <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="prod-foto-upload" />
+                  <label htmlFor="prod-foto-upload" className={`p-4 rounded-2xl border-2 border-dashed flex items-center justify-center cursor-pointer transition-all ${novoProdImagem.startsWith('data:') ? 'bg-yellow-400 border-yellow-500 text-zinc-900' : 'border-zinc-200 hover:bg-zinc-50 text-zinc-400'}`}>
+                    <ImageIcon size={20} />
+                  </label>
+                </div>
+              </div>
+              {novoProdImagem.startsWith('data:') && (
+                <div className="relative w-20 h-20 rounded-xl overflow-hidden border mx-auto">
+                  <img src={novoProdImagem} className="w-full h-full object-cover" alt="Preview" />
+                  <button onClick={() => setNovoProdImagem('')} className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl-lg"><Trash2 size={10}/></button>
+                </div>
+              )}
+            </div>
+
             <div className="space-y-1">
               <label className="text-[10px] font-black text-zinc-400 uppercase ml-2">Disponível em:</label>
               <select className={`w-full p-4 ${bgInput} border rounded-2xl outline-none ${textMain}`} value={novoProdSite} onChange={(e) => setNovoProdSite(e.target.value)}>
