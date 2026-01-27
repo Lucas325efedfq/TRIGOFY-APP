@@ -151,7 +151,7 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
         body: JSON.stringify({
           fields: {
             nome: novoProdNome.toUpperCase().trim(),
-            preco: parseFloat(novoProdPreco),
+            preco: novoProdPreco.toString(),
             site: novoProdSite
           }
         })
