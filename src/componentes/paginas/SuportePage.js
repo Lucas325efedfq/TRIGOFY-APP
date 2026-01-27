@@ -1,34 +1,56 @@
-import React, { useState } from 'react';
-import { Send } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Send, Bot, User } from 'lucide-react';
+import { perguntarAoTriger } from '../../servicos/iaService';
 
 const SuportePage = ({ setActiveTab, temaEscuro }) => {
   const [mensagens, setMensagens] = useState([
     { id: 1, texto: "Olá! Eu sou o Triger, seu suporte inteligente. Como posso te ajudar hoje?", bot: true }
   ]);
   const [inputChat, setInputChat] = useState('');
+  const [estaDigitando, setEstaDigitando] = useState(false);
+  const scrollRef = useRef(null);
 
-  const enviarMensagemChat = (e) => {
+  // Auto-scroll para a última mensagem
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [mensagens, estaDigitando]);
+
+  const enviarMensagemChat = async (e) => {
     e.preventDefault();
-    if (!inputChat.trim()) return;
+    if (!inputChat.trim() || estaDigitando) return;
 
+    const textoUsuario = inputChat;
     const novaMensagemUsuario = {
-      id: mensagens.length + 1,
-      texto: inputChat,
+      id: Date.now(),
+      texto: textoUsuario,
       bot: false
     };
 
-    setMensagens([...mensagens, novaMensagemUsuario]);
+    setMensagens(prev => [...prev, novaMensagemUsuario]);
     setInputChat('');
+    setEstaDigitando(true);
 
-    // Simulação de resposta do bot
-    setTimeout(() => {
+    try {
+      const resposta = await perguntarAoTriger(textoUsuario);
+      
       const respostaBot = {
-        id: mensagens.length + 2,
-        texto: "Obrigado pela sua mensagem! Nossa equipe está analisando e responderá em breve.",
+        id: Date.now() + 1,
+        texto: resposta,
         bot: true
       };
       setMensagens(prev => [...prev, respostaBot]);
-    }, 1000);
+    } catch (error) {
+      const erroMsg = {
+        id: Date.now() + 1,
+        texto: "Ops, tive um probleminha técnico. Pode tentar perguntar de novo?",
+        bot: true
+      };
+      setMensagens(prev => [...prev, erroMsg]);
+    } finally {
+      setEstaDigitando(false);
+    }
   };
 
   const bgCard = temaEscuro ? 'bg-zinc-800' : 'bg-white';
@@ -53,18 +75,39 @@ const SuportePage = ({ setActiveTab, temaEscuro }) => {
           <span className="text-yellow-400 font-black uppercase text-xs italic">Agente Triger</span>
         </div>
         
-        <div className={`flex-1 overflow-y-auto p-4 space-y-3 ${bgChat}`}>
+        <div 
+          ref={scrollRef}
+          className={`flex-1 overflow-y-auto p-4 space-y-4 ${bgChat} scroll-smooth`}
+        >
           {mensagens.map(msg => (
-            <div key={msg.id} className={`flex ${msg.bot ? 'justify-start' : 'justify-end'}`}>
-              <div className={`max-w-[80%] p-3 rounded-2xl text-xs font-bold ${
+            <div key={msg.id} className={`flex items-end gap-2 ${msg.bot ? 'justify-start' : 'justify-end'}`}>
+              {msg.bot && (
+                <div className="w-6 h-6 rounded-full bg-zinc-900 flex items-center justify-center shrink-0 border border-yellow-500/30">
+                  <Bot size={12} className="text-yellow-400" />
+                </div>
+              )}
+              <div className={`max-w-[80%] p-3 rounded-2xl text-xs font-bold shadow-sm ${
                 msg.bot 
-                  ? `${bgCard} ${textMain} border` 
-                  : 'bg-yellow-400 text-zinc-900 shadow-sm'
+                  ? `${bgCard} ${textMain} border border-zinc-200 dark:border-zinc-700 rounded-bl-none` 
+                  : 'bg-yellow-400 text-zinc-900 rounded-br-none'
               }`}>
                 {msg.texto}
               </div>
+              {!msg.bot && (
+                <div className="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center shrink-0">
+                  <User size={12} className="text-zinc-900" />
+                </div>
+              )}
             </div>
           ))}
+          {estaDigitando && (
+            <div className="flex items-center gap-2 text-zinc-400 animate-pulse">
+              <div className="w-6 h-6 rounded-full bg-zinc-900 flex items-center justify-center border border-yellow-500/30">
+                <Bot size={12} className="text-yellow-400" />
+              </div>
+              <span className="text-[10px] font-black uppercase italic">Triger está pensando...</span>
+            </div>
+          )}
         </div>
 
         <form onSubmit={enviarMensagemChat} className={`p-4 border-t ${bgCard} flex gap-2`}>
