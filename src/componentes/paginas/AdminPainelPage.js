@@ -139,33 +139,50 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
   };
 
   const salvarProduto = async () => {
+    console.log("Iniciando salvamento de produto...");
     if (!novoProdNome || !novoProdPreco) {
+      console.warn("Campos obrigatórios faltando:", { novoProdNome, novoProdPreco });
       showToast?.("Preencha Nome e Preço do produto.", "error");
       return;
     }
+    
     setCarregando(true);
     try {
+      const payload = {
+        fields: {
+          nome: novoProdNome.toUpperCase().trim(),
+          preco: novoProdPreco.toString(),
+          site: novoProdSite
+        }
+      };
+      
+      console.log("Enviando payload para Airtable:", payload);
+      
       const response = await fetch(getBaseUrl(TABLES.PRODUTOS), {
         method: 'POST',
         headers: getHeaders(),
-        body: JSON.stringify({
-          fields: {
-            nome: novoProdNome.toUpperCase().trim(),
-            preco: novoProdPreco.toString(),
-            site: novoProdSite
-          }
-        })
+        body: JSON.stringify(payload)
       });
+      
+      const data = await response.json();
+      console.log("Resposta do Airtable:", { status: response.status, ok: response.ok, data });
+
       if (response.ok) {
         setNovoProdNome('');
         setNovoProdPreco('');
         await buscarDadosAirtable();
         showToast?.("✅ Produto cadastrado com sucesso!", "success");
+      } else {
+        const erroMsg = data.error?.message || "Erro desconhecido na API";
+        console.error("Erro retornado pelo Airtable:", erroMsg);
+        showToast?.(`Erro: ${erroMsg}`, "error");
       }
     } catch (e) {
-      showToast?.("Erro ao cadastrar produto.", "error");
+      console.error("Exceção ao cadastrar produto:", e);
+      showToast?.(`Erro de conexão: ${e.message}`, "error");
+    } finally {
+      setCarregando(false);
     }
-    setCarregando(false);
   };
 
   const excluirRegistro = async (tableId, recordId) => {
