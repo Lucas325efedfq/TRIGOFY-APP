@@ -89,7 +89,7 @@ const HomePage = ({
             Olá, <span className="text-yellow-500">Bem-vindo!</span>
           </h2>
           <p className={`text-sm font-medium leading-relaxed max-w-[200px] ${textSub}`}>
-            O que você deseja realizar no sistema hoje?
+            O que você deseja realizar hoje?
           </p>
         </div>
       </div>
