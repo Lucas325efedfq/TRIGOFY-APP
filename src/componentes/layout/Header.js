@@ -28,7 +28,7 @@ const Header = ({
               Trigofy
             </h1>
             <p className="text-[10px] font-bold text-yellow-500 uppercase tracking-widest mt-0.5">
-              Premium System
+              Vendas e Doações - TRIGO
             </p>
           </div>
         </div>
