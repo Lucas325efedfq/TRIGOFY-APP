@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sun, Moon, LogOut, User, Bell } from 'lucide-react';
+import { Sun, Moon, LogOut, User } from 'lucide-react';
 
 const Header = ({ 
   usuarioInput, 
@@ -16,8 +16,8 @@ const Header = ({
       <div className="max-w-2xl mx-auto flex justify-between items-center">
         <div className="flex items-center gap-3 group cursor-pointer">
           <div className="relative">
-            <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20 group-hover:scale-110 transition-transform duration-300">
-              <span className="text-white font-black text-lg">T</span>
+            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-yellow-500/20 group-hover:scale-110 transition-transform duration-300">
+              <img src="/logo.png" alt="Trigofy Logo" className="w-full h-full object-cover" />
             </div>
             <div className="absolute -inset-1 bg-yellow-500/20 blur-lg rounded-xl opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>

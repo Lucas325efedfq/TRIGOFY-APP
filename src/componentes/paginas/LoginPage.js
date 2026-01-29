@@ -39,8 +39,8 @@ const LoginPage = ({
       <div className={`${bgCard} p-10 rounded-[2.5rem] shadow-2xl border ${temaEscuro ? 'border-zinc-800/50' : 'border-zinc-200/50'} w-full max-w-md space-y-8 relative z-10 backdrop-blur-xl animate-in fade-in zoom-in duration-700`}>
         <div className="text-center space-y-4">
           <div className="relative inline-block group">
-            <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl shadow-yellow-500/20 group-hover:scale-105 transition-transform duration-500">
-              <span className="text-white font-black text-5xl italic">T</span>
+            <div className="w-24 h-24 rounded-[2rem] overflow-hidden mx-auto shadow-2xl shadow-yellow-500/20 group-hover:scale-105 transition-transform duration-500">
+              <img src="/logo.png" alt="Trigofy Logo" className="w-full h-full object-cover" />
             </div>
             <div className="absolute -inset-2 bg-yellow-500/20 blur-xl rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
