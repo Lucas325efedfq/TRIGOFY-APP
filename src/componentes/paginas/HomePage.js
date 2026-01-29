@@ -1,5 +1,5 @@
 import React from 'react';
-import { Megaphone, XCircle, CheckCircle2, BookOpen, Settings, MessageCircle, Database } from 'lucide-react';
+import { Megaphone, XCircle, CheckCircle2, BookOpen, Settings, MessageCircle, Database, ArrowRight } from 'lucide-react';
 
 const HomePage = ({ 
   setActiveTab, 
@@ -7,13 +7,13 @@ const HomePage = ({
   isAprovador,
   temaEscuro 
 }) => {
-  const bgCard = temaEscuro ? 'bg-zinc-800' : 'bg-white';
+  const bgCard = temaEscuro ? 'bg-zinc-900/50' : 'bg-white';
   const textMain = temaEscuro ? 'text-white' : 'text-zinc-900';
-  const textSub = temaEscuro ? 'text-zinc-400' : 'text-zinc-600';
+  const textSub = temaEscuro ? 'text-zinc-400' : 'text-zinc-500';
+  const borderColor = temaEscuro ? 'border-zinc-800/50' : 'border-zinc-200/50';
 
   const menuItems = [];
 
-  // Se NÃO for Admin OU se for Aprovador, mostra os formulários de usuário (EXCETO COMPRAS que foi para a aba inferior)
   if (!isAdmin || isAprovador) {
     menuItems.push(
       {
@@ -21,23 +21,26 @@ const HomePage = ({
         title: 'Doações',
         description: 'Solicitar doação de produtos',
         icon: Megaphone,
-        color: 'from-green-500 to-green-600',
+        color: 'from-green-400 to-emerald-600',
+        shadow: 'shadow-green-500/20',
         action: () => setActiveTab('doacoes')
       },
       {
         id: 'historico',
-        title: 'Meu Histórico',
+        title: 'Histórico',
         description: 'Ver meus pedidos',
         icon: BookOpen,
-        color: 'from-yellow-500 to-yellow-600',
+        color: 'from-yellow-400 to-orange-500',
+        shadow: 'shadow-yellow-500/20',
         action: () => setActiveTab('historico')
       },
       {
         id: 'cancelamentos',
         title: 'Cancelamentos',
-        description: 'Cancelar pedidos/produtos',
+        description: 'Cancelar pedidos',
         icon: XCircle,
-        color: 'from-red-500 to-red-600',
+        color: 'from-red-400 to-rose-600',
+        shadow: 'shadow-red-500/20',
         action: () => setActiveTab('cancelamentos')
       },
       {
@@ -45,20 +48,21 @@ const HomePage = ({
         title: 'Suporte',
         description: 'Chat com Agente Triger',
         icon: MessageCircle,
-        color: 'from-orange-500 to-orange-600',
+        color: 'from-blue-400 to-indigo-600',
+        shadow: 'shadow-blue-500/20',
         action: () => setActiveTab('suporte')
       }
     );
   }
 
-  // Se for Admin OU Aprovador, mostra opções de aprovação/admin
   if (isAdmin || isAprovador) {
     menuItems.push({
       id: 'aprovacoes',
-      title: 'Aprovar Pedidos',
-      description: 'Gerenciar aprovações',
+      title: 'Aprovações',
+      description: 'Gerenciar pedidos',
       icon: CheckCircle2,
-      color: 'from-emerald-500 to-emerald-600',
+      color: 'from-emerald-400 to-teal-600',
+      shadow: 'shadow-emerald-500/20',
       action: () => setActiveTab('aprovacoes')
     });
 
@@ -66,55 +70,64 @@ const HomePage = ({
       menuItems.push({
         id: 'admin-painel',
         title: 'Painel Admin',
-        description: 'Gerenciar cadastros na nuvem',
+        description: 'Dados na nuvem',
         icon: Database,
-        color: 'from-indigo-500 to-indigo-600',
+        color: 'from-violet-400 to-purple-600',
+        shadow: 'shadow-purple-500/20',
         action: () => setActiveTab('admin-painel')
-      });
-      menuItems.push({
-        id: 'config',
-        title: 'Administração',
-        description: 'Configurações do sistema',
-        icon: Settings,
-        color: 'from-zinc-500 to-zinc-600',
-        action: () => setActiveTab('config')
       });
     }
   }
 
   return (
-    <div className="pb-20 space-y-6 animate-in fade-in duration-500">
-      <div className={`${bgCard} p-6 rounded-3xl shadow-sm border`}>
-        <h2 className={`text-xl font-black uppercase italic mb-2 ${textMain}`}>
-          Bem-vindo ao Trigofy!
-        </h2>
-        <p className={`text-sm font-bold ${textSub}`}>
-          Escolha uma opção abaixo para começar
-        </p>
+    <div className="pb-32 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Hero Section */}
+      <div className={`relative overflow-hidden ${bgCard} p-8 rounded-[2.5rem] border ${borderColor} shadow-xl`}>
+        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-yellow-500/10 blur-3xl rounded-full" />
+        <div className="relative z-10">
+          <h2 className={`text-2xl font-black uppercase italic tracking-tighter mb-2 ${textMain}`}>
+            Olá, <span className="text-yellow-500">Bem-vindo!</span>
+          </h2>
+          <p className={`text-sm font-medium leading-relaxed max-w-[200px] ${textSub}`}>
+            O que você deseja realizar no sistema hoje?
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        {menuItems.map((item) => {
+      {/* Grid Section */}
+      <div className="grid grid-cols-2 gap-4">
+        {menuItems.map((item, index) => {
           const Icon = item.icon;
+          const isLarge = index === 0 || index === 5; // Make some cards larger for visual interest
+          
           return (
             <button
               key={item.id}
               onClick={item.action}
-              className={`${bgCard} p-6 rounded-2xl border shadow-sm hover:shadow-lg transition-all active:scale-95 text-left`}
+              className={`group relative flex flex-col p-5 rounded-3xl border ${borderColor} ${bgCard} hover:border-yellow-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-yellow-500/5 active:scale-95 text-left overflow-hidden ${
+                isLarge ? 'col-span-2 flex-row items-center gap-5' : 'col-span-1'
+              }`}
             >
-              <div className="flex items-center gap-4">
-                <div className={`w-14 h-14 bg-gradient-to-br ${item.color} rounded-xl flex items-center justify-center shadow-lg`}>
-                  <Icon size={28} className="text-white" strokeWidth={2.5} />
-                </div>
-                <div className="flex-1">
-                  <h3 className={`text-base font-black uppercase ${textMain}`}>
-                    {item.title}
-                  </h3>
-                  <p className={`text-xs font-bold ${textSub}`}>
-                    {item.description}
-                  </p>
-                </div>
+              <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-0 group-hover:opacity-[0.03] transition-opacity`} />
+              
+              <div className={`w-12 h-12 bg-gradient-to-br ${item.color} rounded-2xl flex items-center justify-center shadow-lg ${item.shadow} group-hover:scale-110 transition-transform duration-500`}>
+                <Icon size={24} className="text-white" strokeWidth={2.5} />
               </div>
+              
+              <div className={isLarge ? 'flex-1' : 'mt-4'}>
+                <h3 className={`text-sm font-black uppercase tracking-tight ${textMain}`}>
+                  {item.title}
+                </h3>
+                <p className={`text-[10px] font-bold leading-tight mt-1 ${textSub}`}>
+                  {item.description}
+                </p>
+              </div>
+
+              {isLarge && (
+                <div className={`p-2 rounded-full ${temaEscuro ? 'bg-zinc-800' : 'bg-zinc-100'} group-hover:bg-yellow-500 group-hover:text-white transition-colors`}>
+                  <ArrowRight size={16} />
+                </div>
+              )}
             </button>
           );
         })}

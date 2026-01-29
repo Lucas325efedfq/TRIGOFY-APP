@@ -7,34 +7,36 @@ const Toast = ({ toast }) => {
   const getIcon = () => {
     switch (toast.type) {
       case 'success':
-        return <CheckCircle2 size={20} />;
+        return <CheckCircle2 size={18} strokeWidth={3} />;
       case 'error':
-        return <XCircle size={20} />;
+        return <XCircle size={18} strokeWidth={3} />;
       case 'warning':
-        return <AlertCircle size={20} />;
+        return <AlertCircle size={18} strokeWidth={3} />;
       default:
-        return <CheckCircle2 size={20} />;
+        return <CheckCircle2 size={18} strokeWidth={3} />;
     }
   };
 
-  const getBackgroundColor = () => {
+  const getStyles = () => {
     switch (toast.type) {
       case 'success':
-        return 'bg-green-500';
+        return 'bg-emerald-500 text-white shadow-emerald-500/20';
       case 'error':
-        return 'bg-red-500';
+        return 'bg-rose-500 text-white shadow-rose-500/20';
       case 'warning':
-        return 'bg-yellow-500';
+        return 'bg-yellow-500 text-white shadow-yellow-500/20';
       default:
-        return 'bg-green-500';
+        return 'bg-zinc-900 text-white shadow-black/20';
     }
   };
 
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-top duration-300">
-      <div className={`${getBackgroundColor()} text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 font-bold text-sm`}>
-        {getIcon()}
-        <span>{toast.message}</span>
+    <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-[100] w-full max-w-[90%] sm:max-w-md animate-in slide-in-from-top-10 duration-500">
+      <div className={`${getStyles()} px-6 py-4 rounded-[1.5rem] shadow-2xl flex items-center gap-3 border border-white/10 backdrop-blur-lg`}>
+        <div className="bg-white/20 p-1.5 rounded-lg">
+          {getIcon()}
+        </div>
+        <span className="font-black uppercase italic text-xs tracking-tight">{toast.message}</span>
       </div>
     </div>
   );

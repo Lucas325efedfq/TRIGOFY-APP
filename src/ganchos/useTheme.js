@@ -4,10 +4,12 @@ export const useTheme = () => {
   const [temaEscuro, setTemaEscuro] = useState(false);
 
   useEffect(() => {
-    // Carrega tema do localStorage
     const savedTheme = localStorage.getItem('trigofy-theme');
     if (savedTheme === 'dark') {
       setTemaEscuro(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
   }, []);
 
@@ -15,14 +17,19 @@ export const useTheme = () => {
     const newTheme = !temaEscuro;
     setTemaEscuro(newTheme);
     localStorage.setItem('trigofy-theme', newTheme ? 'dark' : 'light');
+    if (newTheme) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   };
 
-  // Classes de estilo baseadas no tema
-  const bgMain = temaEscuro ? 'bg-zinc-900' : 'bg-white';
-  const bgCard = temaEscuro ? 'bg-zinc-800' : 'bg-white';
-  const textMain = temaEscuro ? 'text-white' : 'text-zinc-900';
-  const textSub = temaEscuro ? 'text-zinc-400' : 'text-zinc-600';
-  const borderColor = temaEscuro ? 'border-zinc-700' : 'border-zinc-200';
+  // Classes de estilo baseadas no tema - Refinadas para um visual mais moderno
+  const bgMain = temaEscuro ? 'bg-zinc-950' : 'bg-zinc-50';
+  const bgCard = temaEscuro ? 'bg-zinc-900/50' : 'bg-white';
+  const textMain = temaEscuro ? 'text-zinc-100' : 'text-zinc-900';
+  const textSub = temaEscuro ? 'text-zinc-400' : 'text-zinc-500';
+  const borderColor = temaEscuro ? 'border-zinc-800' : 'border-zinc-200';
 
   return {
     temaEscuro,
