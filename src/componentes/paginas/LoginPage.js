@@ -50,7 +50,7 @@ const LoginPage = ({
               Trigofy
             </h1>
             <p className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.3em] mt-1">
-              Premium Ordering System
+              Vendas e Doações - TRIGO
             </p>
           </div>
         </div>
