@@ -66,7 +66,7 @@ const LoginPage = ({
               </div>
               <input
                 type="text"
-                placeholder="Seu identificador"
+                placeholder="Digite seu usuário"
                 className={`w-full pl-12 pr-4 py-4 rounded-2xl border outline-none font-bold transition-all ${
                   temaEscuro 
                     ? 'bg-zinc-800/50 border-zinc-700 text-white focus:border-yellow-500/50 focus:bg-zinc-800' 
