@@ -117,7 +117,7 @@ const LoginPage = ({
         
         <div className="text-center">
           <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-tight">
-            © 2026 Trigofy App • Todos os direitos reservados
+            © 2026 Trigofy App 
           </p>
         </div>
       </div>
