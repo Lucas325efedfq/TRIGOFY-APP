@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Lock, User, ArrowRight } from 'lucide-react';
+import { Lock, User, ArrowRight, Moon, Sun } from 'lucide-react';
 
 const LoginPage = ({ 
   onLogin, 
   usuariosAutorizados, 
-  temaEscuro 
+  temaEscuro,
+  toggleTheme 
 }) => {
   const [usuarioInput, setUsuarioInput] = useState('');
   const [senha, setSenha] = useState('');
@@ -38,6 +39,19 @@ const LoginPage = ({
 
       <div className={`${bgCard} p-10 rounded-[2.5rem] shadow-2xl border ${temaEscuro ? 'border-zinc-800/50' : 'border-zinc-200/50'} w-full max-w-md space-y-8 relative z-10 backdrop-blur-xl animate-in fade-in zoom-in duration-700`}>
         <div className="text-center space-y-4">
+          <div className="absolute top-6 right-6">
+            <button 
+              onClick={toggleTheme}
+              className={`p-3 rounded-2xl border transition-all ${
+                temaEscuro 
+                  ? 'bg-zinc-800 border-zinc-700 text-yellow-500' 
+                  : 'bg-zinc-50 border-zinc-200 text-zinc-500'
+              }`}
+            >
+              {temaEscuro ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+          </div>
+
           <div className="relative inline-block group">
             <div className="w-24 h-24 rounded-[2rem] overflow-hidden mx-auto shadow-2xl shadow-yellow-500/20 group-hover:scale-105 transition-transform duration-500">
               <img src="/logo.png" alt="Trigofy Logo" className="w-full h-full object-cover" />

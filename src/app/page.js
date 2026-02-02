@@ -193,7 +193,12 @@ export default function TrigofyApp() {
   if (!estaLogado) {
     return (
       <div className={bgMain}>
-        <LoginPage onLogin={handleLogin} usuariosAutorizados={usuariosAutorizados} />
+        <LoginPage 
+          onLogin={handleLogin} 
+          usuariosAutorizados={usuariosAutorizados} 
+          temaEscuro={temaEscuro} 
+          toggleTheme={toggleTheme}
+        />
         <Toast toast={toast} />
       </div>
     );
