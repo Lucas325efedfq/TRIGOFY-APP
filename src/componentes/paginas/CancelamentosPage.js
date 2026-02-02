@@ -18,6 +18,11 @@ export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAd
 
   // Busca automática do nome ao digitar CPF (se a lista de pessoas tiver sido carregada)
   useEffect(() => {
+    if (!isAdmin && usuarioLogadoCpf && cpf !== usuarioLogadoCpf) {
+      setCpf(usuarioLogadoCpf);
+      return;
+    }
+
     const cpfLimpo = cpf.replace(/\D/g, '');
     if (cpfLimpo.length === 11 && pessoasCadastradas.length > 0) {
       const pessoa = pessoasCadastradas.find(p => p.cpf === cpfLimpo);
@@ -28,7 +33,7 @@ export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAd
         setNome('');
       }
     }
-  }, [cpf, pessoasCadastradas]);
+  }, [cpf, pessoasCadastradas, isAdmin, usuarioLogadoCpf]);
 
   const handleSubmit = async () => {
     // 1. Validação dos campos visuais
@@ -38,7 +43,7 @@ export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAd
     }
 
     // 2. Validação do usuário logado (passado pelo arquivo pai)
-    if (!usuario) {
+    if (!usuarioInput) {
       showToast("Erro crítico: Usuário não identificado. Faça login novamente.", "error");
       return;
     }

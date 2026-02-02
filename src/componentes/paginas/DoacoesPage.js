@@ -30,6 +30,11 @@ const DoacoesPage = ({
 
   // Busca nome pelo CPF
   useEffect(() => {
+    if (!isAdmin && usuarioLogadoCpf && cpfDoacao !== usuarioLogadoCpf) {
+      setCpfDoacao(usuarioLogadoCpf);
+      return;
+    }
+
     if (cpfDoacao.length === 11) {
       const pessoa = pessoasCadastradas.find(p => p.cpf === cpfDoacao);
       if (pessoa) {
@@ -37,12 +42,12 @@ const DoacoesPage = ({
         setAreaDoacao(pessoa.area || '');
       } else {
         setNomeDoacao('');
-        showToast("CPF não encontrado.", "error");
+        if (cpfDoacao.length === 11) showToast("CPF não encontrado.", "error");
       }
     } else {
       setNomeDoacao('');
     }
-  }, [cpfDoacao, pessoasCadastradas]);
+  }, [cpfDoacao, pessoasCadastradas, isAdmin, usuarioLogadoCpf]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];

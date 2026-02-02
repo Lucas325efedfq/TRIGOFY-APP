@@ -25,6 +25,12 @@ const NovoPedidoPage = ({
   const [buscaProduto, setBuscaProduto] = useState('');
 
   useEffect(() => {
+    // Se o usuário não for admin e tiver um CPF vinculado, não deixa o campo ficar diferente do dele
+    if (!isAdmin && usuarioLogadoCpf && cpfPedido !== usuarioLogadoCpf) {
+      setCpfPedido(usuarioLogadoCpf);
+      return;
+    }
+
     if (cpfPedido.length === 11) {
       const pessoa = pessoasCadastradas.find(p => p.cpf === cpfPedido);
       if (pessoa) {
@@ -32,12 +38,12 @@ const NovoPedidoPage = ({
         setAreaPedido(pessoa.area || '');
       } else {
         setNomePedido('');
-        showToast("CPF não encontrado.", "error");
+        if (cpfPedido.length === 11) showToast("CPF não encontrado.", "error");
       }
     } else {
       setNomePedido('');
     }
-  }, [cpfPedido, pessoasCadastradas]);
+  }, [cpfPedido, pessoasCadastradas, isAdmin, usuarioLogadoCpf]);
 
   const toggleNoCarrinho = (produto) => {
     const jaEstaNaCesta = cesta.find(item => item.id === produto.id);
@@ -84,7 +90,8 @@ const NovoPedidoPage = ({
       }
 
       setCesta([]);
-      setCpfPedido('');
+      // Se for usuário comum, mantém o CPF dele. Se for admin, limpa.
+      setCpfPedido(isAdmin ? '' : (usuarioLogadoCpf || ''));
       setTelefonePedido('');
       setAreaPedido('');
       setDataRetirada('');
