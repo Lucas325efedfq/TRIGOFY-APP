@@ -17,7 +17,7 @@ const LoginPage = ({
     );
 
     if (usuarioEncontrado) {
-      onLogin(usuarioEncontrado.usuario, usuarioEncontrado.origem, usuarioEncontrado.funcao);
+      onLogin(usuarioEncontrado.usuario, usuarioEncontrado.origem, usuarioEncontrado.funcao, usuarioEncontrado.cpf);
       setErro('');
     } else {
       setErro('Usuário ou senha incorretos!');

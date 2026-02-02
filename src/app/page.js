@@ -47,6 +47,7 @@ export default function TrigofyApp() {
   const [usuarioInput, setUsuarioInput] = useState('');
   const [usuarioLogadoOrigem, setUsuarioLogadoOrigem] = useState('');
   const [usuarioLogadoFuncao, setUsuarioLogadoFuncao] = useState('');
+  const [usuarioLogadoCpf, setUsuarioLogadoCpf] = useState('');
 
   // Estados de navegação
   const [activeTab, setActiveTab] = useState('home');
@@ -92,11 +93,12 @@ export default function TrigofyApp() {
     setCarregando(false);
   };
 
-  const handleLogin = (usuario, origem, funcao) => {
+  const handleLogin = (usuario, origem, funcao, cpf) => {
     setEstaLogado(true);
     setUsuarioInput(usuario);
     setUsuarioLogadoOrigem(origem);
     setUsuarioLogadoFuncao(funcao);
+    setUsuarioLogadoCpf(cpf || '');
     showToast(`Bem-vindo, ${usuario}!`, 'success');
   };
 
@@ -106,6 +108,7 @@ export default function TrigofyApp() {
     setUsuarioInput('');
     setUsuarioLogadoOrigem('');
     setUsuarioLogadoFuncao('');
+    setUsuarioLogadoCpf('');
     setSiteFiltro('');
     setMeusPedidosHistorico([]);
     setPedidosParaAprovar([]);
@@ -223,6 +226,8 @@ export default function TrigofyApp() {
         {activeTab === 'novo' && (
           <NovoPedidoPage 
             usuarioInput={usuarioInput}
+            usuarioLogadoCpf={usuarioLogadoCpf}
+            isAdmin={isAdmin}
             pessoasCadastradas={pessoasCadastradas}
             produtosLancados={produtosLancados}
             siteFiltro={siteFiltro}
@@ -236,6 +241,8 @@ export default function TrigofyApp() {
         {activeTab === 'doacoes' && (
           <DoacoesPage 
             usuarioInput={usuarioInput}
+            usuarioLogadoCpf={usuarioLogadoCpf}
+            isAdmin={isAdmin}
             pessoasCadastradas={pessoasCadastradas}
             temaEscuro={temaEscuro}
             showToast={showToast}
@@ -247,6 +254,8 @@ export default function TrigofyApp() {
         {activeTab === 'cancelamentos' && (
           <CancelamentosPage 
             usuarioInput={usuarioInput}
+            usuarioLogadoCpf={usuarioLogadoCpf}
+            isAdmin={isAdmin}
             pessoasCadastradas={pessoasCadastradas}
             temaEscuro={temaEscuro}
             showToast={showToast}

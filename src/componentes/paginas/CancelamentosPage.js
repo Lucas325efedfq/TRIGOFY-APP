@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { enviarCancelamento } from '../../servicos/cancelamentosService';
 
-export default function CancelamentosPage({ usuario, showToast, onVoltar, pessoasCadastradas = [] }) {
+export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAdmin, showToast, setActiveTab, pessoasCadastradas = [] }) {
   const [carregando, setCarregando] = useState(false);
   
   // Estados do Formulário
-  const [cpf, setCpf] = useState('');
+  const [cpf, setCpf] = useState(usuarioLogadoCpf || '');
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
   const [area, setArea] = useState('');
@@ -47,7 +47,7 @@ export default function CancelamentosPage({ usuario, showToast, onVoltar, pessoa
     try {
       // Chama o serviço passando o objeto completo
       await enviarCancelamento({
-        solicitante: usuario, // Envia quem está logado no sistema
+        solicitante: usuarioInput, // Envia quem está logado no sistema
         cpf,
         nome,
         telefone,
@@ -87,7 +87,7 @@ export default function CancelamentosPage({ usuario, showToast, onVoltar, pessoa
 
   return (
     <div className="animate-in slide-in-from-right duration-300 pb-20">
-      <button onClick={onVoltar} className="text-zinc-500 font-bold text-xs uppercase mb-2 hover:text-zinc-800">← Voltar</button>
+      <button onClick={() => setActiveTab('home')} className="text-zinc-500 font-bold text-xs uppercase mb-2 hover:text-zinc-800">← Voltar</button>
       
       <h2 className="text-xl font-black uppercase italic mb-4 text-zinc-900">Cancelamento de Compra</h2>
       
@@ -103,10 +103,11 @@ export default function CancelamentosPage({ usuario, showToast, onVoltar, pessoa
                 type="text" 
                 placeholder="Digite o CPF" 
                 maxLength={11} 
-                className={inputStyle} 
-                value={cpf} 
-                onChange={(e) => setCpf(e.target.value)} 
-              />
+	                className={inputStyle} 
+	                value={cpf} 
+	                onChange={(e) => setCpf(e.target.value)}
+                  readOnly={!isAdmin && !!usuarioLogadoCpf}
+	              />
           </div>
 
           {/* Nome Identificado (apenas leitura) */}

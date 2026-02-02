@@ -5,6 +5,8 @@ import { criarPedidosEmLote } from '../../servicos/pedidosService';
 
 const NovoPedidoPage = ({ 
   usuarioInput, 
+  usuarioLogadoCpf,
+  isAdmin,
   pessoasCadastradas, 
   produtosLancados, 
   siteFiltro, 
@@ -13,7 +15,7 @@ const NovoPedidoPage = ({
   setActiveTab,
   onNotificarAprovador
 }) => {
-  const [cpfPedido, setCpfPedido] = useState('');
+  const [cpfPedido, setCpfPedido] = useState(usuarioLogadoCpf || '');
   const [nomePedido, setNomePedido] = useState('');
   const [telefonePedido, setTelefonePedido] = useState('');
   const [areaPedido, setAreaPedido] = useState('');
@@ -134,7 +136,8 @@ const NovoPedidoPage = ({
                   : 'bg-zinc-50 border-zinc-200 focus:border-yellow-500/50 font-bold'
               }`} 
               value={cpfPedido} 
-              onChange={(e) => setCpfPedido(e.target.value)} 
+              onChange={(e) => setCpfPedido(e.target.value)}
+              readOnly={!isAdmin && !!usuarioLogadoCpf}
             />
           </div>
           <div className="space-y-2">

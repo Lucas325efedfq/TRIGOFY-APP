@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, UserPlus, Users, PackagePlus, Camera, Image as ImageIcon, ArrowLeft, Plus, Database } from 'lucide-react';
+import { Trash2, UserPlus, Users, PackagePlus, ArrowLeft, Database } from 'lucide-react';
 import { TABLES, getHeaders, getBaseUrl } from '../../configuracao/airtable';
 
 const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
@@ -14,6 +14,7 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
   const [novaSenha, setNovaSenha] = useState('');
   const [novaOrigem, setNovaOrigem] = useState('VR');
   const [novaFuncao, setNovaFuncao] = useState('USER');
+  const [novoUsuarioCpf, setNovoUsuarioCpf] = useState('');
   const [usuariosCadastrados, setUsuariosCadastrados] = useState([]);
 
   const [novoProdNome, setNovoProdNome] = useState('');
@@ -59,7 +60,8 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
           id: reg.id,
           usuario: reg.fields.usuario || '',
           origem: reg.fields.origem || '',
-          funcao: reg.fields.funcao || ''
+          funcao: reg.fields.funcao || '',
+          cpf: reg.fields.cpf || ''
         })));
       }
 
@@ -113,8 +115,8 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
   };
 
   const salvarUsuario = async () => {
-    if (!novoUsuario || !novaSenha) {
-      showToast?.("Preencha Usuário e Senha.", "error");
+    if (!novoUsuario || !novaSenha || !novoUsuarioCpf) {
+      showToast?.("Preencha Usuário, Senha e CPF.", "error");
       return;
     }
     setCarregando(true);
@@ -127,13 +129,15 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
             usuario: novoUsuario.trim(),
             senha: novaSenha,
             origem: novaOrigem,
-            funcao: novaFuncao
+            funcao: novaFuncao,
+            cpf: novoUsuarioCpf.replace(/\D/g, '')
           }
         })
       });
       if (response.ok) {
         setNovoUsuario('');
         setNovaSenha('');
+        setNovoUsuarioCpf('');
         await buscarDadosAirtable();
         showToast?.("✅ Login criado com sucesso!", "success");
       }
@@ -208,7 +212,6 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
         <h2 className={`text-xl font-black uppercase italic tracking-tighter ${textMain}`}>Painel <span className="text-yellow-500">Admin</span></h2>
       </div>
 
-      {/* Seleção de Aba Interna */}
       <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
         {[
           { id: 'pessoas', icon: Users, label: 'Pessoas' },
@@ -281,33 +284,33 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
             <div className="space-y-4">
               <input type="text" placeholder="Usuário" className={`w-full p-4 ${bgInput} border ${borderColor} rounded-2xl outline-none focus:border-yellow-500/50 transition-all ${textMain} font-bold`} value={novoUsuario} onChange={(e) => setNovoUsuario(e.target.value)} />
               <input type="password" placeholder="Senha" className={`w-full p-4 ${bgInput} border ${borderColor} rounded-2xl outline-none focus:border-yellow-500/50 transition-all ${textMain} font-bold`} value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} />
-              <div className="flex gap-3">
+              <input type="text" placeholder="CPF do Usuário (Obrigatório)" className={`w-full p-4 ${bgInput} border ${borderColor} rounded-2xl outline-none focus:border-yellow-500/50 transition-all ${textMain} font-bold`} value={novoUsuarioCpf} onChange={(e) => setNovoUsuarioCpf(e.target.value)} />
+              
+              <div className="grid grid-cols-2 gap-4">
                 <select className={`flex-1 p-4 ${bgInput} border ${borderColor} rounded-2xl outline-none ${textMain} font-bold text-xs`} value={novaOrigem} onChange={(e) => setNovaOrigem(e.target.value)}>
                   <option value="VR">UNIDADE VR</option>
                   <option value="RIO/SP">UNIDADE RIO/SP</option>
                 </select>
                 <select className={`flex-1 p-4 ${bgInput} border ${borderColor} rounded-2xl outline-none ${textMain} font-bold text-xs`} value={novaFuncao} onChange={(e) => setNovaFuncao(e.target.value)}>
-                  <option value="USER">USUÁRIO</option>
+                  <option value="USER">USUÁRIO COMUM</option>
                   <option value="APROVADOR">APROVADOR</option>
-                  <option value="ADMIN">ADMIN</option>
+                  <option value="ADMIN">ADMINISTRADOR</option>
                 </select>
               </div>
+
               <button onClick={salvarUsuario} className="w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50" disabled={carregando}>
-                {carregando ? "Processando..." : "Criar Login"}
+                {carregando ? "Criando..." : "Gerar Acesso"}
               </button>
             </div>
 
             <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
-              <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] ${textSub}`}>Logins Ativos ({usuariosCadastrados.length})</h4>
+              <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] ${textSub}`}>Acessos Criados ({usuariosCadastrados.length})</h4>
               <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                 {usuariosCadastrados.map(u => (
                   <div key={u.id} className={`flex justify-between items-center p-4 ${bgInput} rounded-2xl border ${borderColor} group hover:border-yellow-500/30 transition-all`}>
                     <div>
                       <p className={`font-black uppercase text-[11px] tracking-tight ${textMain}`}>{u.usuario}</p>
-                      <div className="flex gap-2 mt-1">
-                        <span className="text-[8px] font-black px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-700 rounded text-zinc-500">{u.origem}</span>
-                        <span className="text-[8px] font-black px-1.5 py-0.5 bg-yellow-500/10 text-yellow-600 rounded">{u.funcao}</span>
-                      </div>
+                      <p className={`text-[10px] font-bold ${textSub}`}>{u.origem} • {u.funcao} • {u.cpf}</p>
                     </div>
                     <button onClick={() => excluirRegistro(TABLES.USUARIOS, u.id)} className="text-zinc-400 hover:text-rose-500 p-2 hover:bg-rose-500/10 rounded-xl transition-all">
                       <Trash2 size={16}/>
@@ -330,29 +333,31 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
 
             <div className="space-y-4">
               <input type="text" placeholder="Nome do Produto" className={`w-full p-4 ${bgInput} border ${borderColor} rounded-2xl outline-none focus:border-yellow-500/50 transition-all ${textMain} font-bold`} value={novoProdNome} onChange={(e) => setNovoProdNome(e.target.value)} />
-              <div className="flex gap-3">
-                <input type="number" placeholder="Preço" className={`flex-1 p-4 ${bgInput} border ${borderColor} rounded-2xl outline-none focus:border-yellow-500/50 transition-all ${textMain} font-bold`} value={novoProdPreco} onChange={(e) => setNovoProdPreco(e.target.value)} />
-                <select className={`flex-1 p-4 ${bgInput} border ${borderColor} rounded-2xl outline-none ${textMain} font-bold text-xs`} value={novoProdSite} onChange={(e) => setNovoProdSite(e.target.value)}>
-                  <option value="AMBOS">AMBOS</option>
+              <div className="grid grid-cols-2 gap-4">
+                <input type="number" placeholder="Preço" className={`w-full p-4 ${bgInput} border ${borderColor} rounded-2xl outline-none focus:border-yellow-500/50 transition-all ${textMain} font-bold`} value={novoProdPreco} onChange={(e) => setNovoProdPreco(e.target.value)} />
+                <select className={`w-full p-4 ${bgInput} border ${borderColor} rounded-2xl outline-none ${textMain} font-bold text-xs`} value={novoProdSite} onChange={(e) => setNovoProdSite(e.target.value)}>
                   <option value="VR">VR</option>
                   <option value="RIO/SP">RIO/SP</option>
+                  <option value="AMBOS">AMBOS</option>
                 </select>
               </div>
+              <input type="text" placeholder="URL da Imagem (Opcional)" className={`w-full p-4 ${bgInput} border ${borderColor} rounded-2xl outline-none focus:border-yellow-500/50 transition-all ${textMain} font-bold`} value={novoProdImagem} onChange={(e) => setNovoProdImagem(e.target.value)} />
+              
               <button onClick={salvarProduto} className="w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50" disabled={carregando}>
-                {carregando ? "Processando..." : "Cadastrar Produto"}
+                {carregando ? "Cadastrando..." : "Salvar Produto"}
               </button>
             </div>
 
             <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
-              <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] ${textSub}`}>Catálogo Atual ({produtosCadastrados.length})</h4>
+              <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] ${textSub}`}>Produtos no Catálogo ({produtosCadastrados.length})</h4>
               <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-                {produtosCadastrados.map(p => (
-                  <div key={p.id} className={`flex justify-between items-center p-4 ${bgInput} rounded-2xl border ${borderColor} group hover:border-yellow-500/30 transition-all`}>
+                {produtosCadastrados.map(prod => (
+                  <div key={prod.id} className={`flex justify-between items-center p-4 ${bgInput} rounded-2xl border ${borderColor} group hover:border-yellow-500/30 transition-all`}>
                     <div>
-                      <p className={`font-black uppercase text-[11px] tracking-tight ${textMain}`}>{p.nome}</p>
-                      <p className="text-[10px] font-bold text-yellow-600">R$ {p.preco} • {p.site}</p>
+                      <p className={`font-black uppercase text-[11px] tracking-tight ${textMain}`}>{prod.nome}</p>
+                      <p className={`text-[10px] font-bold ${textSub}`}>R$ {prod.preco} • {prod.site}</p>
                     </div>
-                    <button onClick={() => excluirRegistro(TABLES.PRODUTOS, p.id)} className="text-zinc-400 hover:text-rose-500 p-2 hover:bg-rose-500/10 rounded-xl transition-all">
+                    <button onClick={() => excluirRegistro(TABLES.PRODUTOS, prod.id)} className="text-zinc-400 hover:text-rose-500 p-2 hover:bg-rose-500/10 rounded-xl transition-all">
                       <Trash2 size={16}/>
                     </button>
                   </div>

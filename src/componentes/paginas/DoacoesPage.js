@@ -4,13 +4,15 @@ import { criarDoacao } from '../../servicos/doacoesService';
 
 const DoacoesPage = ({ 
   usuarioInput, 
+  usuarioLogadoCpf,
+  isAdmin,
   pessoasCadastradas, 
   temaEscuro, 
   showToast, 
   setActiveTab,
   onNotificarAprovador
 }) => {
-  const [cpfDoacao, setCpfDoacao] = useState('');
+  const [cpfDoacao, setCpfDoacao] = useState(usuarioLogadoCpf || '');
   const [nomeDoacao, setNomeDoacao] = useState('');
   const [areaDoacao, setAreaDoacao] = useState('');
   const [produtoDoacao, setProdutoDoacao] = useState('');
@@ -115,7 +117,8 @@ const DoacoesPage = ({
               maxLength={11} 
               className={`w-full p-4 rounded-2xl outline-none border ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} 
               value={cpfDoacao} 
-              onChange={(e) => setCpfDoacao(e.target.value)} 
+              onChange={(e) => setCpfDoacao(e.target.value)}
+              readOnly={!isAdmin && !!usuarioLogadoCpf}
             />
           </div>
           <div>

@@ -108,6 +108,7 @@ export const fetchUsuarios = async () => {
     usuario: reg.fields.usuario || '',
     senha: reg.fields.senha || '',
     origem: reg.fields.origem || 'VR',
-    funcao: reg.fields.funcao || 'USER'
+    funcao: reg.fields.funcao || 'USER',
+    cpf: reg.fields.cpf || ''
   }));
 };
