@@ -16,7 +16,7 @@ export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAd
   const [unidade, setUnidade] = useState('CX');
   const [motivo, setMotivo] = useState('');
 
-  // Busca automática do nome ao digitar CPF (se a lista de pessoas tiver sido carregada)
+  // Busca automática do nome ao digitar CPF
   useEffect(() => {
     if (!isAdmin && usuarioLogadoCpf && cpf !== usuarioLogadoCpf) {
       setCpf(usuarioLogadoCpf);
@@ -28,7 +28,7 @@ export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAd
       const pessoa = pessoasCadastradas.find(p => p.cpf === cpfLimpo);
       if (pessoa) {
         setNome(pessoa.nome);
-        if (pessoa.area) setArea(pessoa.area); // Preenche a área se existir no cadastro
+        if (pessoa.area) setArea(pessoa.area);
       } else {
         setNome('');
       }
@@ -36,13 +36,12 @@ export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAd
   }, [cpf, pessoasCadastradas, isAdmin, usuarioLogadoCpf]);
 
   const handleSubmit = async () => {
-    // 1. Validação dos campos visuais
-    if (!nome || !telefone || !area || !produto || !qtde || !motivo) {
-      showToast("Preencha todos os campos obrigatórios.", "error");
+    // Validação de todos os campos obrigatórios conforme solicitado
+    if (!cpf || !nome || !telefone || !area || !produto || !qtde || !motivo) {
+      showToast("Preencha todos os campos do formulário para prosseguir.", "error");
       return;
     }
 
-    // 2. Validação do usuário logado (passado pelo arquivo pai)
     if (!usuarioInput) {
       showToast("Erro crítico: Usuário não identificado. Faça login novamente.", "error");
       return;
@@ -50,9 +49,8 @@ export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAd
 
     setCarregando(true);
     try {
-      // Chama o serviço passando o objeto completo
       await enviarCancelamento({
-        solicitante: usuarioInput, // Envia quem está logado no sistema
+        solicitante: usuarioInput,
         cpf,
         nome,
         telefone,
@@ -65,8 +63,8 @@ export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAd
 
       showToast("✅ Solicitação enviada com sucesso!", "success");
       
-      // Limpa os campos após enviar
-      setCpf('');
+      // Limpa os campos após enviar (mantendo CPF se não for admin)
+      setCpf(isAdmin ? '' : (usuarioLogadoCpf || ''));
       setNome('');
       setTelefone('');
       setArea('');
@@ -75,11 +73,11 @@ export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAd
       setUnidade('CX');
       setMotivo('');
       
+      setActiveTab('home');
     } catch (error) {
       console.error(error);
-      // Tenta identificar o erro comum de nome de coluna errado
       if (error.message && error.message.includes('422')) {
-        showToast("Erro de configuração: Verifique os nomes das colunas no Airtable.", "error");
+        showToast("Erro de configuração no banco de dados.", "error");
       } else {
         showToast("Erro de conexão ao enviar.", "error");
       }
@@ -98,26 +96,26 @@ export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAd
       
       <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm space-y-4">
           <div className="bg-red-50 p-4 rounded-xl mb-4 border border-red-100">
-              <p className="text-red-600 text-xs font-bold uppercase text-center">Preencha os dados abaixo para cancelar um item.</p>
+              <p className="text-red-600 text-xs font-bold uppercase text-center">Todos os campos abaixo são de preenchimento obrigatório.</p>
           </div>
 
           {/* CPF */}
           <div>
-              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">CPF (Apenas números)</label>
+              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">CPF (Apenas números) *</label>
               <input 
                 type="text" 
                 placeholder="Digite o CPF" 
                 maxLength={11} 
-	                className={inputStyle} 
-	                value={cpf} 
-	                onChange={(e) => setCpf(e.target.value)}
-                  readOnly={!isAdmin && !!usuarioLogadoCpf}
-	              />
+                className={inputStyle} 
+                value={cpf} 
+                onChange={(e) => setCpf(e.target.value)}
+                readOnly={!isAdmin && !!usuarioLogadoCpf}
+              />
           </div>
 
-          {/* Nome Identificado (apenas leitura) */}
+          {/* Nome Identificado */}
           <div>
-              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Nome Identificado</label>
+              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Nome Identificado *</label>
               <input 
                 type="text" 
                 readOnly 
@@ -129,28 +127,28 @@ export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAd
 
           {/* Telefone */}
           <div>
-              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Seu Telefone / WhatsApp</label>
+              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Seu Telefone / WhatsApp *</label>
               <input type="text" placeholder="(XX) 9XXXX-XXXX" className={inputStyle} value={telefone} onChange={(e) => setTelefone(e.target.value)} />
           </div>
 
           {/* Área */}
           <div>
-              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Sua Área / Setor</label>
+              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Sua Área / Setor *</label>
               <input type="text" placeholder="Ex: Logística, RH, Cozinha..." className={inputStyle} value={area} onChange={(e) => setArea(e.target.value)} />
           </div>
           
           <div className="pt-4 border-t border-dashed border-zinc-200 mt-2">
-            <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Produto a Cancelar</label>
+            <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Produto a Cancelar *</label>
             <input type="text" placeholder="Ex: Arroz Tipo 1" className={inputStyle} value={produto} onChange={(e) => setProduto(e.target.value)} />
           </div>
 
           <div className="flex gap-2">
               <div className="flex-1">
-                  <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Quantidade</label>
+                  <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Quantidade *</label>
                   <input type="number" placeholder="0" className={inputStyle} value={qtde} onChange={(e) => setQtde(e.target.value)} />
               </div>
               <div className="w-1/3">
-                  <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Unidade</label>
+                  <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Unidade *</label>
                   <select className={inputStyle} value={unidade} onChange={(e) => setUnidade(e.target.value)}>
                       <option value="CX">CX</option>
                       <option value="KG">KG</option>
@@ -160,7 +158,7 @@ export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAd
           </div>
 
           <div>
-              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Motivo do Cancelamento</label>
+              <label className="text-[10px] font-black text-zinc-400 uppercase px-1">Motivo do Cancelamento *</label>
               <textarea 
                 placeholder="Descreva por que deseja cancelar..." 
                 rows={3} 
@@ -171,9 +169,9 @@ export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAd
           </div>
 
           <button 
-              disabled={!nome || !produto || !motivo || carregando}
+              disabled={!cpf || !nome || !telefone || !area || !produto || !qtde || !motivo || carregando}
               onClick={handleSubmit}
-              className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all active:scale-95 ${nome && produto ? 'bg-red-500 text-white shadow-red-500/20' : 'bg-zinc-200 text-zinc-400'}`}
+              className={`w-full py-4 rounded-2xl font-black uppercase shadow-lg transition-all active:scale-95 ${(!cpf || !nome || !telefone || !area || !produto || !qtde || !motivo) ? 'bg-zinc-200 text-zinc-400' : 'bg-red-500 text-white shadow-red-500/20'}`}
           >
               {carregando ? "ENVIANDO..." : "SOLICITAR CANCELAMENTO"}
           </button>
