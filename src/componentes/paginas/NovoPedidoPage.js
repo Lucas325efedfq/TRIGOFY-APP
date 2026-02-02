@@ -65,7 +65,7 @@ const NovoPedidoPage = ({
       }));
 
       await criarPedidosEmLote(pedidos);
-      showToast("✅ PEDIDO REALIZADO COM SUCESSO!", "success");
+      showToast("✅ SOLICITAÇÃO ENVIADA PARA APROVAÇÃO!", "success");
       
       if (onNotificarAprovador) {
         onNotificarAprovador({

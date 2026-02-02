@@ -3,7 +3,9 @@ import {
   LayoutGrid, 
   ShoppingBag, 
   Settings,
-  BookOpen
+  BookOpen,
+  CheckCircle2,
+  Database
 } from 'lucide-react';
 
 const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro, totalPendencias }) => {
@@ -17,8 +19,12 @@ const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro,
     navItems.push({ id: 'historico', icon: BookOpen, label: 'Histórico' });
   }
 
+  if (isAdmin || isAprovador) {
+    navItems.push({ id: 'aprovacoes', icon: CheckCircle2, label: 'Aprovações' });
+  }
+
   if (isAdmin) {
-    navItems.push({ id: 'config', icon: Settings, label: 'Admin' });
+    navItems.push({ id: 'admin-painel', icon: Database, label: 'Admin' });
   }
 
   return (
@@ -48,7 +54,7 @@ const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro,
               
               <div className="relative">
                 <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-                {item.id === 'config' && totalPendencias > 0 && (
+                {item.id === 'aprovacoes' && totalPendencias > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white dark:border-zinc-900 animate-bounce">
                     {totalPendencias}
                   </span>

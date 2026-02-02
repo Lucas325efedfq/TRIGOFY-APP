@@ -75,7 +75,7 @@ const DoacoesPage = ({
       };
 
       await criarDoacao(dados);
-      showToast("✅ DOAÇÃO REGISTRADA COM SUCESSO!", "success");
+      showToast("✅ SOLICITAÇÃO ENVIADA PARA APROVAÇÃO!", "success");
       
       if (onNotificarAprovador) {
         onNotificarAprovador({

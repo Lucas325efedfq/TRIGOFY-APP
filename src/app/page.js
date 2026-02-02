@@ -34,6 +34,7 @@ import SuportePage from '../componentes/paginas/SuportePage';
 import AdminPainelPage from '../componentes/paginas/AdminPainelPage';
 import SelecaoUnidadePage from '../componentes/paginas/SelecaoUnidadePage';
 import HistoricoPage from '../componentes/paginas/HistoricoPage';
+import AprovacoesPage from '../componentes/paginas/AprovacoesPage';
 
 
 // Constants
@@ -277,8 +278,17 @@ export default function TrigofyApp() {
           />
         )}
 
+        {activeTab === 'aprovacoes' && (isAdmin || isAprovador) && (
+          <AprovacoesPage 
+            pedidosParaAprovar={pedidosParaAprovar}
+            onAtualizarStatus={handleAtualizarStatus}
+            temaEscuro={temaEscuro}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
         {/* Outras páginas */}
-        {activeTab !== 'home' && activeTab !== 'compras-aba' && activeTab !== 'novo' && activeTab !== 'doacoes' && activeTab !== 'cancelamentos' && activeTab !== 'suporte' && activeTab !== 'admin-painel' && activeTab !== 'historico' && (
+        {activeTab !== 'home' && activeTab !== 'compras-aba' && activeTab !== 'novo' && activeTab !== 'doacoes' && activeTab !== 'cancelamentos' && activeTab !== 'suporte' && activeTab !== 'admin-painel' && activeTab !== 'historico' && activeTab !== 'aprovacoes' && (
           <div className={`${bgCard} p-6 rounded-3xl shadow-sm border`}>
             <p className={`${textMain} font-bold`}>
               Página: {activeTab}
