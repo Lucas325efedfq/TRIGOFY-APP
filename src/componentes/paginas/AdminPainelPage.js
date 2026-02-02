@@ -7,6 +7,7 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
   
   const [novoCpf, setNovoCpf] = useState('');
   const [novoNome, setNovoNome] = useState('');
+  const [novaArea, setNovaArea] = useState('');
   const [pessoasCadastradas, setPessoasCadastradas] = useState([]);
   
   const [novoUsuario, setNovoUsuario] = useState('');
@@ -48,7 +49,8 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
         setPessoasCadastradas(dataPessoas.records.map(reg => ({
           id: reg.id,
           cpf: reg.fields.cpf || '',
-          nome: reg.fields.nome || ''
+          nome: reg.fields.nome || '',
+          area: reg.fields.area || ''
         })));
       }
 
@@ -92,13 +94,15 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
         body: JSON.stringify({
           fields: {
             cpf: novoCpf.replace(/\D/g, ''),
-            nome: novoNome.toUpperCase().trim()
+            nome: novoNome.toUpperCase().trim(),
+            area: novaArea.trim()
           }
         })
       });
       if (response.ok) {
         setNovoCpf('');
         setNovoNome('');
+        setNovaArea('');
         await buscarDadosAirtable();
         showToast?.("✅ Pessoa cadastrada!", "success");
       }
@@ -240,6 +244,7 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
             <div className="space-y-4">
               <input type="text" placeholder="CPF (apenas números)" className={`w-full p-4 ${bgInput} border ${borderColor} rounded-2xl outline-none focus:border-yellow-500/50 transition-all ${textMain} font-bold`} value={novoCpf} onChange={(e) => setNovoCpf(e.target.value)} />
               <input type="text" placeholder="Nome Completo" className={`w-full p-4 ${bgInput} border ${borderColor} rounded-2xl outline-none focus:border-yellow-500/50 transition-all ${textMain} font-bold`} value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
+              <input type="text" placeholder="Área / Setor (Ex: Logística)" className={`w-full p-4 ${bgInput} border ${borderColor} rounded-2xl outline-none focus:border-yellow-500/50 transition-all ${textMain} font-bold`} value={novaArea} onChange={(e) => setNovaArea(e.target.value)} />
               <button onClick={salvarPessoa} className="w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50" disabled={carregando}>
                 {carregando ? "Processando..." : "Salvar na Nuvem"}
               </button>
@@ -252,7 +257,7 @@ const AdminPainelPage = ({ setActiveTab, temaEscuro, showToast }) => {
                   <div key={p.id} className={`flex justify-between items-center p-4 ${bgInput} rounded-2xl border ${borderColor} group hover:border-yellow-500/30 transition-all`}>
                     <div>
                       <p className={`font-black uppercase text-[11px] tracking-tight ${textMain}`}>{p.nome}</p>
-                      <p className={`text-[10px] font-bold ${textSub}`}>{p.cpf}</p>
+                      <p className={`text-[10px] font-bold ${textSub}`}>{p.cpf} • {p.area || 'Sem Área'}</p>
                     </div>
                     <button onClick={() => excluirRegistro(TABLES.PESSOAS, p.id)} className="text-zinc-400 hover:text-rose-500 p-2 hover:bg-rose-500/10 rounded-xl transition-all">
                       <Trash2 size={16}/>

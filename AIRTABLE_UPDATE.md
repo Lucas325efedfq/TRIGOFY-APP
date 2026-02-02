@@ -21,3 +21,15 @@ O aplicativo agora envia esses dois novos dados ao criar um pedido de compra. Se
 
 ### Dica
 Certifique-se de que não existam espaços extras antes ou depois dos nomes das colunas.
+
+---
+
+### Tabela: Pessoas (ou o nome que você definiu para `TABLES.PESSOAS`)
+
+Para que o cadastro de pessoas salve a área corretamente, adicione esta coluna na tabela de **Pessoas**:
+
+1.  **Coluna: `area`**
+    *   **Tipo**: Single line text (Texto de linha única)
+    *   **Descrição**: Armazena o setor ou área padrão do colaborador.
+
+Com isso, ao cadastrar uma pessoa no Painel Admin, a área será salva e aparecerá automaticamente quando ela fizer uma solicitação de compra ou doação.
