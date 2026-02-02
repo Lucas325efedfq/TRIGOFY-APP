@@ -60,8 +60,13 @@ const NovoPedidoPage = ({
   };
 
   const finalizarPedido = async () => {
-    if (!nomePedido || !telefonePedido || !areaPedido || !dataRetirada || cesta.length === 0) {
-      return showToast("Preencha todos os campos, incluindo área e data de retirada.", "error");
+    // Validação de todos os campos obrigatórios conforme solicitado
+    if (!cpfPedido || !nomePedido || !telefonePedido || !areaPedido || !dataRetirada) {
+      return showToast("Preencha todos os dados do formulário (CPF, Telefone, Área e Data).", "error");
+    }
+
+    if (cesta.length === 0) {
+      return showToast("Selecione pelo menos um produto no catálogo.", "error");
     }
 
     setCarregando(true);
@@ -132,7 +137,7 @@ const NovoPedidoPage = ({
         
         <div className="space-y-5">
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">CPF (Apenas números)</label>
+            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">CPF (Apenas números) *</label>
             <input 
               type="text" 
               placeholder="00000000000" 
@@ -148,7 +153,7 @@ const NovoPedidoPage = ({
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Nome Identificado</label>
+            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Nome Identificado *</label>
             <div className={`w-full p-4 border rounded-2xl font-bold ${
               temaEscuro ? 'bg-zinc-950/50 text-zinc-500 border-zinc-800' : 'bg-zinc-100 text-zinc-500 border-zinc-200'
             }`}>
@@ -156,7 +161,7 @@ const NovoPedidoPage = ({
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Telefone / WhatsApp</label>
+            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Telefone / WhatsApp *</label>
             <input 
               type="text" 
               placeholder="249XXXXXXXX" 
@@ -170,7 +175,7 @@ const NovoPedidoPage = ({
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Sua Área / Setor</label>
+            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Sua Área / Setor *</label>
             <input 
               type="text" 
               placeholder="Ex: Logística, Cozinha..." 
@@ -184,7 +189,7 @@ const NovoPedidoPage = ({
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Data Desejada de Retirada</label>
+            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Data Desejada de Retirada *</label>
             <input 
               type="date" 
               className={`w-full p-4 rounded-2xl outline-none border transition-all ${
