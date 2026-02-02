@@ -1,5 +1,9 @@
-"use client";
+'use client';
+
 import React, { useState, useEffect } from 'react';
+import { 
+  Moon, Sun, Lock, User, ArrowLeft, Save, Settings, Shield
+} from 'lucide-react';
 
 // Hooks
 import { useToast } from '../ganchos/useToast';
@@ -9,7 +13,8 @@ import { useTheme } from '../ganchos/useTheme';
 import { 
   fetchPessoas, 
   fetchProdutos, 
-  fetchUsuarios 
+  fetchUsuarios,
+  updateRecord
 } from '../servicos/airtableService';
 import { 
   buscarPedidosPendentes as buscarPedidosPendentesService,
@@ -65,6 +70,11 @@ export default function TrigofyApp() {
   const [meusPedidosHistorico, setMeusPedidosHistorico] = useState([]);
   const [pedidosParaAprovar, setPedidosParaAprovar] = useState([]);
   const [totalPendencias, setTotalPendencias] = useState(0);
+
+  // Estados locais para Configurações (integrado)
+  const [novaSenha, setNovaSenha] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [salvandoSenha, setSalvandoSenha] = useState(false);
   
   // Hooks customizados
   const { toast, showToast } = useToast();
@@ -100,7 +110,7 @@ export default function TrigofyApp() {
     setUsuarioLogadoFuncao(funcao);
     setUsuarioLogadoCpf(cpf || '');
     
-    // Busca o objeto completo do usuário para passar para a aba de configurações
+    // Busca o objeto completo do usuário para uso em configurações
     const obj = usuariosAutorizados.find(u => u.usuario === usuario);
     setUsuarioObjeto(obj);
 
@@ -156,68 +166,60 @@ export default function TrigofyApp() {
     }
   };
 
-  // Efeito para carregar pedidos quando necessário
-  useEffect(() => {
-    if (activeTab === 'historico' || activeTab === 'pedidos') {
-      carregarMeusPedidos();
+  const handleAlterarSenhaInterno = async () => {
+    if (!novaSenha || !confirmarSenha) return showToast("Preencha as senhas.", "error");
+    if (novaSenha !== confirmarSenha) return showToast("As senhas não coincidem.", "error");
+    
+    setSalvandoSenha(true);
+    try {
+      if (!usuarioObjeto?.id) {
+        showToast("Erro: Usuário não identificado. Tente relogar.", "error");
+        return;
+      }
+      await updateRecord('USUARIOS', usuarioObjeto.id, { senha: novaSenha });
+      showToast("✅ Senha alterada!", "success");
+      setNovaSenha('');
+      setConfirmarSenha('');
+    } catch (e) {
+      showToast("Erro ao salvar senha.", "error");
+    } finally {
+      setSalvandoSenha(false);
     }
-  }, [activeTab]);
-
-  useEffect(() => {
-    if (activeTab === 'aprovacoes') {
-      carregarPedidosPendentes();
-    }
-  }, [activeTab]);
+  };
 
   const isAdmin = usuarioLogadoFuncao === 'ADMIN';
   const isAprovador = usuarioLogadoFuncao === 'APROVADOR';
 
-  // Atualiza contagem de pendências periodicamente para aprovadores
-  useEffect(() => {
-    if (estaLogado && (isAdmin || isAprovador)) {
-      const atualizarContagem = async () => {
-        const count = await buscarPendenciasContagem(buscarPedidosPendentesService, buscarDoacoesPendentes);
-        setTotalPendencias(count);
-      };
-      atualizarContagem();
-      const interval = setInterval(atualizarContagem, 60000); // A cada 1 minuto
-      return () => clearInterval(interval);
-    }
-  }, [estaLogado, isAdmin, isAprovador]);
-
-  // Renderização
   if (!estaLogado) {
     return (
-      <>
+      <div className={bgMain}>
+        <LoginPage onLogin={handleLogin} usuariosAutorizados={usuariosAutorizados} />
         <Toast toast={toast} />
-        <LoginPage 
-          onLogin={handleLogin}
-          usuariosAutorizados={usuariosAutorizados}
-          temaEscuro={temaEscuro}
-        />
-      </>
+      </div>
     );
   }
 
   return (
-    <div className={`min-h-screen ${bgMain}`}>
-      <Toast toast={toast} />
-      
+    <div className={`min-h-screen ${bgMain} transition-colors duration-500`}>
       <Header 
-        usuarioInput={usuarioInput}
+        usuarioInput={usuarioInput} 
+        usuarioLogadoOrigem={usuarioLogadoOrigem}
+        usuarioLogadoFuncao={usuarioLogadoFuncao}
+        onLogout={handleLogout}
         temaEscuro={temaEscuro}
         toggleTheme={toggleTheme}
-        onLogout={handleLogout}
       />
 
-      <main className="p-4 max-w-2xl mx-auto">
+      <main className="container mx-auto px-4 pt-24 pb-32">
+        <Toast toast={toast} />
+
         {activeTab === 'home' && (
           <HomePage 
+            usuarioInput={usuarioInput}
+            usuarioLogadoFuncao={usuarioLogadoFuncao}
             setActiveTab={setActiveTab}
-            setSiteFiltro={setSiteFiltro}
-            isAdmin={isAdmin}
-            isAprovador={isAprovador}
             temaEscuro={temaEscuro}
+            totalPendencias={totalPendencias}
           />
         )}
 
@@ -234,13 +236,13 @@ export default function TrigofyApp() {
             usuarioInput={usuarioInput}
             usuarioLogadoCpf={usuarioLogadoCpf}
             isAdmin={isAdmin}
+            siteFiltro={siteFiltro}
             pessoasCadastradas={pessoasCadastradas}
             produtosLancados={produtosLancados}
-            siteFiltro={siteFiltro}
             temaEscuro={temaEscuro}
             showToast={showToast}
             setActiveTab={setActiveTab}
-            onNotificarAprovador={(dados) => enviarNotificacaoWhatsApp('PEDIDO', dados)}
+            onNotificarAprovador={enviarNotificacaoWhatsApp}
           />
         )}
 
@@ -253,7 +255,7 @@ export default function TrigofyApp() {
             temaEscuro={temaEscuro}
             showToast={showToast}
             setActiveTab={setActiveTab}
-            onNotificarAprovador={(dados) => enviarNotificacaoWhatsApp('DOACAO', dados)}
+            onNotificarAprovador={enviarNotificacaoWhatsApp}
           />
         )}
 
@@ -303,27 +305,68 @@ export default function TrigofyApp() {
         )}
 
         {activeTab === 'configuracoes' && (
-          <ConfiguracoesPage 
-            usuarioLogado={usuarioObjeto || { usuario: usuarioInput, funcao: usuarioLogadoFuncao, origem: usuarioLogadoOrigem }}
-            temaEscuro={temaEscuro}
-            toggleTheme={toggleTheme}
-            showToast={showToast}
-            setActiveTab={setActiveTab}
-          />
+          <div className="animate-in fade-in duration-500 pb-32 space-y-6">
+            <div className="flex items-center justify-between">
+              <button onClick={() => setActiveTab('home')} className={`${textSub} flex items-center gap-2 font-bold text-xs uppercase`}>
+                <ArrowLeft size={16} /> Voltar
+              </button>
+              <h2 className={`text-lg font-black uppercase italic ${textMain}`}>Ajustes</h2>
+            </div>
+
+            <div className={`${bgCard} p-6 rounded-3xl border shadow-xl`}>
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center text-yellow-500">
+                  <User size={24} />
+                </div>
+                <div>
+                  <h3 className={`font-black uppercase ${textMain}`}>{usuarioInput || 'Usuário'}</h3>
+                  <p className={`text-[10px] font-bold uppercase opacity-60 ${textSub}`}>
+                    {usuarioLogadoFuncao} • {usuarioLogadoOrigem}
+                  </p>
+                </div>
+              </div>
+
+              <button onClick={toggleTheme} className={`w-full flex items-center justify-between p-4 rounded-2xl border ${bgMain}`}>
+                <div className="flex items-center gap-3">
+                  {temaEscuro ? <Moon className="text-yellow-500" size={20} /> : <Sun className="text-yellow-500" size={20} />}
+                  <span className={`font-bold text-sm ${textMain}`}>Modo Escuro</span>
+                </div>
+                <div className={`w-10 h-5 rounded-full relative ${temaEscuro ? 'bg-yellow-500' : 'bg-zinc-300'}`}>
+                  <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${temaEscuro ? 'right-1' : 'left-1'}`} />
+                </div>
+              </button>
+            </div>
+
+            <div className={`${bgCard} p-6 rounded-3xl border shadow-xl space-y-4`}>
+              <div className="flex items-center gap-3 mb-2">
+                <Lock className="text-rose-500" size={20} />
+                <h3 className={`font-black uppercase italic ${textMain}`}>Segurança</h3>
+              </div>
+              <input 
+                type="password" placeholder="Nova Senha" 
+                className={`w-full p-4 ${bgMain} border rounded-2xl outline-none ${textMain} font-bold`} 
+                value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} 
+              />
+              <input 
+                type="password" placeholder="Confirmar Senha" 
+                className={`w-full p-4 ${bgMain} border rounded-2xl outline-none ${textMain} font-bold`} 
+                value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value)} 
+              />
+              <button 
+                onClick={handleAlterarSenhaInterno} disabled={salvandoSenha}
+                className="w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 py-4 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-2"
+              >
+                {salvandoSenha ? "Salvando..." : <><Save size={16} /> Salvar Senha</>}
+              </button>
+            </div>
+          </div>
         )}
 
-        {/* Outras páginas */}
+        {/* Fallback para abas não implementadas */}
         {activeTab !== 'home' && activeTab !== 'compras-aba' && activeTab !== 'novo' && activeTab !== 'doacoes' && activeTab !== 'cancelamentos' && activeTab !== 'suporte' && activeTab !== 'admin-painel' && activeTab !== 'historico' && activeTab !== 'aprovacoes' && activeTab !== 'configuracoes' && (
           <div className={`${bgCard} p-6 rounded-3xl shadow-sm border`}>
-            <p className={`${textMain} font-bold`}>
-              Página: {activeTab}
-            </p>
-            <button 
-              onClick={() => setActiveTab('home')}
-              className="mt-4 px-4 py-2 bg-yellow-500 text-white rounded-xl font-bold"
-            >
-              Voltar ao Menu
-            </button>
+            <p className={`${textMain} font-bold`}>Página: {activeTab}</p>
+            <button onClick={() => setActiveTab('home')} className="mt-4 px-4 py-2 bg-yellow-500 text-white rounded-xl font-bold">Voltar ao Menu</button>
           </div>
         )}
       </main>
