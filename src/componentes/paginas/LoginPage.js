@@ -25,16 +25,18 @@ const LoginPage = ({
     }
   };
 
-  const bgMain = temaEscuro ? 'bg-zinc-950' : 'bg-zinc-50';
-  const bgCard = temaEscuro ? 'bg-zinc-900/50' : 'bg-white';
+  const bgCard = temaEscuro ? 'bg-zinc-950/80' : 'bg-white/90';
   const textMain = temaEscuro ? 'text-white' : 'text-zinc-900';
 
   return (
-    <div className={`min-h-screen ${bgMain} flex items-center justify-center p-6 relative overflow-hidden`}>
-      {/* Background Decorative Elements */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-yellow-500/10 blur-[100px] rounded-full" />
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-yellow-500/5 blur-[100px] rounded-full" />
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Imagem de Fundo com Overlay */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700"
+        style={{ backgroundImage: "url('/bg-login.jpg')" }}
+      >
+        {/* Overlay para garantir contraste */}
+        <div className={`absolute inset-0 ${temaEscuro ? 'bg-black/60' : 'bg-white/20'} backdrop-blur-[2px]`} />
       </div>
 
       <div className={`${bgCard} p-10 rounded-[2.5rem] shadow-2xl border ${temaEscuro ? 'border-zinc-800/50' : 'border-zinc-200/50'} w-full max-w-md space-y-8 relative z-10 backdrop-blur-xl animate-in fade-in zoom-in duration-700`}>
@@ -83,7 +85,7 @@ const LoginPage = ({
                 placeholder="Digite seu usuário"
                 className={`w-full pl-12 pr-4 py-4 rounded-2xl border outline-none font-bold transition-all ${
                   temaEscuro 
-                    ? 'bg-zinc-800/50 border-zinc-700 text-white focus:border-yellow-500/50 focus:bg-zinc-800' 
+                    ? 'bg-zinc-900/50 border-zinc-700 text-white focus:border-yellow-500/50 focus:bg-zinc-900' 
                     : 'bg-zinc-50 border-zinc-200 focus:border-yellow-500/50 focus:bg-white'
                 }`}
                 value={usuarioInput}
@@ -105,7 +107,7 @@ const LoginPage = ({
                 placeholder="••••••••"
                 className={`w-full pl-12 pr-4 py-4 rounded-2xl border outline-none font-bold transition-all ${
                   temaEscuro 
-                    ? 'bg-zinc-800/50 border-zinc-700 text-white focus:border-yellow-500/50 focus:bg-zinc-800' 
+                    ? 'bg-zinc-900/50 border-zinc-700 text-white focus:border-yellow-500/50 focus:bg-zinc-900' 
                     : 'bg-zinc-50 border-zinc-200 focus:border-yellow-500/50 focus:bg-white'
                 }`}
                 value={senha}
