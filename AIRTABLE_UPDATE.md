@@ -45,3 +45,32 @@ Para que o bloqueio de CPF funcione, você precisa vincular cada login a um CPF.
     *   **Descrição**: Armazena o CPF do usuário vinculado a esse login.
 
 **Importante**: Para os usuários já existentes, você deve preencher manualmente o CPF na planilha do Airtable para que a trava comece a funcionar para eles. Novos usuários cadastrados pelo Painel Admin já terão esse campo preenchido automaticamente.
+
+---
+
+### Tabela: Doações (ou o nome que você definiu para `TABLES.DOACOES`)
+
+Para suportar os novos campos obrigatórios do formulário de doações, certifique-se de que as seguintes colunas existam na sua tabela de Doações:
+
+1.  **Coluna: `area_produto`**
+    *   **Tipo**: Single line text
+    *   **Opções sugeridas**: Lasagna, Pesagem, Cozinha Central, Pane, Massa, Molho, Qualidade, P&D, Estoque, Suprimentos, Meio Ambiente.
+
+2.  **Coluna: `vencimento`**
+    *   **Tipo**: Date (Data)
+
+3.  **Coluna: `origem`**
+    *   **Tipo**: Single line text
+    *   **Opções sugeridas**: Insumo / Produto Fábrica, Produto Fora do Padrão, Produto Teste, Produto Distribuidora, Estoque de Contingência, Produto Varejo.
+
+4.  **Coluna: `local_armazenamento`**
+    *   **Tipo**: Single line text
+
+5.  **Coluna: `porcionamento`**
+    *   **Tipo**: Single line text
+
+6.  **Coluna: `codigo_produto`**
+    *   **Tipo**: Single line text
+
+7.  **Coluna: `foto_etiqueta`**
+    *   **Tipo**: Long text (Texto longo)

@@ -43,6 +43,10 @@ export const buscarDoacoesPendentes = async () => {
     origem: r.fields.origem,
     data: r.fields.data,
     status: r.fields.status,
+    local_armazenamento: r.fields.local_armazenamento,
+    quantidade_doacao: r.fields.quantidade_doacao,
+    unidade_medida: r.fields.unidade_medida,
+    porcionamento: r.fields.porcionamento,
     tipo: 'DOACAO'
   }));
 };

@@ -108,12 +108,28 @@ const AprovacoesPage = ({
                 ) : (
                   <>
                     <div>
-                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Área</p>
-                      <p className={`text-xs font-black ${textMain}`}>{item.area}</p>
+                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Área Produto</p>
+                      <p className={`text-xs font-black ${textMain}`}>{item.area_produto || '-'}</p>
                     </div>
                     <div>
                       <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Vencimento</p>
-                      <p className={`text-xs font-black ${textMain}`}>{item.vencimento}</p>
+                      <p className={`text-xs font-black ${textMain}`}>{formatarData(item.vencimento) || '-'}</p>
+                    </div>
+                    <div>
+                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Origem</p>
+                      <p className={`text-xs font-black ${textMain}`}>{item.origem || '-'}</p>
+                    </div>
+                    <div>
+                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Qtd / Unidade</p>
+                      <p className={`text-xs font-black ${textMain}`}>{item.quantidade_doacao} {item.unidade_medida}</p>
+                    </div>
+                    <div>
+                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Local Armazenamento</p>
+                      <p className={`text-xs font-black ${textMain}`}>{item.local_armazenamento || '-'}</p>
+                    </div>
+                    <div>
+                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Porcionamento</p>
+                      <p className={`text-xs font-black ${textMain}`}>{item.porcionamento || '-'}</p>
                     </div>
                     <div className="col-span-2">
                       <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Motivo</p>

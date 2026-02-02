@@ -20,11 +20,11 @@ const DoacoesPage = ({
   const [motivoDoacao, setMotivoDoacao] = useState('');
   const [areaProdutoDoacao, setAreaProdutoDoacao] = useState('');
   const [vencimentoDoacao, setVencimentoDoacao] = useState('');
-  const [origemDoacao, setOrigemDoacao] = useState('VR');
+  const [origemDoacao, setOrigemDoacao] = useState('');
   const [localDoacao, setLocalDoacao] = useState('');
   const [quantidadeDoacao, setQuantidadeDoacao] = useState('');
   const [unidadeDoacao, setUnidadeDoacao] = useState('CX');
-  const [porcionamentoDoacao, setPorcionamentoDoacao] = useState('NÃO');
+  const [porcionamentoDoacao, setPorcionamentoDoacao] = useState('');
   const [fotoDoacao, setFotoDoacao] = useState('');
   const [carregando, setCarregando] = useState(false);
 
@@ -59,8 +59,21 @@ const DoacoesPage = ({
   };
 
   const handleEnviar = async () => {
-    if (!nomeDoacao || !produtoDoacao || !quantidadeDoacao || !motivoDoacao) {
-      return showToast("Preencha os campos obrigatórios.", "error");
+    // Todos os campos agora são obrigatórios conforme solicitado
+    if (
+      !nomeDoacao || 
+      !produtoDoacao || 
+      !codigoDoacao ||
+      !quantidadeDoacao || 
+      !motivoDoacao || 
+      !areaProdutoDoacao || 
+      !vencimentoDoacao || 
+      !origemDoacao || 
+      !localDoacao || 
+      !porcionamentoDoacao ||
+      !fotoDoacao
+    ) {
+      return showToast("Todos os campos são obrigatórios, incluindo a foto.", "error");
     }
 
     setCarregando(true);
@@ -115,7 +128,7 @@ const DoacoesPage = ({
         
         <div className="space-y-4">
           <div>
-            <label className="text-[10px] font-black text-zinc-400 uppercase">CPF do Solicitante</label>
+            <label className="text-[10px] font-black text-zinc-400 uppercase">CPF do Solicitante *</label>
             <input 
               type="text" 
               placeholder="000.000.000-00" 
@@ -138,22 +151,64 @@ const DoacoesPage = ({
           
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] font-black text-zinc-400 uppercase">Produto</label>
+              <label className="text-[10px] font-black text-zinc-400 uppercase">Produto *</label>
               <input type="text" placeholder="Ex: Arroz" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={produtoDoacao} onChange={(e) => setProdutoDoacao(e.target.value)} />
             </div>
             <div>
-              <label className="text-[10px] font-black text-zinc-400 uppercase">Código (Opcional)</label>
+              <label className="text-[10px] font-black text-zinc-400 uppercase">Código *</label>
               <input type="text" placeholder="Ex: 1234" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={codigoDoacao} onChange={(e) => setCodigoDoacao(e.target.value)} />
             </div>
           </div>
 
+          <div>
+            <label className="text-[10px] font-black text-zinc-400 uppercase">Área do produto a ser doado *</label>
+            <select className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={areaProdutoDoacao} onChange={(e) => setAreaProdutoDoacao(e.target.value)}>
+              <option value="">Selecione a área...</option>
+              <option value="Lasagna">Lasagna</option>
+              <option value="Pesagem">Pesagem</option>
+              <option value="Cozinha Central">Cozinha Central</option>
+              <option value="Pane">Pane</option>
+              <option value="Massa">Massa</option>
+              <option value="Molho">Molho</option>
+              <option value="Qualidade">Qualidade</option>
+              <option value="P&D">P&D</option>
+              <option value="Estoque">Estoque</option>
+              <option value="Suprimentos">Suprimentos</option>
+              <option value="Meio Ambiente">Meio Ambiente</option>
+            </select>
+          </div>
+
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] font-black text-zinc-400 uppercase">Quantidade</label>
+              <label className="text-[10px] font-black text-zinc-400 uppercase">Data de Vencimento *</label>
+              <input type="date" className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={vencimentoDoacao} onChange={(e) => setVencimentoDoacao(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-zinc-400 uppercase">Origem do Produto *</label>
+              <select className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={origemDoacao} onChange={(e) => setOrigemDoacao(e.target.value)}>
+                <option value="">Selecione a origem...</option>
+                <option value="Insumo / Produto Fábrica">Insumo / Produto Fábrica</option>
+                <option value="Produto Fora do Padrão">Produto Fora do Padrão</option>
+                <option value="Produto Teste">Produto Teste</option>
+                <option value="Produto Distribuidora">Produto Distribuidora</option>
+                <option value="Estoque de Contingência">Estoque de Contingência</option>
+                <option value="Produto Varejo">Produto Varejo</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-[10px] font-black text-zinc-400 uppercase">Em qual câmara/local está armazenado? *</label>
+            <input type="text" placeholder="Ex: Câmara Fria 01" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={localDoacao} onChange={(e) => setLocalDoacao(e.target.value)} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[10px] font-black text-zinc-400 uppercase">Quantidade *</label>
               <input type="number" placeholder="0" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={quantidadeDoacao} onChange={(e) => setQuantidadeDoacao(e.target.value)} />
             </div>
             <div>
-              <label className="text-[10px] font-black text-zinc-400 uppercase">Unidade</label>
+              <label className="text-[10px] font-black text-zinc-400 uppercase">Unidade *</label>
               <select className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={unidadeDoacao} onChange={(e) => setUnidadeDoacao(e.target.value)}>
                 <option value="CX">CX</option>
                 <option value="KG">KG</option>
@@ -164,12 +219,17 @@ const DoacoesPage = ({
           </div>
 
           <div>
-            <label className="text-[10px] font-black text-zinc-400 uppercase">Motivo da Doação</label>
+            <label className="text-[10px] font-black text-zinc-400 uppercase">Como está porcionado o volume total? *</label>
+            <input type="text" placeholder="Ex: 10 pacotes de 1kg" className={`w-full p-4 rounded-2xl border outline-none ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50 font-bold'}`} value={porcionamentoDoacao} onChange={(e) => setPorcionamentoDoacao(e.target.value)} />
+          </div>
+
+          <div>
+            <label className="text-[10px] font-black text-zinc-400 uppercase">Motivo da Doação *</label>
             <textarea rows={2} placeholder="Ex: Vencimento próximo" className={`w-full p-4 rounded-2xl border outline-none font-bold ${temaEscuro ? 'bg-zinc-700 border-zinc-600 text-white' : 'bg-zinc-50'}`} value={motivoDoacao} onChange={(e) => setMotivoDoacao(e.target.value)} />
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-zinc-400 uppercase block">Foto da Etiqueta</label>
+            <label className="text-[10px] font-black text-zinc-400 uppercase block">Foto da Etiqueta *</label>
             <div className="relative">
               <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="foto-upload" />
               <label htmlFor="foto-upload" className={`w-full p-4 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${temaEscuro ? 'border-zinc-600 hover:bg-zinc-700' : 'border-zinc-200 hover:bg-zinc-50'}`}>
