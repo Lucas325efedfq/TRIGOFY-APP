@@ -27,6 +27,8 @@ const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro,
     navItems.push({ id: 'admin-painel', icon: Database, label: 'Admin' });
   }
 
+  navItems.push({ id: 'configuracoes', icon: Settings, label: 'Ajustes' });
+
   return (
     <div className="fixed bottom-6 left-0 right-0 flex justify-center px-4 z-50 pointer-events-none">
       <nav className={`flex items-center gap-1 p-2 rounded-2xl border shadow-2xl pointer-events-auto ${

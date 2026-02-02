@@ -296,6 +296,16 @@ export default function TrigofyApp() {
           />
         )}
 
+        {activeTab === 'configuracoes' && (
+          <ConfiguracoesPage 
+            usuarioLogado={usuarioObjeto || { usuario: usuarioInput, funcao: usuarioLogadoFuncao, origem: usuarioLogadoOrigem }}
+            temaEscuro={temaEscuro}
+            toggleTheme={toggleTheme}
+            showToast={showToast}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
         {/* Outras páginas */}
         {activeTab !== 'home' && activeTab !== 'compras-aba' && activeTab !== 'novo' && activeTab !== 'doacoes' && activeTab !== 'cancelamentos' && activeTab !== 'suporte' && activeTab !== 'admin-painel' && activeTab !== 'historico' && activeTab !== 'aprovacoes' && (
           <div className={`${bgCard} p-6 rounded-3xl shadow-sm border`}>
