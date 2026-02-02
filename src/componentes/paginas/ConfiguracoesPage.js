@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Moon, Sun, Lock, Shield, User, Bell, ArrowLeft, Save } from 'lucide-react';
-import { updateRecord } from '../../servicos/airtableService';
-import { TABLES } from '../../configuracao/airtable';
+import { Settings, Moon, Sun, Lock, Shield, User, ArrowLeft, Save } from 'lucide-react';
 
 const ConfiguracoesPage = ({ 
   usuarioLogado, 
@@ -14,6 +12,9 @@ const ConfiguracoesPage = ({
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [carregando, setCarregando] = useState(false);
 
+  // Fallback seguro para evitar erros de undefined
+  const user = usuarioLogado || {};
+  
   const textMain = temaEscuro ? 'text-white' : 'text-zinc-900';
   const textSub = temaEscuro ? 'text-zinc-400' : 'text-zinc-500';
   const bgCard = temaEscuro ? 'bg-zinc-900/50' : 'bg-white';
@@ -22,34 +23,41 @@ const ConfiguracoesPage = ({
 
   const handleAlterarSenha = async () => {
     if (!novaSenha || !confirmarSenha) {
-      return showToast("Preencha todos os campos de senha.", "error");
+      if (showToast) showToast("Preencha todos os campos de senha.", "error");
+      return;
     }
 
     if (novaSenha !== confirmarSenha) {
-      return showToast("As senhas não coincidem.", "error");
+      if (showToast) showToast("As senhas não coincidem.", "error");
+      return;
     }
 
     if (novaSenha.length < 4) {
-      return showToast("A senha deve ter pelo menos 4 caracteres.", "error");
+      if (showToast) showToast("A senha deve ter pelo menos 4 caracteres.", "error");
+      return;
     }
 
     setCarregando(true);
     try {
-      // O usuarioLogado deve conter o ID do registro no Airtable para o update
-      if (!usuarioLogado || !usuarioLogado.id) {
-        return showToast("Erro: ID do usuário não identificado. Tente relogar.", "error");
+      // Import dinâmico para evitar problemas de carregamento circular ou inicial
+      const { updateRecord, TABLES } = await import('../../servicos/airtableService');
+      
+      if (!user.id) {
+        if (showToast) showToast("Erro: ID do usuário não identificado. Tente relogar.", "error");
+        setCarregando(false);
+        return;
       }
 
-      await updateRecord(TABLES.USUARIOS, usuarioLogado.id, {
+      await updateRecord(TABLES.USUARIOS, user.id, {
         senha: novaSenha
       });
 
-      showToast("✅ Senha alterada com sucesso!", "success");
+      if (showToast) showToast("✅ Senha alterada com sucesso!", "success");
       setNovaSenha('');
       setConfirmarSenha('');
     } catch (error) {
       console.error(error);
-      showToast("Erro ao alterar senha. Tente novamente.", "error");
+      if (showToast) showToast("Erro ao conectar ao servidor.", "error");
     } finally {
       setCarregando(false);
     }
@@ -59,7 +67,7 @@ const ConfiguracoesPage = ({
     <div className="animate-in slide-in-from-right duration-700 pb-32 space-y-8">
       <div className="flex items-center justify-between">
         <button 
-          onClick={() => setActiveTab('home')} 
+          onClick={() => setActiveTab && setActiveTab('home')} 
           className={`flex items-center gap-2 ${textSub} font-black text-[10px] uppercase tracking-widest hover:text-yellow-500 transition-colors`}
         >
           <ArrowLeft size={14} /> Voltar
@@ -70,7 +78,6 @@ const ConfiguracoesPage = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Seção de Perfil e Tema */}
         <div className="space-y-6">
           <div className={`${bgCard} p-8 rounded-[2.5rem] border ${borderColor} shadow-xl relative overflow-hidden`}>
             <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-yellow-500/5 blur-3xl rounded-full" />
@@ -80,9 +87,9 @@ const ConfiguracoesPage = ({
                 <User size={24} strokeWidth={2.5} />
               </div>
               <div>
-                <h3 className={`text-lg font-black uppercase italic tracking-tight ${textMain}`}>{usuarioLogado?.usuario || 'Usuário'}</h3>
+                <h3 className={`text-lg font-black uppercase italic tracking-tight ${textMain}`}>{user.usuario || 'Usuário'}</h3>
                 <p className={`text-[10px] font-black uppercase tracking-widest ${textSub}`}>
-                  {usuarioLogado?.funcao || 'Nível'} • {usuarioLogado?.origem || 'Unidade'}
+                  {user.funcao || 'Perfil'} • {user.origem || 'Unidade'}
                 </p>
               </div>
             </div>
@@ -90,7 +97,7 @@ const ConfiguracoesPage = ({
             <div className="space-y-4">
               <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] ${textSub} mb-2`}>Aparência</h4>
               <button 
-                onClick={toggleTheme}
+                onClick={() => toggleTheme && toggleTheme()}
                 className={`w-full flex items-center justify-between p-4 rounded-2xl border ${borderColor} ${bgInput} hover:border-yellow-500/30 transition-all group`}
               >
                 <div className="flex items-center gap-3">
@@ -121,13 +128,12 @@ const ConfiguracoesPage = ({
           </div>
         </div>
 
-        {/* Seção de Segurança */}
         <div className={`${bgCard} p-8 rounded-[2.5rem] border ${borderColor} shadow-xl space-y-6`}>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-rose-500/10 rounded-xl flex items-center justify-center text-rose-500">
               <Lock size={20} strokeWidth={2.5} />
             </div>
-            <h3 className={`text-lg font-black uppercase italic tracking-tight ${textMain}`}>Alterar Senha</h3>
+            <h3 className={`text-lg font-black uppercase italic tracking-tight ${textMain}`}>Segurança</h3>
           </div>
 
           <div className="space-y-4">
@@ -158,12 +164,6 @@ const ConfiguracoesPage = ({
             >
               {carregando ? "Processando..." : <><Save size={16} /> Salvar Nova Senha</>}
             </button>
-          </div>
-
-          <div className={`p-4 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 mt-6`}>
-            <p className="text-[10px] font-bold text-yellow-600 dark:text-yellow-500 leading-relaxed">
-              DICA: Use uma senha que você não utilize em outros serviços para garantir a segurança dos seus dados no Trigofy.
-            </p>
           </div>
         </div>
       </div>

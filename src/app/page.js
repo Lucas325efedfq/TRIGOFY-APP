@@ -314,7 +314,7 @@ export default function TrigofyApp() {
         )}
 
         {/* Outras páginas */}
-        {activeTab !== 'home' && activeTab !== 'compras-aba' && activeTab !== 'novo' && activeTab !== 'doacoes' && activeTab !== 'cancelamentos' && activeTab !== 'suporte' && activeTab !== 'admin-painel' && activeTab !== 'historico' && activeTab !== 'aprovacoes' && (
+        {activeTab !== 'home' && activeTab !== 'compras-aba' && activeTab !== 'novo' && activeTab !== 'doacoes' && activeTab !== 'cancelamentos' && activeTab !== 'suporte' && activeTab !== 'admin-painel' && activeTab !== 'historico' && activeTab !== 'aprovacoes' && activeTab !== 'configuracoes' && (
           <div className={`${bgCard} p-6 rounded-3xl shadow-sm border`}>
             <p className={`${textMain} font-bold`}>
               Página: {activeTab}
