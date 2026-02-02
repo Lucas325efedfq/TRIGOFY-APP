@@ -177,7 +177,16 @@ export default function TrigofyApp() {
         return;
       }
       await updateRecord('USUARIOS', usuarioObjeto.id, { senha: novaSenha });
-      showToast("✅ Senha alterada!", "success");
+      
+      // Recarregar a lista de usuários para que a nova senha seja reconhecida no sistema
+      const novosUsuarios = await fetchUsuarios();
+      setUsuariosAutorizados([ADMIN_USER, ...novosUsuarios]);
+      
+      // Atualizar o objeto do usuário logado no estado local
+      const objAtualizado = novosUsuarios.find(u => u.id === usuarioObjeto.id);
+      if (objAtualizado) setUsuarioObjeto(objAtualizado);
+
+      showToast("✅ Senha alterada com sucesso!", "success");
       setNovaSenha('');
       setConfirmarSenha('');
     } catch (e) {
