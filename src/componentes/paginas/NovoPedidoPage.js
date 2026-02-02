@@ -16,6 +16,8 @@ const NovoPedidoPage = ({
   const [cpfPedido, setCpfPedido] = useState('');
   const [nomePedido, setNomePedido] = useState('');
   const [telefonePedido, setTelefonePedido] = useState('');
+  const [areaPedido, setAreaPedido] = useState('');
+  const [dataRetirada, setDataRetirada] = useState('');
   const [cesta, setCesta] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [buscaProduto, setBuscaProduto] = useState('');
@@ -25,6 +27,7 @@ const NovoPedidoPage = ({
       const pessoa = pessoasCadastradas.find(p => p.cpf === cpfPedido);
       if (pessoa) {
         setNomePedido(pessoa.nome);
+        setAreaPedido(pessoa.area || '');
       } else {
         setNomePedido('');
         showToast("CPF não encontrado.", "error");
@@ -49,8 +52,8 @@ const NovoPedidoPage = ({
   };
 
   const finalizarPedido = async () => {
-    if (!nomePedido || !telefonePedido || cesta.length === 0) {
-      return showToast("Preencha os dados e adicione produtos.", "error");
+    if (!nomePedido || !telefonePedido || !areaPedido || !dataRetirada || cesta.length === 0) {
+      return showToast("Preencha todos os campos, incluindo área e data de retirada.", "error");
     }
 
     setCarregando(true);
@@ -61,7 +64,9 @@ const NovoPedidoPage = ({
         produto: item.nome,
         valor: item.preco,
         site: siteFiltro,
-        telefone: telefonePedido
+        telefone: telefonePedido,
+        area: areaPedido,
+        dataRetirada: dataRetirada
       }));
 
       await criarPedidosEmLote(pedidos);
@@ -79,6 +84,8 @@ const NovoPedidoPage = ({
       setCesta([]);
       setCpfPedido('');
       setTelefonePedido('');
+      setAreaPedido('');
+      setDataRetirada('');
       setActiveTab('home');
     } catch (error) {
       showToast("Erro ao finalizar pedido.", "error");
@@ -150,6 +157,33 @@ const NovoPedidoPage = ({
               }`} 
               value={telefonePedido} 
               onChange={(e) => setTelefonePedido(e.target.value)} 
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Sua Área / Setor</label>
+            <input 
+              type="text" 
+              placeholder="Ex: Logística, Cozinha..." 
+              className={`w-full p-4 rounded-2xl outline-none border transition-all ${
+                temaEscuro 
+                  ? 'bg-zinc-800/50 border-zinc-700 text-white focus:border-yellow-500/50' 
+                  : 'bg-zinc-50 border-zinc-200 focus:border-yellow-500/50 font-bold'
+              }`} 
+              value={areaPedido} 
+              onChange={(e) => setAreaPedido(e.target.value)} 
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Data Desejada de Retirada</label>
+            <input 
+              type="date" 
+              className={`w-full p-4 rounded-2xl outline-none border transition-all ${
+                temaEscuro 
+                  ? 'bg-zinc-800/50 border-zinc-700 text-white focus:border-yellow-500/50' 
+                  : 'bg-zinc-50 border-zinc-200 focus:border-yellow-500/50 font-bold'
+              }`} 
+              value={dataRetirada} 
+              onChange={(e) => setDataRetirada(e.target.value)} 
             />
           </div>
         </div>

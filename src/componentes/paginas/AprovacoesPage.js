@@ -96,6 +96,14 @@ const AprovacoesPage = ({
                         {item.site} <ExternalLink size={10} />
                       </p>
                     </div>
+                    <div>
+                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Área</p>
+                      <p className={`text-xs font-black ${textMain}`}>{item.area || '-'}</p>
+                    </div>
+                    <div>
+                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Retirada</p>
+                      <p className={`text-xs font-black ${textMain}`}>{formatarData(item.data_retirada) || '-'}</p>
+                    </div>
                   </>
                 ) : (
                   <>

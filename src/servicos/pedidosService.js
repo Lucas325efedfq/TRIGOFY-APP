@@ -12,7 +12,9 @@ export const criarPedido = async (pedidoData) => {
     site: pedidoData.site,
     data: formatDateToISO(),
     status: 'PENDENTE',
-    telefone: pedidoData.telefone || ''
+    telefone: pedidoData.telefone || '',
+    area: pedidoData.area || '',
+    data_retirada: pedidoData.dataRetirada || ''
   };
 
   return await createRecord(TABLES.PEDIDOS, fields);
@@ -53,6 +55,8 @@ export const buscarPedidosPendentes = async () => {
     data: r.fields.data,
     site: r.fields.site,
     status: r.fields.status,
+    area: r.fields.area,
+    data_retirada: r.fields.data_retirada,
     tipo: 'COMPRA'
   }));
 };
