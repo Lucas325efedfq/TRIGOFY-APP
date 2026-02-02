@@ -48,6 +48,7 @@ export default function TrigofyApp() {
   const [usuarioLogadoOrigem, setUsuarioLogadoOrigem] = useState('');
   const [usuarioLogadoFuncao, setUsuarioLogadoFuncao] = useState('');
   const [usuarioLogadoCpf, setUsuarioLogadoCpf] = useState('');
+  const [usuarioObjeto, setUsuarioObjeto] = useState(null);
 
   // Estados de navegação
   const [activeTab, setActiveTab] = useState('home');
@@ -99,6 +100,11 @@ export default function TrigofyApp() {
     setUsuarioLogadoOrigem(origem);
     setUsuarioLogadoFuncao(funcao);
     setUsuarioLogadoCpf(cpf || '');
+    
+    // Busca o objeto completo do usuário para passar para a aba de configurações
+    const obj = usuariosAutorizados.find(u => u.usuario === usuario);
+    setUsuarioObjeto(obj);
+
     showToast(`Bem-vindo, ${usuario}!`, 'success');
   };
 
@@ -109,6 +115,7 @@ export default function TrigofyApp() {
     setUsuarioLogadoOrigem('');
     setUsuarioLogadoFuncao('');
     setUsuarioLogadoCpf('');
+    setUsuarioObjeto(null);
     setSiteFiltro('');
     setMeusPedidosHistorico([]);
     setPedidosParaAprovar([]);

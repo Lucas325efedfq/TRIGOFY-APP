@@ -36,8 +36,8 @@ const ConfiguracoesPage = ({
     setCarregando(true);
     try {
       // O usuarioLogado deve conter o ID do registro no Airtable para o update
-      if (!usuarioLogado.id) {
-        throw new Error("ID do usuário não encontrado.");
+      if (!usuarioLogado || !usuarioLogado.id) {
+        return showToast("Erro: ID do usuário não identificado. Tente relogar.", "error");
       }
 
       await updateRecord(TABLES.USUARIOS, usuarioLogado.id, {
@@ -80,8 +80,10 @@ const ConfiguracoesPage = ({
                 <User size={24} strokeWidth={2.5} />
               </div>
               <div>
-                <h3 className={`text-lg font-black uppercase italic tracking-tight ${textMain}`}>{usuarioLogado.usuario}</h3>
-                <p className={`text-[10px] font-black uppercase tracking-widest ${textSub}`}>{usuarioLogado.funcao} • {usuarioLogado.origem}</p>
+                <h3 className={`text-lg font-black uppercase italic tracking-tight ${textMain}`}>{usuarioLogado?.usuario || 'Usuário'}</h3>
+                <p className={`text-[10px] font-black uppercase tracking-widest ${textSub}`}>
+                  {usuarioLogado?.funcao || 'Nível'} • {usuarioLogado?.origem || 'Unidade'}
+                </p>
               </div>
             </div>
 
