@@ -39,7 +39,6 @@ import AprovacoesPage from '../componentes/paginas/AprovacoesPage';
 
 // Constants
 import { ADMIN_USER } from '../constantes/roles';
-import { updateRecord } from '../servicos/airtableService';
 
 export default function TrigofyApp() {
   // Estados de autenticação
