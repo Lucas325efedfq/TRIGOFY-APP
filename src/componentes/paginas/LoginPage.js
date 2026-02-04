@@ -33,10 +33,10 @@ const LoginPage = ({
       {/* Imagem de Fundo com Overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700"
-        style={{ backgroundImage: "url('/bg-login.jpg')" }}
+        style={{ backgroundImage: "url('/bg-app.jpg')" }}
       >
         {/* Overlay para garantir contraste */}
-        <div className={`absolute inset-0 ${temaEscuro ? 'bg-black/60' : 'bg-white/20'} backdrop-blur-[2px]`} />
+        <div className={`absolute inset-0 ${temaEscuro ? 'bg-black/70' : 'bg-white/40'} backdrop-blur-[2px]`} />
       </div>
 
       <div className={`${bgCard} p-10 rounded-[2.5rem] shadow-2xl border ${temaEscuro ? 'border-zinc-800/50' : 'border-zinc-200/50'} w-full max-w-md space-y-8 relative z-10 backdrop-blur-xl animate-in fade-in zoom-in duration-700`}>

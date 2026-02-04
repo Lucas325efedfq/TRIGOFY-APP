@@ -226,11 +226,11 @@ export default function TrigofyApp() {
     <div className={`min-h-screen ${bgMain} transition-colors duration-500 relative`}>
       {/* Imagem de Fundo para telas internas */}
       <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-40 pointer-events-none"
-        style={{ backgroundImage: "url('/bg-main.jpg')" }}
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-60 pointer-events-none"
+        style={{ backgroundImage: "url('/bg-app.jpg')" }}
       />
       {/* Overlay de contraste para garantir legibilidade sobre o fundo */}
-      <div className={`fixed inset-0 pointer-events-none ${temaEscuro ? 'bg-zinc-950/80' : 'bg-zinc-50/60'} backdrop-blur-[1px]`} />
+      <div className={`fixed inset-0 pointer-events-none ${temaEscuro ? 'bg-zinc-950/90' : 'bg-white/80'} backdrop-blur-[1px]`} />
 
       <Header 
         usuarioInput={usuarioInput} 
