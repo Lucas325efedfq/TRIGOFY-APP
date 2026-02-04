@@ -20,9 +20,10 @@ import {
   buscarPedidosPendentes as buscarPedidosPendentesService,
 } from '../servicos/pedidosService';
 import { buscarHistoricoCompleto } from '../servicos/historicoService';
-import { 
+import {
   buscarDoacoesPendentes 
 } from '../servicos/doacoesService';
+import { buscarCancelamentosPendentes } from '../servicos/cancelamentosService';
 import { buscarPendenciasContagem, enviarNotificacaoWhatsApp } from '../servicos/notificacaoService';
 
 
@@ -148,7 +149,8 @@ export default function TrigofyApp() {
     try {
       const pedidosComuns = await buscarPedidosPendentesService();
       const doacoes = await buscarDoacoesPendentes();
-      const listaCompleta = [...pedidosComuns, ...doacoes];
+      const cancelamentos = await buscarCancelamentosPendentes();
+      const listaCompleta = [...pedidosComuns, ...doacoes, ...cancelamentos];
       setPedidosParaAprovar(listaCompleta);
       setTotalPendencias(listaCompleta.length);
     } catch (error) {

@@ -34,3 +34,19 @@ export const enviarCancelamento = async (dados) => {
     throw error;
   }
 };
+// Busca cancelamentos pendentes
+export const buscarCancelamentosPendentes = async () => {
+  const formula = `{status} = 'PENDENTE'`;
+  const records = await fetchRecordsWithFilter(TABLES.CANCELAMENTOS, formula);
+  
+  return records.map(r => ({
+    id: r.id,
+    tabelaOrigem: TABLES.CANCELAMENTOS,
+    solicitante: r.fields.solicitante,
+    produto: r.fields.produto_cancelar,
+    data: r.fields.data,
+    status: r.fields.status,
+    motivo: r.fields.motivo_cancelamento,
+    tipo: 'CANCELAMENTO'
+  }));
+};

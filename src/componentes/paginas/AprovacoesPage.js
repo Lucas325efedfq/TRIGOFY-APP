@@ -55,19 +55,22 @@ const AprovacoesPage = ({
             >
               {/* Badge de Tipo */}
               <div className={`absolute top-0 right-0 px-4 py-1.5 rounded-bl-2xl font-black text-[9px] uppercase tracking-widest ${
-                item.tipo === 'COMPRA' ? 'bg-blue-500 text-white' : 
-                item.tipo === 'PROMOCIONAL' ? 'bg-orange-500 text-white' : 'bg-green-500 text-white'
+                item.tipo === 'COMPRA' ? 'bg-blue-500 text-white' :
+                item.tipo === 'PROMOCIONAL' ? 'bg-orange-500 text-white' :
+                item.tipo === 'CANCELAMENTO' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
               }`}>
                 {item.tipo}
               </div>
 
               <div className="flex gap-4">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-                  item.tipo === 'COMPRA' ? 'bg-blue-500/10 text-blue-500' : 
-                  item.tipo === 'PROMOCIONAL' ? 'bg-orange-500/10 text-orange-500' : 'bg-green-500/10 text-green-500'
+                  item.tipo === 'COMPRA' ? 'bg-blue-500/10 text-blue-500' :
+                  item.tipo === 'PROMOCIONAL' ? 'bg-orange-500/10 text-orange-500' :
+                  item.tipo === 'CANCELAMENTO' ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'
                 }`}>
                   {item.tipo === 'COMPRA' ? <ShoppingBag size={24} /> : 
-                   item.tipo === 'PROMOCIONAL' ? <Tag size={24} /> : <Gift size={24} />}
+                   item.tipo === 'PROMOCIONAL' ? <Tag size={24} /> :
+                   item.tipo === 'CANCELAMENTO' ? <X size={24} /> : <Gift size={24} />}
                 </div>
                 
                 <div className="flex-1 min-w-0">
