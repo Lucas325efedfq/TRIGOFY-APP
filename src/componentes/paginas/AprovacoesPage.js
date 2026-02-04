@@ -22,6 +22,102 @@ const AprovacoesPage = ({
     }
   };
 
+  const renderDetalhes = (item) => {
+    if (item.tipo === 'COMPRA' || item.tipo === 'PROMOCIONAL') {
+      return (
+        <>
+          <div>
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Valor</p>
+            <p className={`text-xs font-black ${textMain}`}>R$ {item.valor}</p>
+          </div>
+          <div>
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Site</p>
+            <p className={`text-xs font-black text-yellow-500 flex items-center gap-1`}>
+              {item.site} <ExternalLink size={10} />
+            </p>
+          </div>
+          <div>
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Área</p>
+            <p className={`text-xs font-black ${textMain}`}>{item.area || '-'}</p>
+          </div>
+          <div>
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Retirada</p>
+            <p className={`text-xs font-black ${textMain}`}>{formatarData(item.data_retirada) || '-'}</p>
+          </div>
+        </>
+      );
+    }
+
+    if (item.tipo === 'VENDA') {
+      return (
+        <>
+          <div>
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Valor Venda</p>
+            <p className={`text-xs font-black text-emerald-500`}>R$ {item.valor_venda}</p>
+          </div>
+          <div>
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Qtd / Unidade</p>
+            <p className={`text-xs font-black ${textMain}`}>{item.quantidade} {item.unidade_medida}</p>
+          </div>
+          <div>
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Câmara</p>
+            <p className={`text-xs font-black ${textMain}`}>{item.camara || '-'}</p>
+          </div>
+          <div>
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Vencimento</p>
+            <p className={`text-xs font-black ${textMain}`}>{formatarData(item.vencimento) || '-'}</p>
+          </div>
+          <div>
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Origem</p>
+            <p className={`text-xs font-black ${textMain}`}>{item.origem || '-'}</p>
+          </div>
+          <div>
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Porcionamento</p>
+            <p className={`text-xs font-black ${textMain}`}>{item.porcionamento || '-'}</p>
+          </div>
+          <div className="col-span-2">
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Motivo</p>
+            <p className={`text-[10px] font-bold ${textMain} italic`}>"{item.motivo}"</p>
+          </div>
+        </>
+      );
+    }
+
+    // Default: DOACAO ou outros
+    return (
+      <>
+        <div>
+          <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Área Produto</p>
+          <p className={`text-xs font-black ${textMain}`}>{item.area_produto || '-'}</p>
+        </div>
+        <div>
+          <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Vencimento</p>
+          <p className={`text-xs font-black ${textMain}`}>{formatarData(item.vencimento) || '-'}</p>
+        </div>
+        <div>
+          <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Origem</p>
+          <p className={`text-xs font-black ${textMain}`}>{item.origem || '-'}</p>
+        </div>
+        <div>
+          <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Qtd / Unidade</p>
+          <p className={`text-xs font-black ${textMain}`}>{item.quantidade_doacao} {item.unidade_medida}</p>
+        </div>
+        <div>
+          <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Local Armazenamento</p>
+          <p className={`text-xs font-black ${textMain}`}>{item.local_armazenamento || '-'}</p>
+        </div>
+        <div>
+          <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Porcionamento</p>
+          <p className={`text-xs font-black ${textMain}`}>{item.porcionamento || '-'}</p>
+        </div>
+        <div className="col-span-2">
+          <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Motivo</p>
+          <p className={`text-[10px] font-bold ${textMain} italic`}>"{item.motivo}"</p>
+        </div>
+      </>
+    );
+  };
+
   return (
     <div className="animate-in slide-in-from-right duration-700 pb-32 space-y-8">
       <div className="flex items-center justify-between">
@@ -93,122 +189,8 @@ const AprovacoesPage = ({
 
               {/* Detalhes Específicos */}
               <div className={`p-4 ${temaEscuro ? 'bg-zinc-800/30' : 'bg-zinc-50'} rounded-2xl border ${borderColor} grid grid-cols-2 gap-4`}>
-                {(item.tipo === 'COMPRA' || item.tipo === 'PROMOCIONAL') ? (
-                  <>
-                    <div>
-                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Valor</p>
-                      <p className={`text-xs font-black ${textMain}`}>R$ {item.valor}</p>
-                    </div>
-                    <div>
-                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Site</p>
-                      <p className={`text-xs font-black text-yellow-500 flex items-center gap-1`}>
-                        {item.site} <ExternalLink size={10} />
-                      </p>
-                    </div>
-                    <div>
-                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Área</p>
-                      <p className={`text-xs font-black ${textMain}`}>{item.area || '-'}</p>
-                    </div>
-                    <div>
-                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Retirada</p>
-                      <p className={`text-xs font-black ${textMain}`}>{formatarData(item.data_retirada) || '-'}</p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div>
-                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Área Produto</p>
-                      <p className={`text-xs font-black ${textMain}`}>{item.area_produto || '-'}</p>
-                    </div>
-                    <div>
-                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Vencimento</p>
-                      <p className={`text-xs font-black ${textMain}`}>{formatarData(item.vencimento) || '-'}</p>
-                    </div>
-                    <div>
-                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Origem</p>
-                      <p className={`text-xs font-black ${textMain}`}>{item.origem || '-'}</p>
-                    </div>
-                    <div>
-                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Qtd / Unidade</p>
-                      <p className={`text-xs font-black ${textMain}`}>{item.quantidade_doacao} {item.unidade_medida}</p>
-                    </div>
-                    <div>
-                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Local Armazenamento</p>
-                      <p className={`text-xs font-black ${textMain}`}>{item.local_armazenamento || '-'}</p>
-                    </div>
-                    <div>
-                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Porcionamento</p>
-                      <p className={`text-xs font-black ${textMain}`}>{item.porcionamento || '-'}</p>
-                    </div>
-	                    <div className="col-span-2">
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Motivo</p>
-	                      <p className={`text-[10px] font-bold ${textMain} italic`}>"{item.motivo}"</p>
-	                    </div>
-	                  </>
-	                ) : item.tipo === 'VENDA' ? (
-	                  <>
-	                    <div>
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Valor Venda</p>
-	                      <p className={`text-xs font-black text-emerald-500`}>R$ {item.valor_venda}</p>
-	                    </div>
-	                    <div>
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Qtd / Unidade</p>
-	                      <p className={`text-xs font-black ${textMain}`}>{item.quantidade} {item.unidade_medida}</p>
-	                    </div>
-	                    <div>
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Câmara</p>
-	                      <p className={`text-xs font-black ${textMain}`}>{item.camara || '-'}</p>
-	                    </div>
-	                    <div>
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Vencimento</p>
-	                      <p className={`text-xs font-black ${textMain}`}>{formatarData(item.vencimento) || '-'}</p>
-	                    </div>
-	                    <div>
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Origem</p>
-	                      <p className={`text-xs font-black ${textMain}`}>{item.origem || '-'}</p>
-	                    </div>
-	                    <div>
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Porcionamento</p>
-	                      <p className={`text-xs font-black ${textMain}`}>{item.porcionamento || '-'}</p>
-	                    </div>
-	                    <div className="col-span-2">
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Motivo</p>
-	                      <p className={`text-[10px] font-bold ${textMain} italic`}>"{item.motivo}"</p>
-	                    </div>
-	                  </>
-	                ) : (
-	                  <>
-	                    <div>
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Área Produto</p>
-	                      <p className={`text-xs font-black ${textMain}`}>{item.area_produto || '-'}</p>
-	                    </div>
-	                    <div>
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Vencimento</p>
-	                      <p className={`text-xs font-black ${textMain}`}>{formatarData(item.vencimento) || '-'}</p>
-	                    </div>
-	                    <div>
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Origem</p>
-	                      <p className={`text-xs font-black ${textMain}`}>{item.origem || '-'}</p>
-	                    </div>
-	                    <div>
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Qtd / Unidade</p>
-	                      <p className={`text-xs font-black ${textMain}`}>{item.quantidade_doacao} {item.unidade_medida}</p>
-	                    </div>
-	                    <div>
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Local Armazenamento</p>
-	                      <p className={`text-xs font-black ${textMain}`}>{item.local_armazenamento || '-'}</p>
-	                    </div>
-	                    <div>
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Porcionamento</p>
-	                      <p className={`text-xs font-black ${textMain}`}>{item.porcionamento || '-'}</p>
-	                    </div>
-	                    <div className="col-span-2">
-	                      <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Motivo</p>
-	                      <p className={`text-[10px] font-bold ${textMain} italic`}>"{item.motivo}"</p>
-	                    </div>
-	                  </>
-	                )}
-	              </div>
+                {renderDetalhes(item)}
+              </div>
 
               {/* Ações */}
               <div className="flex gap-3 pt-2">
