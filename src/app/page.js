@@ -42,6 +42,7 @@ import SelecaoUnidadePage from '../componentes/paginas/SelecaoUnidadePage';
 import HistoricoPage from '../componentes/paginas/HistoricoPage';
 import AprovacoesPage from '../componentes/paginas/AprovacoesPage';
 import PromocionaisPage from '../componentes/paginas/PromocionaisPage';
+import SolicitacaoVendaPage from '../componentes/paginas/SolicitacaoVendaPage';
 
 
 // Constants
@@ -301,6 +302,18 @@ export default function TrigofyApp() {
 
         {activeTab === 'cancelamentos' && (
           <CancelamentosPage 
+            usuarioInput={usuarioInput}
+            usuarioLogadoCpf={usuarioLogadoCpf}
+            isAdmin={isAdmin}
+            pessoasCadastradas={pessoasCadastradas}
+            temaEscuro={temaEscuro}
+            showToast={showToast}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
+        {activeTab === 'vendas' && (
+          <SolicitacaoVendaPage 
             usuarioInput={usuarioInput}
             usuarioLogadoCpf={usuarioLogadoCpf}
             isAdmin={isAdmin}

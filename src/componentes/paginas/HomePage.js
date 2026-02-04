@@ -1,5 +1,5 @@
 import React from 'react';
-import { Megaphone, XCircle, CheckCircle2, BookOpen, Settings, MessageCircle, Database, ArrowRight } from 'lucide-react';
+import { Megaphone, XCircle, CheckCircle2, BookOpen, Settings, MessageCircle, Database, ArrowRight, Tag } from 'lucide-react';
 
 const HomePage = ({ 
   setActiveTab, 
@@ -51,6 +51,15 @@ const HomePage = ({
         color: 'from-blue-400 to-indigo-600',
         shadow: 'shadow-blue-500/20',
         action: () => setActiveTab('suporte')
+      },
+      {
+        id: 'vendas',
+        title: 'Solicitação de Venda',
+        description: 'Cadastrar nova venda',
+        icon: Tag,
+        color: 'from-emerald-400 to-green-600',
+        shadow: 'shadow-green-500/20',
+        action: () => setActiveTab('vendas')
       }
     );
   }

@@ -10,6 +10,7 @@ export const TABLES = {
   USUARIOS: 'tblUsuarios',
   DOACOES: 'tblDoacoes',
   CANCELAMENTOS: 'tblCancelamentos',
+  VENDAS: 'tblVendas',
 };
 
 // Headers padrão para requisições
