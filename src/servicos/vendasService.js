@@ -43,3 +43,28 @@ export const buscarVendasUsuario = async (usuario) => {
     valor: r.fields.valor_venda
   }));
 };
+
+// Busca vendas pendentes
+export const buscarVendasPendentes = async () => {
+  const formula = `{status} = 'PENDENTE'`;
+  const records = await fetchRecordsWithFilter(TABLES.VENDAS, formula);
+  
+  return records.map(r => ({
+    id: r.id,
+    tabelaOrigem: TABLES.VENDAS,
+    solicitante: r.fields.solicitante,
+    produto: r.fields.produto,
+    data: r.fields.data,
+    status: r.fields.status,
+    motivo: r.fields.motivo,
+    area: r.fields.area,
+    quantidade: r.fields.quantidade,
+    unidade_medida: r.fields.unidade_medida,
+    valor_venda: r.fields.valor_venda,
+    vencimento: r.fields.vencimento,
+    origem: r.fields.origem,
+    camara: r.fields.camara_armazenamento,
+    porcionamento: r.fields.porcionamento,
+    tipo: 'VENDA'
+  }));
+};
