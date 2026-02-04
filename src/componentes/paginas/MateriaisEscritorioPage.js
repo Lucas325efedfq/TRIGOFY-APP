@@ -73,7 +73,7 @@ export default function MateriaisEscritorioPage({ usuarioInput, usuarioLogadoCpf
     <div className="animate-in slide-in-from-right duration-300 pb-20">
       <button onClick={() => setActiveTab('home')} className="text-zinc-500 font-bold text-xs uppercase mb-2 hover:text-zinc-800">← Voltar</button>
       
-      <h2 className="text-xl font-black uppercase italic mb-4 text-zinc-900">Solicitação de Materiais</h2>
+      <h2 className="text-xl font-black uppercase italic mb-4 text-zinc-900">Solicitação de Materiais para escritório/produção</h2>
       
       <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm space-y-4">
           <div className="bg-blue-50 p-4 rounded-xl mb-4 border border-blue-100">

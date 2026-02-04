@@ -63,7 +63,7 @@ const HomePage = ({
       },
       {
         id: 'materiais',
-        title: 'Materiais de Escritório',
+        title: 'Materiais para escritório/produção',
         description: 'Solicitar suprimentos',
         icon: BookOpen,
         color: 'from-indigo-400 to-blue-600',
