@@ -40,6 +40,7 @@ import AdminPainelPage from '../componentes/paginas/AdminPainelPage';
 import SelecaoUnidadePage from '../componentes/paginas/SelecaoUnidadePage';
 import HistoricoPage from '../componentes/paginas/HistoricoPage';
 import AprovacoesPage from '../componentes/paginas/AprovacoesPage';
+import PromocionaisPage from '../componentes/paginas/PromocionaisPage';
 
 
 // Constants
@@ -255,6 +256,21 @@ export default function TrigofyApp() {
 
         {activeTab === 'novo' && (
           <NovoPedidoPage 
+            usuarioInput={usuarioInput}
+            usuarioLogadoCpf={usuarioLogadoCpf}
+            isAdmin={isAdmin}
+            siteFiltro={siteFiltro}
+            pessoasCadastradas={pessoasCadastradas}
+            produtosLancados={produtosLancados}
+            temaEscuro={temaEscuro}
+            showToast={showToast}
+            setActiveTab={setActiveTab}
+            onNotificarAprovador={enviarNotificacaoWhatsApp}
+          />
+        )}
+
+        {activeTab === 'promocionais' && (
+          <PromocionaisPage 
             usuarioInput={usuarioInput}
             usuarioLogadoCpf={usuarioLogadoCpf}
             isAdmin={isAdmin}

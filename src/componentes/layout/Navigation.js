@@ -38,7 +38,7 @@ const Navigation = ({ activeTab, setActiveTab, isAdmin, isAprovador, temaEscuro,
       } backdrop-blur-xl`}>
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeTab === item.id || (item.id === 'compras-aba' && (activeTab === 'novo' || activeTab === 'pedidos'));
+          const isActive = activeTab === item.id || (item.id === 'compras-aba' && (activeTab === 'novo' || activeTab === 'pedidos' || activeTab === 'promocionais'));
           
           return (
             <button

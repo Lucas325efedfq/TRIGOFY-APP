@@ -21,6 +21,13 @@ const SelecaoUnidadePage = ({ setActiveTab, setSiteFiltro, temaEscuro }) => {
       description: 'Unidade Rio de Janeiro / SP',
       color: 'from-purple-400 to-purple-600',
       shadow: 'shadow-purple-500/20',
+    },
+    {
+      id: 'PROMO',
+      title: 'Produtos Promocionais disponíveis para compra',
+      description: 'Ofertas Especiais',
+      color: 'from-orange-400 to-orange-600',
+      shadow: 'shadow-orange-500/20',
     }
   ];
 
@@ -41,8 +48,13 @@ const SelecaoUnidadePage = ({ setActiveTab, setSiteFiltro, temaEscuro }) => {
           <button
             key={unidade.id}
             onClick={() => {
-              setSiteFiltro(unidade.id);
-              setActiveTab('novo');
+              if (unidade.id === 'PROMO') {
+                setSiteFiltro('VR'); // Ou outro filtro padrão se necessário
+                setActiveTab('promocionais');
+              } else {
+                setSiteFiltro(unidade.id);
+                setActiveTab('novo');
+              }
             }}
             className={`group relative ${bgCard} p-6 rounded-3xl border ${borderColor} hover:border-yellow-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-yellow-500/5 active:scale-95 text-left overflow-hidden`}
           >
