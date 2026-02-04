@@ -58,7 +58,7 @@ export const buscarPedidosPendentes = async () => {
     status: r.fields.status,
     area: r.fields.area,
     data_retirada: r.fields.data_retirada,
-    tipo: 'COMPRA'
+    tipo: r.fields.tipo || 'COMPRA'
   }));
 };
 
