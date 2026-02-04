@@ -60,6 +60,15 @@ const HomePage = ({
         color: 'from-emerald-400 to-green-600',
         shadow: 'shadow-green-500/20',
         action: () => setActiveTab('vendas')
+      },
+      {
+        id: 'materiais',
+        title: 'Materiais de Escritório',
+        description: 'Solicitar suprimentos',
+        icon: BookOpen,
+        color: 'from-indigo-400 to-blue-600',
+        shadow: 'shadow-indigo-500/20',
+        action: () => setActiveTab('materiais')
       }
     );
   }

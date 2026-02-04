@@ -25,6 +25,7 @@ import {
 } from '../servicos/doacoesService';
 import { buscarCancelamentosPendentes } from '../servicos/cancelamentosService';
 import { buscarVendasPendentes } from '../servicos/vendasService';
+import { buscarMateriaisPendentes } from '../servicos/materiaisService';
 import { buscarPendenciasContagem, enviarNotificacaoWhatsApp } from '../servicos/notificacaoService';
 
 
@@ -44,6 +45,7 @@ import HistoricoPage from '../componentes/paginas/HistoricoPage';
 import AprovacoesPage from '../componentes/paginas/AprovacoesPage';
 import PromocionaisPage from '../componentes/paginas/PromocionaisPage';
 import SolicitacaoVendaPage from '../componentes/paginas/SolicitacaoVendaPage';
+import MateriaisEscritorioPage from '../componentes/paginas/MateriaisEscritorioPage';
 
 
 // Constants
@@ -153,7 +155,8 @@ export default function TrigofyApp() {
       const doacoes = await buscarDoacoesPendentes();
       const cancelamentos = await buscarCancelamentosPendentes();
       const vendas = await buscarVendasPendentes();
-      const listaCompleta = [...pedidosComuns, ...doacoes, ...cancelamentos, ...vendas];
+      const materiais = await buscarMateriaisPendentes();
+      const listaCompleta = [...pedidosComuns, ...doacoes, ...cancelamentos, ...vendas, ...materiais];
       setPedidosParaAprovar(listaCompleta);
       setTotalPendencias(listaCompleta.length);
     } catch (error) {
@@ -316,6 +319,18 @@ export default function TrigofyApp() {
 
         {activeTab === 'vendas' && (
           <SolicitacaoVendaPage 
+            usuarioInput={usuarioInput}
+            usuarioLogadoCpf={usuarioLogadoCpf}
+            isAdmin={isAdmin}
+            pessoasCadastradas={pessoasCadastradas}
+            temaEscuro={temaEscuro}
+            showToast={showToast}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
+        {activeTab === 'materiais' && (
+          <MateriaisEscritorioPage 
             usuarioInput={usuarioInput}
             usuarioLogadoCpf={usuarioLogadoCpf}
             isAdmin={isAdmin}

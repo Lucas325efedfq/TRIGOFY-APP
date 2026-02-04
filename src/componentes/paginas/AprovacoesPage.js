@@ -83,6 +83,31 @@ const AprovacoesPage = ({
       );
     }
 
+    if (item.tipo === 'MATERIAL') {
+      return (
+        <>
+          <div>
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Quantidade</p>
+            <p className={`text-xs font-black ${textMain}`}>{item.quantidade}</p>
+          </div>
+          <div>
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Prioridade</p>
+            <p className={`text-xs font-black ${item.prioridade === 'Urgência' ? 'text-rose-500' : 'text-indigo-500'}`}>
+              {item.prioridade}
+            </p>
+          </div>
+          <div className="col-span-2">
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Especificação</p>
+            <p className={`text-xs font-bold ${textMain}`}>{item.especificacao || '-'}</p>
+          </div>
+          <div className="col-span-2">
+            <p className={`text-[8px] font-black uppercase tracking-widest ${textSub} mb-0.5`}>Motivo</p>
+            <p className={`text-[10px] font-bold ${textMain} italic`}>"{item.motivo}"</p>
+          </div>
+        </>
+      );
+    }
+
     // Default: DOACAO ou outros
     return (
       <>
@@ -154,7 +179,8 @@ const AprovacoesPage = ({
                 item.tipo === 'COMPRA' ? 'bg-blue-500 text-white' :
                 item.tipo === 'PROMOCIONAL' ? 'bg-orange-500 text-white' :
                 item.tipo === 'CANCELAMENTO' ? 'bg-red-500 text-white' :
-                item.tipo === 'VENDA' ? 'bg-emerald-600 text-white' : 'bg-green-500 text-white'
+                item.tipo === 'VENDA' ? 'bg-emerald-600 text-white' :
+                item.tipo === 'MATERIAL' ? 'bg-indigo-600 text-white' : 'bg-green-500 text-white'
               }`}>
                 {item.tipo}
               </div>
@@ -164,12 +190,14 @@ const AprovacoesPage = ({
                   item.tipo === 'COMPRA' ? 'bg-blue-500/10 text-blue-500' :
                   item.tipo === 'PROMOCIONAL' ? 'bg-orange-500/10 text-orange-500' :
                   item.tipo === 'CANCELAMENTO' ? 'bg-red-500/10 text-red-500' :
-                  item.tipo === 'VENDA' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-green-500/10 text-green-500'
+                  item.tipo === 'VENDA' ? 'bg-emerald-500/10 text-emerald-500' :
+                  item.tipo === 'MATERIAL' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-green-500/10 text-green-500'
                 }`}>
                   {item.tipo === 'COMPRA' ? <ShoppingBag size={24} /> : 
                    item.tipo === 'PROMOCIONAL' ? <Tag size={24} /> :
                    item.tipo === 'CANCELAMENTO' ? <X size={24} /> :
-                   item.tipo === 'VENDA' ? <Tag size={24} /> : <Gift size={24} />}
+                   item.tipo === 'VENDA' ? <Tag size={24} /> :
+                   item.tipo === 'MATERIAL' ? <BookOpen size={24} /> : <Gift size={24} />}
                 </div>
                 
                 <div className="flex-1 min-w-0">

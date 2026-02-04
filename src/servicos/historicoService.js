@@ -2,6 +2,7 @@ import { buscarPedidosUsuario } from './pedidosService';
 import { buscarDoacoesUsuario } from './doacoesService';
 import { buscarCancelamentosUsuario } from './cancelamentosService';
 import { buscarVendasUsuario } from './vendasService';
+import { buscarMateriaisUsuario } from './materiaisService';
 
 export const buscarHistoricoCompleto = async (usuario) => {
   try {
@@ -9,7 +10,8 @@ export const buscarHistoricoCompleto = async (usuario) => {
       buscarPedidosUsuario(usuario),
       buscarDoacoesUsuario(usuario),
       buscarCancelamentosUsuario(usuario),
-      buscarVendasUsuario(usuario)
+      buscarVendasUsuario(usuario),
+      buscarMateriaisUsuario(usuario)
     ]);
 
     // Normalizar pedidos para o histórico
@@ -40,12 +42,20 @@ export const buscarHistoricoCompleto = async (usuario) => {
       detalhes: `Venda: R$ ${v.valor}`
     }));
 
+    // Normalizar materiais para o histórico
+    const materiaisNormalizados = materiais.map(m => ({
+      ...m,
+      tipo: 'MATERIAL',
+      detalhes: m.detalhes
+    }));
+
     // Combinar e ordenar por data (mais recente primeiro)
     return [
       ...pedidosNormalizados, 
       ...doacoesNormalizadas, 
       ...cancelamentosNormalizados,
-      ...vendasNormalizadas
+      ...vendasNormalizadas,
+      ...materiaisNormalizados
     ].sort((a, b) => {
       const dataA = a.data ? new Date(a.data) : new Date(0);
       const dataB = b.data ? new Date(b.data) : new Date(0);

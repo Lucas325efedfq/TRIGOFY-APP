@@ -11,6 +11,7 @@ export const TABLES = {
   DOACOES: 'tblDoacoes',
   CANCELAMENTOS: 'tblCancelamentos',
   VENDAS: 'tblVendas',
+  MATERIAIS: 'tblMateriaisEscritorio',
 };
 
 // Headers padrão para requisições
