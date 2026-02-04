@@ -36,7 +36,7 @@ const HomePage = ({
       },
       {
         id: 'cancelamentos',
-        title: 'Cancelamentos',
+        title: 'Cancelamentos de Compras',
         description: 'Cancelar pedidos',
         icon: XCircle,
         color: 'from-red-400 to-rose-600',

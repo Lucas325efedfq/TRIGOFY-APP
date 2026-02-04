@@ -19,7 +19,7 @@ const PromocionaisPage = ({
   const [nomePedido, setNomePedido] = useState('');
   const [telefonePedido, setTelefonePedido] = useState('');
   const [areaPedido, setAreaPedido] = useState('');
-  const [dataRetirada, setDataRetirada] = useState('');
+  // const [dataRetirada, setDataRetirada] = useState('');
   const [cesta, setCesta] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [buscaProduto, setBuscaProduto] = useState('');
@@ -59,8 +59,8 @@ const PromocionaisPage = ({
   };
 
   const finalizarPedido = async () => {
-    if (!cpfPedido || !nomePedido || !telefonePedido || !areaPedido || !dataRetirada) {
-      return showToast("Preencha todos os dados do formulário (CPF, Telefone, Área e Data).", "error");
+    if (!cpfPedido || !nomePedido || !telefonePedido || !areaPedido) {
+      return showToast("Preencha todos os dados do formulário (CPF, Telefone e Área).", "error");
     }
 
     if (cesta.length === 0) {
@@ -77,8 +77,7 @@ const PromocionaisPage = ({
         site: siteFiltro,
         tipo: 'PROMOCIONAL',
         telefone: telefonePedido,
-        area: areaPedido,
-        dataRetirada: dataRetirada
+        area: areaPedido
       }));
 
       await criarPedidosEmLote(pedidos);
@@ -97,7 +96,7 @@ const PromocionaisPage = ({
       setCpfPedido(isAdmin ? '' : (usuarioLogadoCpf || ''));
       setTelefonePedido('');
       setAreaPedido('');
-      setDataRetirada('');
+      // setDataRetirada('');
       setActiveTab('home');
     } catch (error) {
       showToast("Erro ao finalizar pedido promocional.", "error");
@@ -189,20 +188,7 @@ const PromocionaisPage = ({
               required
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Data Desejada de Retirada *</label>
-            <input 
-              type="date" 
-              className={`w-full p-4 rounded-2xl outline-none border transition-all ${
-                temaEscuro 
-                  ? 'bg-zinc-800/50 border-zinc-700 text-white focus:border-yellow-500/50' 
-                  : 'bg-zinc-50 border-zinc-200 focus:border-yellow-500/50 font-bold'
-              }`} 
-              value={dataRetirada} 
-              onChange={(e) => setDataRetirada(e.target.value)} 
-              required
-            />
-          </div>
+
         </div>
       </div>
 

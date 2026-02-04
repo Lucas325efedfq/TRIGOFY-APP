@@ -92,7 +92,7 @@ export default function CancelamentosPage({ usuarioInput, usuarioLogadoCpf, isAd
     <div className="animate-in slide-in-from-right duration-300 pb-20">
       <button onClick={() => setActiveTab('home')} className="text-zinc-500 font-bold text-xs uppercase mb-2 hover:text-zinc-800">← Voltar</button>
       
-      <h2 className="text-xl font-black uppercase italic mb-4 text-zinc-900">Cancelamento de Compra</h2>
+      <h2 className="text-xl font-black uppercase italic mb-4 text-zinc-900">Cancelamentos de Compras</h2>
       
       <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm space-y-4">
           <div className="bg-red-50 p-4 rounded-xl mb-4 border border-red-100">
