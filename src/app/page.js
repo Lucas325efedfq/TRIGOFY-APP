@@ -224,13 +224,13 @@ export default function TrigofyApp() {
 
   return (
     <div className={`min-h-screen ${bgMain} transition-colors duration-500 relative`}>
-      {/* Imagem de Fundo para telas internas */}
+      {/* Imagem de Fundo para telas internas - Agora unificada com bg-home.jpg */}
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-100 pointer-events-none"
-        style={{ backgroundImage: activeTab === 'home' ? "url('/bg-home.jpg')" : "url('/bg-app.jpg')" }}
+        style={{ backgroundImage: "url('/bg-home.jpg')" }}
       />
-      {/* Overlay de contraste - Removido backdrop-blur para a Home conforme solicitado */}
-      <div className={`fixed inset-0 pointer-events-none ${temaEscuro ? 'bg-zinc-950/70' : 'bg-white/40'} ${activeTab === 'home' ? '' : 'backdrop-blur-[1px]'}`} />
+      {/* Overlay de contraste - Backdrop-blur removido de todas as telas conforme solicitado */}
+      <div className={`fixed inset-0 pointer-events-none ${temaEscuro ? 'bg-zinc-950/70' : 'bg-white/40'}`} />
 
       <Header 
         usuarioInput={usuarioInput} 
