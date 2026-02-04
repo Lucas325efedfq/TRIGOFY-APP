@@ -150,6 +150,7 @@ const NovoPedidoPage = ({
               value={cpfPedido} 
               onChange={(e) => setCpfPedido(e.target.value)}
               readOnly={!isAdmin && !!usuarioLogadoCpf}
+              required
             />
           </div>
           <div className="space-y-2">
@@ -172,6 +173,7 @@ const NovoPedidoPage = ({
               }`} 
               value={telefonePedido} 
               onChange={(e) => setTelefonePedido(e.target.value)} 
+              required
             />
           </div>
           <div className="space-y-2">
@@ -186,6 +188,7 @@ const NovoPedidoPage = ({
               }`} 
               value={areaPedido} 
               onChange={(e) => setAreaPedido(e.target.value)} 
+              required
             />
           </div>
           <div className="space-y-2">
@@ -199,6 +202,7 @@ const NovoPedidoPage = ({
               }`} 
               value={dataRetirada} 
               onChange={(e) => setDataRetirada(e.target.value)} 
+              required
             />
           </div>
         </div>
