@@ -18,7 +18,7 @@ export const enviarCancelamento = async (dados) => {
     // Verifique se no Airtable é 'produto' ou 'produto_cancelar'
     "produto_cancelar": dados.produto, 
     
-    "quantidade": dados.quantidade ? String(dados.quantidade) : "0",
+    "quantidade": dados.quantidade ? Number(dados.quantidade) : 0,
     "unidade_medida": dados.unidade,
     "motivo_cancelamento": dados.motivo,
     "data": new Date().toISOString().split('T')[0],
