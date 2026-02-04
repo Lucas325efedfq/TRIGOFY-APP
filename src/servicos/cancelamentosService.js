@@ -1,5 +1,22 @@
-import { createRecord } from './airtableService';
+import { createRecord, fetchRecordsWithFilter } from './airtableService';
 import { TABLES } from '../configuracao/airtable'; // <--- AQUI ESTAVA O ERRO (Mudei de TABELAS para TABLES)
+
+// Busca cancelamentos de um usuário específico
+export const buscarCancelamentosUsuario = async (usuario) => {
+  const formula = `{solicitante} = '${usuario}'`;
+  const records = await fetchRecordsWithFilter(TABLES.CANCELAMENTOS, formula);
+  
+  return records.map(r => ({
+    id: r.id,
+    produto: r.fields.produto_cancelar,
+    data: r.fields.data,
+    status: r.fields.status || 'PENDENTE',
+    tipo: 'CANCELAMENTO',
+    quantidade: r.fields.quantidade,
+    unidade: r.fields.unidade_medida,
+    motivo: r.fields.motivo_cancelamento
+  }));
+};
 
 export const enviarCancelamento = async (dados) => {
   // 1. Validação: Garante que os dados chegaram até aqui

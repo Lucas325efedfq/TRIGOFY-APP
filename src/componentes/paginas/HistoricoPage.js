@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, ShoppingBag, Gift, CheckCircle2, XCircle, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Clock, ShoppingBag, Gift, CheckCircle2, XCircle, AlertCircle, ArrowLeft, Tag, X } from 'lucide-react';
 
 const HistoricoPage = ({ 
   historico, 
@@ -31,6 +31,51 @@ const HistoricoPage = ({
         return 'bg-rose-500/10 text-rose-500 border-rose-500/20';
       default:
         return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
+    }
+  };
+
+  const getTypeStyles = (tipo) => {
+    switch (tipo) {
+      case 'COMPRA':
+        return 'bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-blue-500/20';
+      case 'DOACAO':
+        return 'bg-gradient-to-br from-purple-400 to-purple-600 text-white shadow-purple-500/20';
+      case 'CANCELAMENTO':
+        return 'bg-gradient-to-br from-red-400 to-red-600 text-white shadow-red-500/20';
+      case 'VENDA':
+        return 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-emerald-500/20';
+      default:
+        return 'bg-gradient-to-br from-zinc-400 to-zinc-600 text-white shadow-zinc-500/20';
+    }
+  };
+
+  const getTypeBadge = (tipo) => {
+    switch (tipo) {
+      case 'COMPRA':
+        return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+      case 'DOACAO':
+        return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
+      case 'CANCELAMENTO':
+        return 'bg-red-500/10 text-red-500 border-red-500/20';
+      case 'VENDA':
+        return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+      default:
+        return 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20';
+    }
+  };
+
+  const getTypeIcon = (tipo) => {
+    switch (tipo) {
+      case 'COMPRA':
+        return <ShoppingBag size={24} strokeWidth={2.5} />;
+      case 'DOACAO':
+        return <Gift size={24} strokeWidth={2.5} />;
+      case 'CANCELAMENTO':
+        return <X size={24} strokeWidth={2.5} />;
+      case 'VENDA':
+        return <Tag size={24} strokeWidth={2.5} />;
+      default:
+        return <Clock size={24} strokeWidth={2.5} />;
     }
   };
 
@@ -80,7 +125,7 @@ const HistoricoPage = ({
           </div>
           <div className="space-y-2">
             <p className={`${textMain} font-black uppercase italic text-lg`}>Nada por aqui ainda</p>
-            <p className={`${textSub} text-xs font-medium max-w-[200px] mx-auto`}>Você ainda não possui pedidos ou doações registradas no sistema.</p>
+            <p className={`${textSub} text-xs font-medium max-w-[200px] mx-auto`}>Você ainda não possui solicitações registradas no sistema.</p>
           </div>
           <button 
             onClick={() => setActiveTab('home')}
@@ -93,20 +138,14 @@ const HistoricoPage = ({
         <div className="space-y-4">
           {historico.map((item) => (
             <div key={item.id} className={`${bgCard} p-5 rounded-3xl border ${borderColor} shadow-lg hover:shadow-yellow-500/5 transition-all duration-300 flex items-center gap-5 group`}>
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg transition-transform duration-500 group-hover:scale-110 ${
-                item.tipo === 'COMPRA' 
-                  ? 'bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-blue-500/20' 
-                  : 'bg-gradient-to-br from-purple-400 to-purple-600 text-white shadow-purple-500/20'
-              }`}>
-                {item.tipo === 'COMPRA' ? <ShoppingBag size={24} strokeWidth={2.5} /> : <Gift size={24} strokeWidth={2.5} />}
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg transition-transform duration-500 group-hover:scale-110 ${getTypeStyles(item.tipo)}`}>
+                {getTypeIcon(item.tipo)}
               </div>
               
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start gap-2">
                   <h3 className={`font-black uppercase text-sm truncate tracking-tight ${textMain}`}>{item.produto}</h3>
-                  <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${
-                    item.tipo === 'COMPRA' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-purple-500/10 text-purple-500 border-purple-500/20'
-                  }`}>
+                  <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${getTypeBadge(item.tipo)}`}>
                     {item.tipo}
                   </span>
                 </div>
