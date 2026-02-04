@@ -14,7 +14,8 @@ export const criarPedido = async (pedidoData) => {
     status: 'PENDENTE',
     telefone: pedidoData.telefone || '',
     area: pedidoData.area || '',
-    data_retirada: pedidoData.dataRetirada || ''
+    data_retirada: pedidoData.dataRetirada || '',
+    tipo: pedidoData.tipo || 'COMPRA'
   };
 
   return await createRecord(TABLES.PEDIDOS, fields);

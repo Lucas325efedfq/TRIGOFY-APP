@@ -75,6 +75,7 @@ const PromocionaisPage = ({
         produto: `[PROMO] ${item.nome}`,
         valor: item.preco,
         site: siteFiltro,
+        tipo: 'PROMOCIONAL',
         telefone: telefonePedido,
         area: areaPedido,
         dataRetirada: dataRetirada
