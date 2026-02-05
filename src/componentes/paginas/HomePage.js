@@ -1,5 +1,5 @@
 import React from 'react';
-import { Megaphone, XCircle, CheckCircle2, BookOpen, Settings, MessageCircle, Database, ArrowRight, Tag } from 'lucide-react';
+import { Megaphone, XCircle, CheckCircle2, BookOpen, Settings, MessageCircle, Database, ArrowRight, Tag, ClipboardEdit } from 'lucide-react';
 
 const HomePage = ({ 
   setActiveTab, 
@@ -69,6 +69,15 @@ const HomePage = ({
         color: 'from-indigo-400 to-blue-600',
         shadow: 'shadow-indigo-500/20',
         action: () => setActiveTab('materiais')
+      },
+      {
+        id: 'ficha-tecnica',
+        title: 'Alteração de Ficha Técnica - P&D',
+        description: 'Solicitar revisão de FT',
+        icon: ClipboardEdit,
+        color: 'from-amber-400 to-orange-600',
+        shadow: 'shadow-orange-500/20',
+        action: () => setActiveTab('ficha-tecnica')
       }
     );
   }

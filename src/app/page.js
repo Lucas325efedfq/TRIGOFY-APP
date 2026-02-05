@@ -46,6 +46,7 @@ import AprovacoesPage from '../componentes/paginas/AprovacoesPage';
 import PromocionaisPage from '../componentes/paginas/PromocionaisPage';
 import SolicitacaoVendaPage from '../componentes/paginas/SolicitacaoVendaPage';
 import MateriaisEscritorioPage from '../componentes/paginas/MateriaisEscritorioPage';
+import FichaTecnicaPage from '../componentes/paginas/FichaTecnicaPage';
 
 
 // Constants
@@ -331,6 +332,18 @@ export default function TrigofyApp() {
 
         {activeTab === 'materiais' && (
           <MateriaisEscritorioPage 
+            usuarioInput={usuarioInput}
+            usuarioLogadoCpf={usuarioLogadoCpf}
+            isAdmin={isAdmin}
+            pessoasCadastradas={pessoasCadastradas}
+            temaEscuro={temaEscuro}
+            showToast={showToast}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
+        {activeTab === 'ficha-tecnica' && (
+          <FichaTecnicaPage 
             usuarioInput={usuarioInput}
             usuarioLogadoCpf={usuarioLogadoCpf}
             isAdmin={isAdmin}
